@@ -48,10 +48,12 @@ class SignUpView(APIView):
         user = User.objects.create_user(
             username=username, password=password, email=email)
         refresh = RefreshToken.for_user(user)
+ # غیرفعال کردن refresh token و access token
+        refresh.blacklist()
+        refresh.access_token.blacklist()
 
         return Response({
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
+            'message': "کاربر با موفقیت ایجاد شد"
         }, status=status.HTTP_201_CREATED)
 
 
@@ -70,9 +72,12 @@ class LoginView(APIView):
 
             if user:
                 refresh = RefreshToken.for_user(user)
+                # غیرفعال کردن refresh token و access token
+                refresh.blacklist()
+                refresh.access_token.blacklist()
+
                 return Response({
-                    'refresh': str(refresh),
-                    'access': str(refresh.access_token),
+                    'message': 'شما با موفقیت وارد شدید و توکن‌ها غیرفعال شدند.'
                 }, status=status.HTTP_200_OK)
         return Response({'error': 'پسوورد یا ایمیل اشتباه است'}, status=status.HTTP_401_UNAUTHORIZED)
 
@@ -246,20 +251,6 @@ class updatePasswordViewSet(ModelViewSet):
 
             except updatePassword.DoesNotExist:
                 return JsonResponse({'error': 'رمز عبور فعلی اشتباه است'}, status=404)
-
-
-# class userRegisterViewSet(ModelViewSet):
-
-  #  queryset = User.objects.all()
-   # permission_classes = [permissions.AllowAny]
-  #  serializer_class = userRegisterSerializer
-
-
-# class userLoginViewSet(ModelViewSet):
-
- #   queryset = User.objects.all()
-  #  permission_classes = [AllowAny]
-  #  serializer_class = userLoginSerializer
 
 
 class pollsViewSet(ModelViewSet):
