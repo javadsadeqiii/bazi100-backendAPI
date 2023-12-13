@@ -74,17 +74,15 @@ class LoginView(APIView):
         if user:
             user_auth = authenticate(username=user.username, password=password)
 
-        if user_auth:
-
-            return Response({
-                'message': 'با موفقیت وارد شدید',
-                'user': {
-                    'id': user.id,
-                    'username': user.username,
-                    'email': user.email,
-
-                }
-            }, status=status.HTTP_200_OK)
+            if user_auth:
+                return Response({
+                    'message': 'با موفقیت وارد شدید',
+                    'user': {
+                        'id': user.id,
+                        'username': user.username,
+                        'email': user.email,
+                    }
+                }, status=status.HTTP_200_OK)
 
         return Response({'error': 'ایمیل یا رمز عبور اشتباه است'}, status=status.HTTP_401_UNAUTHORIZED)
 
