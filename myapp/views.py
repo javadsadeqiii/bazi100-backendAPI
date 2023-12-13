@@ -16,7 +16,7 @@ from django.core.exceptions import ValidationError
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework_simplejwt.tokens import RefreshToken
+# from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.validators import validate_email
 from django.contrib.auth import authenticate, get_user_model
 
@@ -44,42 +44,31 @@ class SignUpView(APIView):
 
         if User.objects.filter(email=email).exists():
             return Response({'error': 'ایمیل وجود دارد'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
 
-        user = User.objects.create_user(
-            username=username, password=password, email=email)
-        refresh = RefreshToken.for_user(user)
- # غیرفعال کردن refresh token و access token
-        refresh.blacklist()
-        refresh.access_token.blacklist()
-
-        return Response({
-            'message': "کاربر با موفقیت ایجاد شد"
-        }, status=status.HTTP_201_CREATED)
+            User.objects.create_user(
+                username=username, password=password, email=email)
+        return Response({'message': 'ثبت نام با موفقیت انجام شد'}, status=status.HTTP_201_CREATED)
 
 
 class LoginView(APIView):
     def post(self, request):
         email = request.data.get('email')
         password = request.data.get('password')
+
         if not email or not password:
-            return Response({'error': 'لطفا هر دو بخش را کامل کنید'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': "یکی از  فیلدها خالی است"}, status=status.HTTP_400_BAD_REQUEST)
 
         User = get_user_model()
         user = User.objects.filter(email=email).first()
 
         if user:
-            user = authenticate(username=user.username, password=password)
+            user_auth = authenticate(username=user.username, password=password)
 
-            if user:
-                refresh = RefreshToken.for_user(user)
-                # غیرفعال کردن refresh token و access token
-                refresh.blacklist()
-                refresh.access_token.blacklist()
+            if user_auth:
+                return Response({'message': "با موفقیت وارد شدید"}, status=status.HTTP_200_OK)
 
-                return Response({
-                    'message': 'شما با موفقیت وارد شدید و توکن‌ها غیرفعال شدند.'
-                }, status=status.HTTP_200_OK)
-        return Response({'error': 'پسوورد یا ایمیل اشتباه است'}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response({'error': 'ایمیل یا رمز عبور اشتباه است'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 def index(request):
