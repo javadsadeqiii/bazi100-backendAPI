@@ -84,53 +84,6 @@ class updatePasswordSerializer(ModelSerializer):
         fields = ('currentPassword', 'newPassword', 'confirmNewPassword')
 
 
-# class userRegisterSerializer(serializers.ModelSerializer):
-
-  #  email = serializers.EmailField()  # Disable default email validation
-    # Disable default username validation
-  #  username = serializers.CharField(validators=[])
-  #  password = serializers.CharField()
-
-  #  class Meta:
-   #     model = User
-   #     fields = ['email', 'username', 'password']
-
-   # def validate(self, attrs):
-    #    email = attrs.get('email')
-    #    username = attrs.get('username')
-
-        # Check if email is unique
-    #    if User.objects.filter(email=email).exists():
-        #       raise serializers.ValidationError("ایمیل قبلا ثبت شده")
-
-        # Check if username is unique
-      #  if User.objects.filter(username=username).exists():
-      #      raise serializers.ValidationError("نام کاربری قبلا ثبت شده")
-
-        #   return attrs
-
-
-# class userLoginSerializer(ModelSerializer):
-
-  #  email = serializers.EmailField()  # Disable default email validation
-  #  password = serializers.CharField()
-
-  #  class Meta:
-   #     model = User
-  #      fields = ['email', 'password']
-
-  #  def validate(self, attrs):
-    #    email = attrs.get('email')
-        #   password = attrs.get('password')
-
-        # Perform custom validation for email and password combination
-        #   user = authenticate(email=email, password=password)
-        #   if not user:
-        #    raise serializers.ValidationError("Invalid email or password.")
-
-        #   return attrs
-
-
 class allPostsSerializer(ModelSerializer):
 
     class Meta:

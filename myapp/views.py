@@ -19,6 +19,7 @@ from rest_framework import status
 # from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.validators import validate_email
 from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth.hashers import make_password
 
 
 DATE_FORMAT = 'Y-m-d'
@@ -44,11 +45,19 @@ class SignUpView(APIView):
 
         if User.objects.filter(email=email).exists():
             return Response({'error': 'ایمیل وجود دارد'}, status=status.HTTP_400_BAD_REQUEST)
-        else:
 
-            User.objects.create_user(
-                username=username, password=password, email=email)
-        return Response({'message': 'ثبت نام با موفقیت انجام شد'}, status=status.HTTP_201_CREATED)
+        # ساخت کاربر با هش شده کردن رمز عبور
+        user = User.objects.create(
+            username=username, password=make_password(password), email=email)
+
+        # بازگرداندن اطلاعات کاربری به عنوان پاسخ
+        response_data = {
+            'username': user.username,
+            'password': user.password,
+            'email': user.email,
+            'message': 'ثبت نام با موفقیت انجام شد'
+        }
+        return Response(response_data, status=status.HTTP_201_CREATED)
 
 
 class LoginView(APIView):
@@ -65,8 +74,17 @@ class LoginView(APIView):
         if user:
             user_auth = authenticate(username=user.username, password=password)
 
-            if user_auth:
-                return Response({'message': "با موفقیت وارد شدید"}, status=status.HTTP_200_OK)
+        if user_auth:
+
+            return Response({
+                'message': 'با موفقیت وارد شدید',
+                'user': {
+                    'id': user.id,
+                    'username': user.username,
+                    'email': user.email,
+
+                }
+            }, status=status.HTTP_200_OK)
 
         return Response({'error': 'ایمیل یا رمز عبور اشتباه است'}, status=status.HTTP_401_UNAUTHORIZED)
 
