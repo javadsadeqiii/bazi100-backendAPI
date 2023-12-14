@@ -20,9 +20,10 @@ from django.core.validators import validate_email
 from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.hashers import make_password
 from django.views import View
-from rest_framework.viewsets import ViewSet
 from myapp.models import contactUs
-from rest_framework.decorators import action
+from rest_framework.authentication import SessionAuthentication
+from rest_framework.permissions import IsAuthenticated
+
 
 DATE_FORMAT = 'Y-m-d'
 DATETIME_FORMAT = 'Y-m-d H:i:s'
@@ -112,7 +113,9 @@ class ChangeUsernameView(APIView):
 
 
 class ChangePasswordView(APIView):
-    permission_classes = [AllowAny]
+
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def put(self, request):
         user = request.user
