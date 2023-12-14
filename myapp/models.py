@@ -460,7 +460,7 @@ class contactUs(models.Model):
 
     fullName = models.CharField(max_length=150, verbose_name="نام کامل")
 
-    emailContact = models.EmailField(verbose_name="ایمبل")
+    emailContact = models.EmailField(verbose_name="ایمیل")
 
     message = models.TextField(verbose_name="متن پیغام")
 

@@ -16,11 +16,11 @@ from django.core.exceptions import ValidationError
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-# from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.validators import validate_email
 from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.hashers import make_password
-
+from django.views import View
+from myapp.models import contactUs
 
 DATE_FORMAT = 'Y-m-d'
 DATETIME_FORMAT = 'Y-m-d H:i:s'
@@ -87,35 +87,75 @@ class LoginView(APIView):
         return Response({'error': 'ایمیل یا رمز عبور اشتباه است'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
+class ChangeUsernameView(APIView):
+    permission_classes = [AllowAny]
+
+    def put(self, request):
+        user = request.user
+        new_username = request.data.get('new_username')
+        previous_username = request.data.get('previous_username')
+
+        if not new_username or not previous_username:
+            return Response({'error': 'لطفاً نام کاربری جدید و نام کاربری قبلی را وارد کنید.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if previous_username != user.username:
+            return Response({'error': 'نام کاربری قبلی صحیح نیست.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        user.username = new_username
+        user.save()
+
+        return Response({'message': 'نام کاربری به‌روزرسانی شد'}, status=status.HTTP_200_OK)
+
+
+class ChangePasswordView(APIView):
+    permission_classes = [AllowAny]
+
+    def put(self, request):
+        user = request.user
+        old_password = request.data.get('old_password')
+        new_password = request.data.get('new_password')
+
+        if not old_password or not new_password:
+            return Response({'error': 'لطفاً رمز عبور قبلی و جدید را وارد کنید.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not user.check_password(old_password):
+            return Response({'error': 'رمز عبور قبلی اشتباه است.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        user.set_password(new_password)
+        user.save()
+
+        return Response({'message': 'رمز عبور به‌روزرسانی شد'}, status=status.HTTP_200_OK)
+
+
 def index(request):
     return render(request, 'index.html')
 
 
-class contactUsViewSet(ModelViewSet):
-
-    queryset = contactUs.objects.all()
-    serializer_class = contactUsSerializer
-
-
-def save_message_and_send_email(request):
-    if request.method == 'POST':
-        full_name = request.POST.get('full_name')
-        email = request.POST.get('email')
+class ContactUsAPIView(APIView):
+    def post(self, request):
+        fullName = request.POST.get('fullName')
+        emailContact = request.POST.get('emailContact')
         message = request.POST.get('message')
 
-        # Save the received message
-        contact = contactUs(fullName=full_name,
-                            emailContact=email, message=message)
-        contact.save()
+        if not fullName or not emailContact or not message:
+            return JsonResponse({'error': 'لطفاً تمام فیلدها را پر کنید.'}, status=400)
 
-        # Send an email to the user
-        send_mail(
-            'Message Received',
-            f'{full_name}, کاربر عزیز سایت 100 پیغام شما دریافت شد ممنون از اینکه با ما در ارتباط هستید',
-            'contact@bazi100.ir',
-            [email],
-            fail_silently=False,
-        )
+        created_contact = contactUs.objects.create(
+            fullName=fullName, emailContact=emailContact, message=message)
+
+        if created_contact:
+            # ارسال ایمیل
+            send_mail(
+                "درخواست کاربر از طریق بخش تماس باما سایت بازی 100",
+                "کاربر عزیز بازی 100 درخواست شما با موفقیت ارسال شد و پس از بررسی پاسخ مورد نظر ارسال میشود",
+                "javadjs197@gmail.com",
+                [emailContact],
+                fail_silently=False,
+            )
+
+            return JsonResponse({'message': 'اطلاعات با موفقیت ذخیره شد و ایمیل ارسال شد.'}, status=201)
+        else:
+            return JsonResponse({'error': 'خطایی در ذخیره‌سازی اطلاعات رخ داده است.'}, status=500)
 
 
 class bazi100TeamViewSet(ModelViewSet):
@@ -192,70 +232,6 @@ def validate_comment_text(value):
     if contains_url(value):
 
         raise ValidationError("کامنت حاوی لینک میباشد")
-
-
-class updateUsernameViewSet(ModelViewSet):
-
-    queryset = updateUsername.objects.all()
-    serializer_class = updateUsernameSerializer
-
-
-def update_Username(request):
-
-    if request.method == 'POST':
-
-        current_username = request.POST['currentUsername']
-
-        new_username = request.POST['newUsername']
-
-        try:
-            # Check if the currentUsername exists in the database
-            user = updateUsername.objects.get(currentUsername=current_username)
-
-            # Update the newUsername
-            user.newUsername = new_username
-            user.save()
-
-            return JsonResponse({'message': 'نام کاربری با موفقیت تغییر کرد'})
-
-        except updateUsername.DoesNotExist:
-            return JsonResponse({'error': 'نام کاربری وجود ندارد'}, status=404)
-
-
-class updatePasswordViewSet(ModelViewSet):
-
-    queryset = updatePassword.objects.all()
-    serializer_class = updatePasswordSerializer
-    permission_classes = [AllowAny]
-
-    def updatePassword(request):
-
-        if request.method == 'POST':
-
-            current_password = request.POST['currentPassword']
-            new_password = request.POST['newPassword']
-            confirm_password = request.POST['confirmPassword']
-
-            try:
-                # Check if the current password matches the one in the database
-                user = updatePassword.objects.get(
-                    currentPassword=current_password)
-
-                # Check if the new password matches the confirmation password
-                if new_password == confirm_password:
-                    # Check if the new password meets the minimum length requirement
-                    if len(new_password) >= 8:
-                        # Update the new password
-                        user.newPassword = new_password
-                        user.save()
-                        return JsonResponse({'message': 'رمز عبور با موفقیت به‌روزرسانی شد'})
-                    else:
-                        return JsonResponse({'error': 'رمز عبور جدید باید حداقل 8 کاراکتر داشته باشد'}, status=400)
-                else:
-                    return JsonResponse({'error': 'تأییدیه رمز عبور جدید مطابقت ندارد'}, status=400)
-
-            except updatePassword.DoesNotExist:
-                return JsonResponse({'error': 'رمز عبور فعلی اشتباه است'}, status=404)
 
 
 class pollsViewSet(ModelViewSet):

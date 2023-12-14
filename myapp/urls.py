@@ -25,6 +25,8 @@ from django.contrib import admin
 from django.urls import path
 from . import views
 from .views import SignUpView, LoginView
+from .views import ContactUsAPIView
+# from .views import ChangeUsernameView, ChangePasswordView
 
 
 # urlpatterns = [
@@ -49,15 +51,12 @@ Including another URLconf
 
 
 router = routers.DefaultRouter()
-router.register(r'updateUsername', views.updateUsernameViewSet)
-router.register(r'updatePassword', views.updatePasswordViewSet)
 router.register(r'comments', views.commentsViewSet)
 router.register(r'commentReply', views.commentReplyViewSet)
 router.register(r'polls', views.pollsViewSet)
 router.register(r'oldPolls', views.oldPollsViewSet)
 router.register(r'choice', views.choiceViewSet)
 router.register(r'bazi100Team', views.bazi100TeamViewSet)
-router.register(r'contactUs', views.contactUsViewSet)
 router.register(r'allPosts', views.allPostsViewSet)
 router.register(r'wallpapers', views.wallpapersViewSet)
 router.register(r'albums', views.albumsViewSet)
@@ -72,6 +71,7 @@ urlpatterns = [
     path('api/', include(router.urls)),
     path('api/signup/', SignUpView.as_view(), name='signup'),
     path('api/login/', LoginView.as_view(), name='login'),
+    path('contact-us/', ContactUsAPIView.as_view(), name='contact_us'),
     path('ckeditor/', include('ckeditor_uploader.urls')),
 
 
