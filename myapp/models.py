@@ -29,13 +29,11 @@ class commentReply(models.Model):
 
     likeCount = models.IntegerField(default=0, verbose_name="تعداد لایک‌ها")
 
-    class Meta:
-        unique_together = ('userId', 'likeCount')
 
-    class Meta:
-
-        verbose_name = "پاسخ"
-        verbose_name_plural = "پاسخ ها"
+class Meta:
+    unique_together = ('userId', 'likeCount')
+    verbose_name = "پاسخ"
+    verbose_name_plural = "پاسخ ها"
 
 
 class comments(models.Model):
@@ -57,32 +55,9 @@ class comments(models.Model):
     likeCount = models.IntegerField(default=0, verbose_name="تعداد لایک‌ها")
 
     class Meta:
-
         unique_together = ('userId', 'likeCount')
-
-    class Meta:
-
         verbose_name = "کامنت"
-        verbose_name_plural = "کامنت ها "
-
-
-class updateUsername(models.Model):
-
-    currentUsername = models.CharField(max_length=150)
-    newUsername = models.CharField(max_length=150)
-
-
-class updatePassword(models.Model):
-
-    currentPassword = models.CharField(max_length=150)
-    newPassword = models.CharField(max_length=150)
-    confirmNewPassword = models.CharField(max_length=150)
-
-
-class userLogin(models.Model):
-
-    email = models.EmailField()
-    password = models.CharField(max_length=128)
+        verbose_name_plural = "کامنت ها"
 
 
 class platform(models.Model):
@@ -463,8 +438,6 @@ class contactUs(models.Model):
     emailContact = models.EmailField(verbose_name="ایمیل")
 
     message = models.TextField(verbose_name="متن پیغام")
-
-    objects = models.Manager()
 
     class Meta:
 

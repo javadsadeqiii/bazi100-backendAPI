@@ -88,18 +88,17 @@ class LoginView(APIView):
 
 
 class ChangeUsernameView(APIView):
-    permission_classes = [AllowAny]
-
     def put(self, request):
-        user = request.user
+        email = request.data.get('email')
         new_username = request.data.get('new_username')
-        previous_username = request.data.get('previous_username')
 
-        if not new_username or not previous_username:
-            return Response({'error': 'لطفاً نام کاربری جدید و نام کاربری قبلی را وارد کنید.'}, status=status.HTTP_400_BAD_REQUEST)
+        if not email or not new_username:
+            return Response({'error': 'لطفاً ایمیل و نام کاربری جدید را وارد کنید.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if previous_username != user.username:
-            return Response({'error': 'نام کاربری قبلی صحیح نیست.'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({'error': 'کاربر با این ایمیل یافت نشد.'}, status=status.HTTP_404_NOT_FOUND)
 
         user.username = new_username
         user.save()
@@ -114,9 +113,13 @@ class ChangePasswordView(APIView):
         user = request.user
         old_password = request.data.get('old_password')
         new_password = request.data.get('new_password')
+        confirm_password = request.data.get('confirm_password')
 
-        if not old_password or not new_password:
-            return Response({'error': 'لطفاً رمز عبور قبلی و جدید را وارد کنید.'}, status=status.HTTP_400_BAD_REQUEST)
+        if not old_password or not new_password or not confirm_password:
+            return Response({'error': 'لطفاً رمز عبور قبلی و رمز عبور جدید را وارد کنید.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if new_password != confirm_password:
+            return Response({'error': 'رمز عبور جدید و تکرار آن باید یکسان باشند.'}, status=status.HTTP_400_BAD_REQUEST)
 
         if not user.check_password(old_password):
             return Response({'error': 'رمز عبور قبلی اشتباه است.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -127,8 +130,8 @@ class ChangePasswordView(APIView):
         return Response({'message': 'رمز عبور به‌روزرسانی شد'}, status=status.HTTP_200_OK)
 
 
-def index(request):
-    return render(request, 'index.html')
+# def index(request):
+  #  return render(request, 'index.html')
 
 
 class ContactUsAPIView(APIView):
@@ -138,7 +141,7 @@ class ContactUsAPIView(APIView):
         message = request.POST.get('message')
 
         if not fullName or not emailContact or not message:
-            return JsonResponse({'error': 'لطفاً تمام فیلدها را پر کنید.'}, status=400)
+            return JsonResponse({'error': 'لطفاً تمام فیلدها را پر کنید'}, status=400)
 
         created_contact = contactUs.objects.create(
             fullName=fullName, emailContact=emailContact, message=message)

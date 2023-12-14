@@ -69,21 +69,6 @@ class contactUsSerializer(ModelSerializer):
         fields = ('__all__')
 
 
-class updateUsernameSerializer(ModelSerializer):
-
-    class Meta:
-
-        model = updateUsername
-        fields = ('currentUsername', 'newUsername')
-
-
-class updatePasswordSerializer(ModelSerializer):
-
-    class Meta:
-        model = updatePassword
-        fields = ('currentPassword', 'newPassword', 'confirmNewPassword')
-
-
 class allPostsSerializer(ModelSerializer):
 
     class Meta:
