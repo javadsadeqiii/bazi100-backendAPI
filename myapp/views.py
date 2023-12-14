@@ -135,10 +135,12 @@ class ChangePasswordView(APIView):
 
 
 class ContactUsAPIView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
-        fullName = request.POST.get('fullName')
-        emailContact = request.POST.get('emailContact')
-        message = request.POST.get('message')
+        fullName = request.data.get('fullName')
+        emailContact = request.data.get('emailContact')
+        message = request.data.get('message')
 
         if not fullName or not emailContact or not message:
             return JsonResponse({'error': 'لطفاً تمام فیلدها را پر کنید'}, status=400)
