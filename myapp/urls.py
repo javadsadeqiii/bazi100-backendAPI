@@ -26,7 +26,7 @@ from django.urls import path
 from . import views
 from .views import SignUpView, LoginView
 from .views import ContactUsAPIView
-# from .views import ChangeUsernameView, ChangePasswordView
+from .views import ChangeUsernameView, ChangePasswordView
 
 
 # urlpatterns = [
@@ -71,7 +71,9 @@ urlpatterns = [
     path('api/', include(router.urls)),
     path('api/signup/', SignUpView.as_view(), name='signup'),
     path('api/login/', LoginView.as_view(), name='login'),
-    path('contact-us/', ContactUsAPIView.as_view(), name='contact_us'),
+    path('change-username/', ChangeUsernameView.as_view(), name='change-username'),
+    path('change-password/', ChangePasswordView.as_view(), name='change-password'),
+    path('api/contact-us/', ContactUsAPIView.as_view(), name='contact_us'),
     path('ckeditor/', include('ckeditor_uploader.urls')),
 
 
