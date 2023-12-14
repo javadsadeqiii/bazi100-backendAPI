@@ -20,7 +20,9 @@ from django.core.validators import validate_email
 from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.hashers import make_password
 from django.views import View
+from rest_framework.viewsets import ViewSet
 from myapp.models import contactUs
+from rest_framework.decorators import action
 
 DATE_FORMAT = 'Y-m-d'
 DATETIME_FORMAT = 'Y-m-d H:i:s'
@@ -110,7 +112,6 @@ class ChangeUsernameView(APIView):
 
 
 class ChangePasswordView(APIView):
-
     permission_classes = [AllowAny]
 
     def put(self, request):
@@ -120,19 +121,18 @@ class ChangePasswordView(APIView):
         confirmPassword = request.data.get('confirmPassword')
 
         if not oldPassword or not newPassword or not confirmPassword:
-            return Response({'error': 'لطفاً رمز عبور قبلی و رمز عبور جدید را وارد کنید.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'لطفا همه فیلد هارا پرکنید'}, status=status.HTTP_400_BAD_REQUEST)
 
         if newPassword != confirmPassword:
-            return Response({'error': 'رمز عبور جدید و تکرار آن باید یکسان باشند.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'رمز عبور جدید باید با رمز تاییدیه یکسان باشد'}, status=status.HTTP_400_BAD_REQUEST)
 
         if not user.check_password(oldPassword):
-            return Response({'error': 'رمز عبور قبلی اشتباه است.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'رمزعبور فعلی اشتباه است'}, status=status.HTTP_400_BAD_REQUEST)
 
         user.set_password(newPassword)
         user.save()
 
-        return Response({'message': 'رمز عبور به‌روزرسانی شد'}, status=status.HTTP_200_OK)
-
+        return Response({'message': 'رمز عبور با موفقیت تغییر یافت'}, status=status.HTTP_200_OK)
 
 # def index(request):
   #  return render(request, 'index.html')

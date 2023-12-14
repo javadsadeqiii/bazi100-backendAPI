@@ -26,7 +26,7 @@ from django.urls import path
 from . import views
 from .views import SignUpView, LoginView
 from .views import ContactUsAPIView
-from .views import ChangeUsernameView, ChangePasswordView
+from .views import *
 
 
 # urlpatterns = [
