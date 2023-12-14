@@ -88,11 +88,14 @@ class LoginView(APIView):
 
 
 class ChangeUsernameView(APIView):
+
+    permission_classes = [AllowAny]
+
     def put(self, request):
         email = request.data.get('email')
-        new_username = request.data.get('new_username')
+        newUsername = request.data.get('newUsername')
 
-        if not email or not new_username:
+        if not email or not newUsername:
             return Response({'error': 'لطفاً ایمیل و نام کاربری جدید را وارد کنید.'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
@@ -100,31 +103,32 @@ class ChangeUsernameView(APIView):
         except User.DoesNotExist:
             return Response({'error': 'کاربر با این ایمیل یافت نشد.'}, status=status.HTTP_404_NOT_FOUND)
 
-        user.username = new_username
+        user.username = newUsername
         user.save()
 
         return Response({'message': 'نام کاربری به‌روزرسانی شد'}, status=status.HTTP_200_OK)
 
 
 class ChangePasswordView(APIView):
+
     permission_classes = [AllowAny]
 
     def put(self, request):
         user = request.user
-        old_password = request.data.get('old_password')
-        new_password = request.data.get('new_password')
-        confirm_password = request.data.get('confirm_password')
+        oldPassword = request.data.get('oldPassword')
+        newPassword = request.data.get('newPassword')
+        confirmPassword = request.data.get('confirmPassword')
 
-        if not old_password or not new_password or not confirm_password:
+        if not oldPassword or not newPassword or not confirmPassword:
             return Response({'error': 'لطفاً رمز عبور قبلی و رمز عبور جدید را وارد کنید.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if new_password != confirm_password:
+        if newPassword != confirmPassword:
             return Response({'error': 'رمز عبور جدید و تکرار آن باید یکسان باشند.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not user.check_password(old_password):
+        if not user.check_password(oldPassword):
             return Response({'error': 'رمز عبور قبلی اشتباه است.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        user.set_password(new_password)
+        user.set_password(newPassword)
         user.save()
 
         return Response({'message': 'رمز عبور به‌روزرسانی شد'}, status=status.HTTP_200_OK)

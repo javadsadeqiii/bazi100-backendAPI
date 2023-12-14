@@ -71,8 +71,10 @@ urlpatterns = [
     path('api/', include(router.urls)),
     path('api/signup/', SignUpView.as_view(), name='signup'),
     path('api/login/', LoginView.as_view(), name='login'),
-    path('change-username/', ChangeUsernameView.as_view(), name='change-username'),
-    path('change-password/', ChangePasswordView.as_view(), name='change-password'),
+    path('api/change-username/', ChangeUsernameView.as_view(),
+         name='change-username'),
+    path('api/change-password/', ChangePasswordView.as_view(),
+         name='change-password'),
     path('api/contact-us/', ContactUsAPIView.as_view(), name='contact_us'),
     path('ckeditor/', include('ckeditor_uploader.urls')),
 

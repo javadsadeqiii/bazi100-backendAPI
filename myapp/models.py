@@ -29,11 +29,10 @@ class commentReply(models.Model):
 
     likeCount = models.IntegerField(default=0, verbose_name="تعداد لایک‌ها")
 
-
-class Meta:
-    unique_together = ('userId', 'likeCount')
-    verbose_name = "پاسخ"
-    verbose_name_plural = "پاسخ ها"
+    class Meta:
+        unique_together = ('userId', 'likeCount')
+        verbose_name = "پاسخ"
+        verbose_name_plural = "پاسخ ها"
 
 
 class comments(models.Model):
