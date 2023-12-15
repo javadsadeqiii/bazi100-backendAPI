@@ -114,29 +114,29 @@ class ChangeUsernameView(APIView):
 
 class ChangePasswordView(APIView):
 
-    authentication_classes = [SessionAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def put(self, request):
-        user = request.user
         oldPassword = request.data.get('oldPassword')
         newPassword = request.data.get('newPassword')
-        confirmPassword = request.data.get('confirmPassword')
+        confirmPassword = request.data.get('confirPassword')
 
         if not oldPassword or not newPassword or not confirmPassword:
-            return Response({'error': 'لطفا همه فیلد هارا پرکنید'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'لطفاً رمز عبور فعلی و رمز عبور جدید و تایید آن را وارد کنید.'}, status=status.HTTP_400_BAD_REQUEST)
 
         if newPassword != confirmPassword:
-            return Response({'error': 'رمز عبور جدید باید با رمز تاییدیه یکسان باشد'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'رمز عبور جدید باید با تایید آن یکسان باشد.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not user.check_password(oldPassword):
-            return Response({'error': 'رمزعبور فعلی اشتباه است'}, status=status.HTTP_400_BAD_REQUEST)
-
-        user.set_password(newPassword)
-        user.save()
-
-        return Response({'message': 'رمز عبور با موفقیت تغییر یافت'}, status=status.HTTP_200_OK)
-
+        try:
+            user = User.objects.get(username=request.user.username)
+            if user.check_password(oldPassword):
+                user.set_password(newPassword)
+                user.save()
+                return Response({'message': 'رمز عبور با موفقیت تغییر یافت.'}, status=status.HTTP_200_OK)
+            else:
+                return Response({'error': 'رمز عبور فعلی اشتباه است.'}, status=status.HTTP_400_BAD_REQUEST)
+        except User.DoesNotExist:
+            return Response({'error': 'کاربر با این نام کاربری یافت نشد.'}, status=status.HTTP_404_NOT_FOUND)
 # def index(request):
   #  return render(request, 'index.html')
 
