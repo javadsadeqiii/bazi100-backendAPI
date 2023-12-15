@@ -115,7 +115,7 @@ class ChangeUsernameView(APIView):
 class ChangePasswordView(APIView):
 
     authentication_classes = [SessionAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def put(self, request):
         user = request.user
