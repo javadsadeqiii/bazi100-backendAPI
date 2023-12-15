@@ -119,7 +119,7 @@ class ChangePasswordView(APIView):
     def put(self, request):
         oldPassword = request.data.get('oldPassword')
         newPassword = request.data.get('newPassword')
-        confirmPassword = request.data.get('confirPassword')
+        confirmPassword = request.data.get('confirmPassword')
 
         if not oldPassword or not newPassword or not confirmPassword:
             return Response({'error': 'لطفاً رمز عبور فعلی و رمز عبور جدید و تایید آن را وارد کنید.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -128,7 +128,8 @@ class ChangePasswordView(APIView):
             return Response({'error': 'رمز عبور جدید باید با تایید آن یکسان باشد.'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            user = User.objects.get(username=request.user.username)
+
+            user = User.objects.get(email=request.user.email)
             if user.check_password(oldPassword):
                 user.set_password(newPassword)
                 user.save()
