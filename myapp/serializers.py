@@ -51,6 +51,12 @@ class pollsSerializer(ModelSerializer):
         fields = ('__all__')
 
 
+class voteSerializer(ModelSerializer):
+    class Meta:
+        model = vote
+        fields = ('__all__')
+
+
 class choiceSerializer(ModelSerializer):
 
     class Meta:

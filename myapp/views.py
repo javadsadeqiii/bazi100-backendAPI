@@ -23,6 +23,7 @@ from django.views import View
 from myapp.models import contactUs
 from django.utils import timezone
 from django.db import transaction
+from rest_framework.decorators import api_view
 
 
 DATE_FORMAT = 'Y-m-d'
@@ -301,22 +302,32 @@ class choiceViewSet(ModelViewSet):
     serializer_class = choiceSerializer
     permission_classes = [AllowAny]
 
-    def update(self, request):
-        user = request.data.get('id')
-        choiceNumber = request.data.get('choiceNumber')
-        instance = self.get_object()
 
-        # بررسی آیا کاربر قبلاً به این گزینه رأی داده یا نه
-        user_voted = choice.objects.filter(
-            user=user, choiceNumber=choiceNumber).exists()
+class voteViewSet(ModelViewSet):
+    queryset = vote.objects.all()
+    serializer_class = voteSerializer
+    permission_classes = [AllowAny]
 
-        if not user_voted:  # اگر کاربر قبلاً به این گزینه رأی نداده باشد
-            instance.numvotes += 1
-            instance.save()
-            serializer = self.get_serializer(instance)
-            return Response(serializer.data, status=status.HTTP_200_OK)
 
-        return Response({"message": "فقط یک بار میتوانید رای بدهید"}, status=status.HTTP_400_BAD_REQUEST)
+@api_view(['POST'])
+def vote_for_choice(request, choice_id):
+    try:
+        choice = choice.objects.get(pk=choice_id)
+        user = request.user  # Assuming user authentication is implemented
+    except choice.DoesNotExist:
+        return Response({'message': 'گزینه ای یافت نشد'}, status=status.HTTP_404_NOT_FOUND)
+
+    # Create a vote for the selected choice and user
+    vote, created = vote.objects.get_or_create(user=user, choice=choice)
+
+    # If the vote was successfully created (not already existing), increment numVotes
+    if created:
+        choice.numVotes += 1
+        choice.save()
+
+        return Response({'message': 'انتخاب شما با موفقیت ثبت شد'}, status=status.HTTP_200_OK)
+    else:
+        return Response({'message': 'فقط یک بار میتوانید در نظرسنجی شرکت کنید'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class allPostsViewSet(ModelViewSet):

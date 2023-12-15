@@ -48,11 +48,19 @@ admin.site.register(oldPolls, oldPollsAdmin)
 
 class choiceAdmin(admin.ModelAdmin):
 
-    list_display = ('title', 'numvotes', 'choiceNumber')
+    list_display = ('id', 'title', 'numVotes')
    # ordering = ('id',)
 
 
 admin.site.register(choice, choiceAdmin)
+
+
+class voteAdmin(admin.ModelAdmin):
+
+    list_display = ('id', 'user', 'choice')
+
+
+admin.site.register(vote, voteAdmin)
 
 
 class contactUsAdmin(admin.ModelAdmin):

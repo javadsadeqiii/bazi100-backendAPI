@@ -379,7 +379,7 @@ class advertisements(models.Model):
 class polls(models.Model):
 
     expiryTimestamp = models.DateTimeField(
-        verbose_name=" تاریخ و ساعت نظرسنجی")
+        verbose_name=" تاریخ و ساعت اتمام نظرسنجی")
 
     question = models.CharField(max_length=170, verbose_name="سوال نظر سنجی")
 
@@ -395,7 +395,7 @@ class polls(models.Model):
 class oldPolls(models.Model):
 
     expiryTimestamp = models.DateTimeField(
-        verbose_name=" تاریخ و ساعت نظرسنجی")
+        verbose_name=" تاریخ و ساعت اتمام نظرسنجی")
 
     question = models.CharField(max_length=170, verbose_name="سوال نظر سنجی")
 
@@ -414,30 +414,24 @@ class choice(models.Model):
 
     image = models.ImageField(upload_to='choice_images/')
 
-    numvotes = models.IntegerField(default=0)
-
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
-
-    choiceNumber = models.IntegerField(
-        verbose_name="شماره گزینه ", blank=True, null=True)
-
-    def save(self, *args, **kwargs):
-        if self.pk is None:  # بررسی برای ساخت یک گزینه جدید
-            last_choice = choice.objects.order_by(
-                '-choiceNumber').first()  # یافتن آخرین شماره
-            if last_choice:
-                self.choiceNumber = last_choice.choiceNumber + \
-                    1  # افزایش شماره بر اساس آخرین شماره
-            else:
-                self.choiceNumber = 1  # اولین شماره برای اولین گزینه
-
-        super().save(*args, **kwargs)
+    numVotes = models.IntegerField(default=0)
 
     class Meta:
 
         verbose_name = "گزینه"
 
         verbose_name_plural = "گزینه ها"
+
+
+class vote(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    choice = models.ForeignKey(choice, on_delete=models.CASCADE)
+
+    class Meta:
+
+        verbose_name = "رای ها"
+
+        verbose_name_plural = "رای ها"
 
 
 class contactUs(models.Model):
