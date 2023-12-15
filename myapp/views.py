@@ -301,9 +301,9 @@ class choiceViewSet(ModelViewSet):
     serializer_class = choiceSerializer
     permission_classes = [AllowAny]
 
-    def update(self, request, *args, **kwargs):
-        user = request.user
-        choiceNumber = kwargs.get('pk')  # مقدار choiceNumber از URL
+    def update(self, request):
+        user = request.data.get('id')
+        choiceNumber = request.data.get('choiceNumber')
         instance = self.get_object()
 
         # بررسی آیا کاربر قبلاً به این گزینه رأی داده یا نه
