@@ -21,9 +21,7 @@ from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.hashers import make_password
 from django.views import View
 from myapp.models import contactUs
-from rest_framework.authentication import SessionAuthentication
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.authentication import TokenAuthentication
+
 
 DATE_FORMAT = 'Y-m-d'
 DATETIME_FORMAT = 'Y-m-d H:i:s'
@@ -47,7 +45,10 @@ class SignUpView(APIView):
             return Response({'error': 'نام کاربری وجود دارد'}, status=status.HTTP_400_BAD_REQUEST)
 
         if User.objects.filter(email=email).exists():
-            return Response({'error': 'ایمیل وجود دارد'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': "ایمیل وارد شده قبلا ثبت شده است"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if len(password) < 8:
+            return Response({'error': "رمز عبور نمیتواند کمتر از 8 کاراکتر باشد"}, status=status.HTTP_400_BAD_REQUEST)
 
         # ساخت کاربر با هش شده کردن رمز عبور
         user = User.objects.create(
@@ -69,7 +70,10 @@ class LoginView(APIView):
         password = request.data.get('password')
 
         if not email or not password:
-            return Response({'error': "یکی از  فیلدها خالی است"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': "لطفا هردو فیلد ایمیل و رمزعبور را وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if len(password) < 8:
+            return Response({'error': "رمز عبور نمیتواند کمتر از 8 کاراکتر باشد"}, status=status.HTTP_400_BAD_REQUEST)
 
         User = get_user_model()
         user = User.objects.filter(email=email).first()
@@ -99,12 +103,12 @@ class ChangeUsernameView(APIView):
         newUsername = request.data.get('newUsername')
 
         if not email or not newUsername:
-            return Response({'error': 'لطفاً ایمیل و نام کاربری جدید را وارد کنید.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'لطفا هردو فیلد ایمیل و نام کاربری را وارد کنید'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
-            return Response({'error': 'کاربر با این ایمیل یافت نشد.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': "کاربر با این ایمیل یافت نشد"}, status=status.HTTP_404_NOT_FOUND)
 
         user.username = newUsername
         user.save()
@@ -123,10 +127,13 @@ class ChangePasswordView(APIView):
         email = request.data.get('email')
 
         if not oldPassword or not newPassword or not confirmPassword:
-            return Response({'error': 'لطفاً رمز عبور فعلی و رمز عبور جدید و تایید آن را وارد کنید.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'لطفا همه فیلدهارا وارد کنید'}, status=status.HTTP_400_BAD_REQUEST)
 
         if newPassword != confirmPassword:
-            return Response({'error': 'رمز عبور جدید باید با تایید آن یکسان باشد.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'رمزعبور جدید با تایید آن همخوانی ندارد'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if len(newPassword) < 8:
+            return Response({'error':  "رمز عبور نمیتواند کمتر از 8 کاراکتر باشد"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
 
@@ -134,13 +141,11 @@ class ChangePasswordView(APIView):
             if user.check_password(oldPassword):
                 user.set_password(newPassword)
                 user.save()
-                return Response({'message': 'رمز عبور با موفقیت تغییر یافت.'}, status=status.HTTP_200_OK)
+                return Response({'message': "رمز عبور شما با موفقیت تغییر کرد"}, status=status.HTTP_200_OK)
             else:
-                return Response({'error': 'رمز عبور فعلی اشتباه است.'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'error': "رمز عبور فعلی نادرست است"}, status=status.HTTP_400_BAD_REQUEST)
         except User.DoesNotExist:
-            return Response({'error': 'کاربر با این نام کاربری یافت نشد.'}, status=status.HTTP_404_NOT_FOUND)
-# def index(request):
-  #  return render(request, 'index.html')
+            return Response({'error':  " نام کاربری وارد شده یافت نشد"}, status=status.HTTP_404_NOT_FOUND)
 
 
 class ContactUsAPIView(APIView):
