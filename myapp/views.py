@@ -21,7 +21,7 @@ from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.hashers import make_password
 from django.views import View
 from myapp.models import contactUs
-# from rest_framework.authentication import SessionAuthentication
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 
@@ -114,7 +114,7 @@ class ChangeUsernameView(APIView):
 
 class ChangePasswordView(APIView):
 
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
     def put(self, request):
