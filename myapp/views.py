@@ -79,9 +79,6 @@ class LoginView(APIView):
         if not email or not password:
             return Response({'error': "لطفا هردو فیلد ایمیل و رمزعبور را وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
 
-        if len(password) < 8:
-            return Response({'error': "رمز عبور نمیتواند کمتر از 8 کاراکتر باشد"}, status=status.HTTP_400_BAD_REQUEST)
-
         User = get_user_model()
         user = User.objects.filter(email=email).first()
 
