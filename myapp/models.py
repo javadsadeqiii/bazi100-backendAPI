@@ -418,7 +418,7 @@ class choice(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
 
-    choiceNumber = choiceNumber = models.IntegerField(
+    choiceNumber = models.IntegerField(
         verbose_name="شماره گزینه ", blank=True, null=True)
 
     def save(self, *args, **kwargs):
