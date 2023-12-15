@@ -48,8 +48,8 @@ admin.site.register(oldPolls, oldPollsAdmin)
 
 class choiceAdmin(admin.ModelAdmin):
 
-    list_display = ('id', 'title', 'numvotes')
-    ordering = ('id',)
+    list_display = ('title', 'numvotes', 'choiceNumber')
+   # ordering = ('id',)
 
 
 admin.site.register(choice, choiceAdmin)

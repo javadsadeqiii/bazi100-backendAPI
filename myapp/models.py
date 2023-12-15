@@ -11,7 +11,7 @@ from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 from django.conf import settings
 
-en_formats.DATETIME_FORMAT = 'Y-m-d'
+# en_formats.DATETIME_FORMAT = 'Y-m-d'
 
 
 class commentReply(models.Model):
@@ -299,7 +299,7 @@ class bazi100Team(models.Model):
 
     memberName = models.CharField(max_length=80, verbose_name="اسم کاربر")
 
-    username = models.CharField(max_length=80, verbose_name="نام کاربری",
+    username = models.CharField(max_length=80, verbose_name="نام کاربری", unique=True,
                                 help_text="Usernames can contain letters(a-z),numbers(0-9),and periods(.).Usernames cannot contain an ampersand(&),equals sings(=),underscore(_),aposterophe('),dash(-),plus sign(+),comma(,),brackets(<,>),or more than one period(.) in a row")
 
     avatar = models.ImageField(upload_to='images/', verbose_name="آواتار", null=True,
@@ -383,6 +383,8 @@ class polls(models.Model):
 
     question = models.CharField(max_length=170, verbose_name="سوال نظر سنجی")
 
+    choices = models.ManyToManyField('choice', verbose_name="گزینه ها")
+
     class Meta:
 
         verbose_name = "نظرسنجی"
@@ -397,6 +399,8 @@ class oldPolls(models.Model):
 
     question = models.CharField(max_length=170, verbose_name="سوال نظر سنجی")
 
+    choices = models.ManyToManyField('choice', verbose_name="گزینه ها")
+
     class Meta:
 
         verbose_name = "نظرسنجی قبل"
@@ -406,22 +410,28 @@ class oldPolls(models.Model):
 
 class choice(models.Model):
 
-    polls = models.ForeignKey(
-        polls, on_delete=models.CASCADE, verbose_name="نظرسنجی")
-
     title = models.CharField(max_length=100)
 
     image = models.ImageField(upload_to='choice_images/')
 
     numvotes = models.IntegerField(default=0)
 
-    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
 
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=['polls', 'user'], name='unique_user_choice')
-        ]
+    choiceNumber = choiceNumber = models.IntegerField(
+        verbose_name="شماره گزینه ", blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        if self.pk is None:  # بررسی برای ساخت یک گزینه جدید
+            last_choice = choice.objects.order_by(
+                '-choiceNumber').first()  # یافتن آخرین شماره
+            if last_choice:
+                self.choiceNumber = last_choice.choiceNumber + \
+                    1  # افزایش شماره بر اساس آخرین شماره
+            else:
+                self.choiceNumber = 1  # اولین شماره برای اولین گزینه
+
+        super().save(*args, **kwargs)
 
     class Meta:
 

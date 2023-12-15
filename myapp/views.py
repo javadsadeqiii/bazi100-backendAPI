@@ -21,6 +21,8 @@ from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.hashers import make_password
 from django.views import View
 from myapp.models import contactUs
+from django.utils import timezone
+from django.db import transaction
 
 
 DATE_FORMAT = 'Y-m-d'
@@ -263,6 +265,29 @@ class pollsViewSet(ModelViewSet):
     serializer_class = pollsSerializer
     permission_classes = [AllowAny]
 
+    def move_expired_polls_to_old():
+        try:
+            with transaction.atomic():
+                current_time = timezone.now()
+
+            # فیلتر کردن نظرسنجی‌های منقضی شده
+            expired_polls = polls.objects.filter(
+                expiryTimestamp__lte=current_time)
+
+           # انتقال نظرسنجیا به اولدپولز و ذخیره اونا
+            for poll in expired_polls:
+                old_poll = oldPolls.objects.create(
+                    expiryTimestamp=poll.expiryTimestamp,
+                    question=poll.question,
+
+                )
+                # نظرسنجی های منقضی شده رو از پولز حذف میکنم
+                poll.delete()
+
+        except Exception as e:
+            print(f"خطایی رخ داد: {e}")
+        # اگ مشکلی ایجاد پیغام بده
+
 
 class oldPollsViewSet(ModelViewSet):
 
@@ -271,22 +296,27 @@ class oldPollsViewSet(ModelViewSet):
     permission_classes = [AllowAny]
 
 
-def move_expired_polls():
-    currentTime = datetime.datetime.now()
-    expired_polls = polls.objects.filter(expiryTimestamp__lt=currentTime)
-
-    for poll in expired_polls:
-        old_poll = oldPolls(
-            expiryTimestamp=poll.expiryTimestamp, question=poll.question)
-        old_poll.save()
-        poll.delete()
-
-
 class choiceViewSet(ModelViewSet):
-
     queryset = choice.objects.all()
     serializer_class = choiceSerializer
     permission_classes = [AllowAny]
+
+    def update(self, request, *args, **kwargs):
+        user = request.user
+        choiceNumber = kwargs.get('pk')  # مقدار choiceNumber از URL
+        instance = self.get_object()
+
+        # بررسی آیا کاربر قبلاً به این گزینه رأی داده یا نه
+        user_voted = choice.objects.filter(
+            user=user, choiceNumber=choiceNumber).exists()
+
+        if not user_voted:  # اگر کاربر قبلاً به این گزینه رأی نداده باشد
+            instance.numvotes += 1
+            instance.save()
+            serializer = self.get_serializer(instance)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response({"message": "فقط یک بار میتوانید رای بدهید"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class allPostsViewSet(ModelViewSet):

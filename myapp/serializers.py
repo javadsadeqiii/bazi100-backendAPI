@@ -30,11 +30,24 @@ class oldPollsSerializer(ModelSerializer):
         fields = ('__all__')
 
 
+class CustomDateTimeField(serializers.DateTimeField):
+    def to_representation(self, value):
+        # Get the formatted date string
+        formatted_date = value.strftime("%Y,%m,%d,%H,%M")
+        formatted_date_parts = formatted_date.split(',')
+        # Remove leading zeros from month and day if they exist
+        formatted_date_parts[1] = str(int(formatted_date_parts[1]))  # Month
+        formatted_date_parts[2] = str(int(formatted_date_parts[2]))  # Day
+        return formatted_date_parts
+
+
 class pollsSerializer(ModelSerializer):
 
-    class Meta:
+    expiryTimestamp = CustomDateTimeField()
 
+    class Meta:
         model = polls
+
         fields = ('__all__')
 
 
