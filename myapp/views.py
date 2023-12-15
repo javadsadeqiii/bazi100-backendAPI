@@ -31,6 +31,7 @@ class SignUpView(APIView):
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
+        confirmPassword = request.data.get('confirmPassword')
         email = request.data.get('email')
         if not username or not password:
             return Response({'error': 'لطفا تمامی فیلد هارا پرکنید'}, status=status.HTTP_400_BAD_REQUEST)
@@ -46,6 +47,12 @@ class SignUpView(APIView):
 
         if User.objects.filter(email=email).exists():
             return Response({'error': "ایمیل وارد شده قبلا ثبت شده است"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if len(password) < 8:
+            return Response({'error': 'رمز عبور نمی‌تواند کمتر از 8 کاراکتر باشد'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if password != confirmPassword:
+            return Response({'error': 'رمز عبور و تایید آن باید یکسان باشند'}, status=status.HTTP_400_BAD_REQUEST)
 
         if len(password) < 8:
             return Response({'error': "رمز عبور نمیتواند کمتر از 8 کاراکتر باشد"}, status=status.HTTP_400_BAD_REQUEST)
