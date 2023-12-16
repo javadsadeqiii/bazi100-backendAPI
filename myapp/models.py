@@ -376,7 +376,7 @@ class advertisements(models.Model):
         return self.brandName
 
 
-class polls(models.Model):
+class Polls(models.Model):
 
     expiryTimestamp = models.DateTimeField(
         verbose_name=" تاریخ و ساعت اتمام نظرسنجی")
@@ -425,6 +425,7 @@ class Choice(models.Model):
 
 class Vote(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    poll = models.ForeignKey(Polls, on_delete=models.CASCADE)
     choice = models.ForeignKey(Choice, on_delete=models.CASCADE)
 
     class Meta:

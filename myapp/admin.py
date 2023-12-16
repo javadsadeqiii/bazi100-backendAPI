@@ -34,7 +34,7 @@ class pollsAdmin(admin.ModelAdmin):
     ordering = ('id',)
 
 
-admin.site.register(polls, pollsAdmin)
+admin.site.register(Polls, pollsAdmin)
 
 
 class oldPollsAdmin(admin.ModelAdmin):
@@ -57,7 +57,7 @@ admin.site.register(Choice, ChoiceAdmin)
 
 class VoteAdmin(admin.ModelAdmin):
 
-    list_display = ('id', 'user', 'choice')
+    list_display = ('id', 'user', 'poll')
 
 
 admin.site.register(Vote, VoteAdmin)

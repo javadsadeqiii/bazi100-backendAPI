@@ -22,6 +22,8 @@ from django.utils import timezone
 from django.db import transaction
 from rest_framework.decorators import api_view
 from django.shortcuts import get_object_or_404
+from django.db.models import Q
+from django.shortcuts import get_object_or_404
 
 
 DATE_FORMAT = 'Y-m-d'
@@ -260,7 +262,7 @@ def validate_comment_text(value):
 
 class pollsViewSet(ModelViewSet):
 
-    queryset = polls.objects.all()
+    queryset = Polls.objects.all()
     serializer_class = pollsSerializer
     permission_classes = [AllowAny]
 
@@ -270,7 +272,7 @@ class pollsViewSet(ModelViewSet):
                 current_time = timezone.now()
 
             # فیلتر کردن نظرسنجی‌های منقضی شده
-            expired_polls = polls.objects.filter(
+            expired_polls = Polls.objects.filter(
                 expiryTimestamp__lte=current_time)
 
            # انتقال نظرسنجیا به اولدپولز و ذخیره اونا
@@ -310,22 +312,22 @@ class voteViewSet(ModelViewSet):
 @api_view(['POST'])
 def voteChoice(request):
     user = request.data.get('user')
+    poll = request.data.get('poll')
     choice = request.data.get('choice')
 
-    try:
-        user = User.objects.get(id=user)
-        choice = Choice.objects.get(id=choice)
-    except (User.DoesNotExist, Choice.DoesNotExist):
-        return Response({'message': 'کاربر یا گزینه پیدا نشد'}, status=status.HTTP_404_NOT_FOUND)
+    user = get_object_or_404(User, id=user)
+    poll = get_object_or_404(Polls, id=poll)
+    choice = get_object_or_404(Choice, id=choice)
 
-    user_voted = Vote.objects.filter(user=user, choice=choice).exists()
+    user_voted = Vote.objects.filter(
+        user=user, poll=poll).exists()
     if user_voted:
-        return Response({'message': 'شما قبلاً برای این گزینه رای داده‌اید'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'error': 'شما قبلاً برای این سوال رای داده‌اید'}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Create a vote for the selected choice and user
-    Vote.objects.create(user=user, choice=choice)
+    # Record the user's vote for the poll
+    Vote.objects.create(user=user, poll=poll, choice=choice)
 
-    # Update numVotes field in Choice model
+    # Update numVotes in Choice model
     choice.numVotes = Vote.objects.filter(choice=choice).count()
     choice.save()
 

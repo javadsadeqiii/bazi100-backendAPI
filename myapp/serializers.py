@@ -46,7 +46,7 @@ class pollsSerializer(ModelSerializer):
     expiryTimestamp = CustomDateTimeField()
 
     class Meta:
-        model = polls
+        model = Polls
 
         fields = ('__all__')
 
