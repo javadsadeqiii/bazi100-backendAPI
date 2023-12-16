@@ -1,6 +1,4 @@
 from django.http import JsonResponse
-from rest_framework import permissions
-from django.shortcuts import render
 from rest_framework.viewsets import ModelViewSet
 from . models import *
 from .serializers import *
@@ -8,7 +6,6 @@ import re
 from django.http import JsonResponse
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
-import datetime
 from django.core.mail import send_mail
 from django.contrib.auth.models import User
 from rest_framework.permissions import AllowAny
@@ -24,6 +21,7 @@ from myapp.models import contactUs
 from django.utils import timezone
 from django.db import transaction
 from rest_framework.decorators import api_view
+from django.shortcuts import get_object_or_404
 
 
 DATE_FORMAT = 'Y-m-d'
@@ -311,20 +309,14 @@ class voteViewSet(ModelViewSet):
 
 @api_view(['POST'])
 def vote_for_choice(request, choice_id):
-    try:
-        choice = choice.objects.get(pk=choice_id)
-        user = request.user  # Assuming user authentication is implemented
-    except choice.DoesNotExist:
-        return Response({'message': 'گزینه ای یافت نشد'}, status=status.HTTP_404_NOT_FOUND)
+    choice_obj = get_object_or_404(choice, pk=choice_id)
+    user = request.user
 
-    # Create a vote for the selected choice and user
-    vote, created = vote.objects.get_or_create(user=user, choice=choice)
+    vote, created = vote.objects.get_or_create(user=user, choice=choice_obj)
 
-    # If the vote was successfully created (not already existing), increment numVotes
     if created:
-        choice.numVotes += 1
-        choice.save()
-
+        choice_obj.numVotes += 1
+        choice_obj.save()
         return Response({'message': 'انتخاب شما با موفقیت ثبت شد'}, status=status.HTTP_200_OK)
     else:
         return Response({'message': 'فقط یک بار میتوانید در نظرسنجی شرکت کنید'}, status=status.HTTP_400_BAD_REQUEST)
