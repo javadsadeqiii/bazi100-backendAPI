@@ -6,10 +6,7 @@ from django.core.validators import FileExtensionValidator
 from django_jsonform.models.fields import ArrayField
 from ckeditor_uploader.fields import RichTextUploadingField
 from django.db import models
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from rest_framework.authtoken.models import Token
-from django.conf import settings
+from django.utils import timezone
 
 en_formats.DATETIME_FORMAT = 'Y-m-d'
 
@@ -391,6 +388,18 @@ class Polls(models.Model):
 
         verbose_name_plural = "نظرسنجی ها"
 
+    def move_expired_questions_to_old_polls(self):
+        current_time = timezone.now()
+        expired_polls = Polls.objects.filter(expiryTimestamp__lte=current_time)
+
+        for poll in expired_polls:
+            old_poll = oldPolls.objects.create(
+                expiryTimestamp=poll.expiryTimestamp,
+                question=poll.question
+            )
+            old_poll.choices.set(poll.choices.all())
+            poll.delete()
+
 
 class oldPolls(models.Model):
 
@@ -398,14 +407,12 @@ class oldPolls(models.Model):
         verbose_name=" تاریخ و ساعت اتمام نظرسنجی")
 
     question = models.CharField(max_length=170, verbose_name="سوال نظر سنجی")
-
     choices = models.ManyToManyField('choice', verbose_name="گزینه ها")
 
-    class Meta:
 
-        verbose_name = "نظرسنجی قبل"
-
-        verbose_name_plural = "نظرسنجی های قبلی"
+class Meta:
+    verbose_name = "نظرسنجی قبل"
+    verbose_name_plural = "نظرسنجی های قبلی"
 
 
 class Choice(models.Model):
