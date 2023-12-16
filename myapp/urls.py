@@ -77,6 +77,7 @@ urlpatterns = [
          name='change-password'),
     path('api/contact-us/', ContactUsAPIView.as_view(), name='contact_us'),
     path('ckeditor/', include('ckeditor_uploader.urls')),
+    path('api/vote/', views.voteChoice, name='voteChoice')
 
 
 

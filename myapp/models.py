@@ -11,7 +11,7 @@ from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 from django.conf import settings
 
-# en_formats.DATETIME_FORMAT = 'Y-m-d'
+en_formats.DATETIME_FORMAT = 'Y-m-d'
 
 
 class commentReply(models.Model):

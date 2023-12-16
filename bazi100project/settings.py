@@ -175,7 +175,7 @@ LANGUAGE_CODE = 'en-us'
 
 # DATE_INPUT_FORMATS = ['YYYY-MM-DD']
 
-TIME_ZONE = 'America/New_York'
+TIME_ZONE = 'Asia/Tehran'
 
 USE_I18N = True
 

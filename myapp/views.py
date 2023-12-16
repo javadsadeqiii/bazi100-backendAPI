@@ -308,18 +308,29 @@ class voteViewSet(ModelViewSet):
 
 
 @api_view(['POST'])
-def vote_for_choice(request, choice_id):
-    choice_obj = get_object_or_404(choice, pk=choice_id)
-    user = request.user
+def voteChoice(request):
+    user = request.data.get('id')
+    choice = request.data.get('id')
 
-    vote, created = vote.objects.get_or_create(user=user, choice=choice_obj)
+    try:
+        user = User.objects.get('id')
+        choice = choice.objects.get('id')
+    except (User.DoesNotExist, choice.DoesNotExist):
+        return Response({'message': 'کاربر پیدا نشد'}, status=status.HTTP_404_NOT_FOUND)
 
-    if created:
-        choice_obj.numVotes += 1
-        choice_obj.save()
-        return Response({'message': 'انتخاب شما با موفقیت ثبت شد'}, status=status.HTTP_200_OK)
-    else:
-        return Response({'message': 'فقط یک بار میتوانید در نظرسنجی شرکت کنید'}, status=status.HTTP_400_BAD_REQUEST)
+    pollId = choice.polls.id
+    user_voted = vote.objects.filter(user=user, choice__polls=pollId).exists()
+    if user_voted:
+        return Response({'message': 'شما قبلاً برای این نظرسنجی رای داده‌اید'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Create a vote for the selected choice and user
+    vote.objects.create(user=user, choice=choice)
+
+    # Increment numVotes field in Choice model
+    choice.numVotes = vote.objects.filter(choice=choice).count()
+    choice.save()
+
+    return Response({'message': 'انتخاب شما با موفقیت ثبت شد'}, status=status.HTTP_200_OK)
 
 
 class allPostsViewSet(ModelViewSet):
