@@ -408,7 +408,7 @@ class oldPolls(models.Model):
         verbose_name_plural = "نظرسنجی های قبلی"
 
 
-class choice(models.Model):
+class Choice(models.Model):
 
     title = models.CharField(max_length=100)
 
@@ -423,9 +423,9 @@ class choice(models.Model):
         verbose_name_plural = "گزینه ها"
 
 
-class vote(models.Model):
+class Vote(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    choice = models.ForeignKey(choice, on_delete=models.CASCADE)
+    choice = models.ForeignKey(Choice, on_delete=models.CASCADE)
 
     class Meta:
 

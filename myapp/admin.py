@@ -46,21 +46,21 @@ class oldPollsAdmin(admin.ModelAdmin):
 admin.site.register(oldPolls, oldPollsAdmin)
 
 
-class choiceAdmin(admin.ModelAdmin):
+class ChoiceAdmin(admin.ModelAdmin):
 
     list_display = ('id', 'title', 'numVotes')
    # ordering = ('id',)
 
 
-admin.site.register(choice, choiceAdmin)
+admin.site.register(Choice, ChoiceAdmin)
 
 
-class voteAdmin(admin.ModelAdmin):
+class VoteAdmin(admin.ModelAdmin):
 
     list_display = ('id', 'user', 'choice')
 
 
-admin.site.register(vote, voteAdmin)
+admin.site.register(Vote, VoteAdmin)
 
 
 class contactUsAdmin(admin.ModelAdmin):

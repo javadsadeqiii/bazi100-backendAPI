@@ -51,16 +51,16 @@ class pollsSerializer(ModelSerializer):
         fields = ('__all__')
 
 
-class voteSerializer(ModelSerializer):
+class VoteSerializer(ModelSerializer):
     class Meta:
-        model = vote
+        model = Vote
         fields = ('__all__')
 
 
-class choiceSerializer(ModelSerializer):
+class ChoiceSerializer(ModelSerializer):
 
     class Meta:
-        model = choice
+        model = Choice
         fields = ('__all__')
 
 

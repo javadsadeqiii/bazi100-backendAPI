@@ -296,14 +296,14 @@ class oldPollsViewSet(ModelViewSet):
 
 
 class choiceViewSet(ModelViewSet):
-    queryset = choice.objects.all()
-    serializer_class = choiceSerializer
+    queryset = Choice.objects.all()
+    serializer_class = ChoiceSerializer
     permission_classes = [AllowAny]
 
 
 class voteViewSet(ModelViewSet):
-    queryset = vote.objects.all()
-    serializer_class = voteSerializer
+    queryset = Vote.objects.all()
+    serializer_class = VoteSerializer
     permission_classes = [AllowAny]
 
 
@@ -313,21 +313,20 @@ def voteChoice(request):
     choice = request.data.get('choice')
 
     try:
-        user = User.objects.get('user')
-        choice = choice.objects.get('choice')
-    except (User.DoesNotExist, choice.DoesNotExist):
-        return Response({'message': 'کاربر پیدا نشد'}, status=status.HTTP_404_NOT_FOUND)
+        user = User.objects.get(id=user)
+        choice = Choice.objects.get(id=choice)
+    except (User.DoesNotExist, Choice.DoesNotExist):
+        return Response({'message': 'کاربر یا گزینه پیدا نشد'}, status=status.HTTP_404_NOT_FOUND)
 
-    pollId = choice.polls.id
-    user_voted = vote.objects.filter(user=user, choice__polls=pollId).exists()
+    user_voted = Vote.objects.filter(user=user, choice=choice).exists()
     if user_voted:
-        return Response({'message': 'شما قبلاً برای این نظرسنجی رای داده‌اید'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'message': 'شما قبلاً برای این گزینه رای داده‌اید'}, status=status.HTTP_400_BAD_REQUEST)
 
     # Create a vote for the selected choice and user
-    vote.objects.create(user=user, choice=choice)
+    Vote.objects.create(user=user, choice=choice)
 
-    # Increment numVotes field in Choice model
-    choice.numVotes = vote.objects.filter(choice=choice).count()
+    # Update numVotes field in Choice model
+    choice.numVotes = Vote.objects.filter(choice=choice).count()
     choice.save()
 
     return Response({'message': 'انتخاب شما با موفقیت ثبت شد'}, status=status.HTTP_200_OK)
