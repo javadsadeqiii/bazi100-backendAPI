@@ -309,12 +309,12 @@ class voteViewSet(ModelViewSet):
 
 @api_view(['POST'])
 def voteChoice(request):
-    user = request.data.get('id')
-    choice = request.data.get('id')
+    user = request.data.get('user')
+    choice = request.data.get('choice')
 
     try:
-        user = User.objects.get('id')
-        choice = choice.objects.get('id')
+        user = User.objects.get('user')
+        choice = choice.objects.get('choice')
     except (User.DoesNotExist, choice.DoesNotExist):
         return Response({'message': 'کاربر پیدا نشد'}, status=status.HTTP_404_NOT_FOUND)
 
