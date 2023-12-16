@@ -315,9 +315,16 @@ def voteChoice(request):
     poll = request.data.get('poll')
     choice = request.data.get('choice')
 
-    user = get_object_or_404(User, id=user)
-    poll = get_object_or_404(Polls, id=poll)
-    choice = get_object_or_404(Choice, id=choice)
+    try:
+        user = get_object_or_404(User, id=user)
+        poll = get_object_or_404(Polls, id=poll)
+        choice = get_object_or_404(Choice, id=choice)
+    except User.DoesNotExist:
+        return Response({'error': 'کاربر مورد نظر پیدا نشد'}, status=status.HTTP_404_NOT_FOUND)
+    except Polls.DoesNotExist:
+        return Response({'error': 'سوال مورد نظر پیدا نشد'}, status=status.HTTP_404_NOT_FOUND)
+    except Choice.DoesNotExist:
+        return Response({'error': 'گزینه مورد نظر پیدا نشد'}, status=status.HTTP_404_NOT_FOUND)
 
     user_voted = Vote.objects.filter(
         user=user, poll=poll).exists()
