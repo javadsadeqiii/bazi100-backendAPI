@@ -18,7 +18,7 @@ from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.hashers import make_password
 from django.views import View
 from myapp.models import contactUs
-from datetime import datetime
+from rest_framework.decorators import action
 from rest_framework.decorators import api_view
 
 
@@ -256,28 +256,33 @@ def validate_comment_text(value):
         raise ValidationError("کامنت حاوی لینک میباشد")
 
 
-class pollsAPIView(APIView):
+class pollsViewSet(ModelViewSet):
     queryset = Polls.objects.all()
     serializer_class = pollsSerializer
-  #  permission_classes = [AllowAny]
+    permission_classes = [AllowAny]
 
-    def post(self):
-        current_time = datetime.now()
-        expired_polls = Polls.objects.filter(expiryTimestamp__lt=current_time)
+    @action(detail=False, methods=['get'])
+    def get_expired_polls(self, request):
+        expired_polls = Polls.objects.filter(
+            expiryTimestamp__lte=timezone.now())
+        serializer = self.get_serializer(expired_polls, many=True)
+        return Response(serializer.data)
 
-        for poll in expired_polls:
-            old_poll_data = {
-                'expiryTimestamp': poll.expiryTimestamp,
-                'question': poll.question,
-                'choices': poll.choices.all()
-            }
-            old_poll_serializer = oldPollsSerializer(data=old_poll_data)
-            if old_poll_serializer.is_valid():
-                old_poll_serializer.save()
+    @action(detail=True, methods=['post'])
+    def move_to_old_polls(self, request, pk=None):
+        try:
+            poll = self.get_object()
+            old_poll = oldPolls.objects.create(
+                expiryTimestamp=poll.expiryTimestamp,
+                question=poll.question,
+                # Copy choices or any other related fields
+            )
+            old_poll.choices.add(*poll.choices.all())
+            poll.delete()
 
-        expired_polls.delete()
-
-        return Response("نظرسنجی منقضی شده و به نظرسنجی های قبلی اضافه شد")
+            return Response({'message': 'نظرسنجی منتقل شد'}, status=status.HTTP_200_OK)
+        except Polls.DoesNotExist:
+            return Response({'error': 'نظرسنجی وجود ندارد'}, status=status.HTTP_404_NOT_FOUND)
 
 
 class oldPollsViewSet(ModelViewSet):
@@ -317,7 +322,6 @@ def voteChoice(request):
     if user_voted:
         return Response({'error': "شما دراین نظرسنجی شرکت کرده اید"}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Record the user's vote for the poll
     Vote.objects.create(user=user, poll=poll, choice=choice)
 
     # Update numVotes in Choice model
