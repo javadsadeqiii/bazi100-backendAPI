@@ -384,21 +384,13 @@ class Polls(models.Model):
 
     choices = models.ManyToManyField('choice', verbose_name="گزینه ها")
 
+    isActive: models.BooleanField(default=False, null=True)
+
     class Meta:
 
         verbose_name = "نظرسنجی"
 
         verbose_name_plural = "نظرسنجی ها"
-
-
-class oldPolls(models.Model):
-
-    question = models.CharField(max_length=170, verbose_name="سوال نظر سنجی")
-    choices = models.ManyToManyField('choice', verbose_name="گزینه ها")
-
-    class Meta:
-        verbose_name = "نظرسنجی قبل"
-        verbose_name_plural = "نظرسنجی های قبلی"
 
 
 class Choice(models.Model):

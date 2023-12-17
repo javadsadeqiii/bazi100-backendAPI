@@ -37,15 +37,6 @@ class pollsAdmin(admin.ModelAdmin):
 admin.site.register(Polls, pollsAdmin)
 
 
-class oldPollsAdmin(admin.ModelAdmin):
-
-    list_display = ('id', 'question')
-    ordering = ('id',)
-
-
-admin.site.register(oldPolls, oldPollsAdmin)
-
-
 class ChoiceAdmin(admin.ModelAdmin):
 
     list_display = ('id', 'title', 'numVotes')

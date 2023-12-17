@@ -284,13 +284,6 @@ class pollsViewSet(ModelViewSet):
             return Response({'error': 'نظرسنجی یافت نشد'}, status=status.HTTP_404_NOT_FOUND)
 
 
-class oldPollsViewSet(ModelViewSet):
-
-    queryset = oldPolls.objects.all()
-    serializer_class = oldPollsSerializer
-    permission_classes = [AllowAny]
-
-
 class choiceViewSet(ModelViewSet):
     queryset = Choice.objects.all()
     serializer_class = ChoiceSerializer
