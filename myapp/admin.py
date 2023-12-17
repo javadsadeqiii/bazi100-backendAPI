@@ -39,7 +39,7 @@ admin.site.register(Polls, pollsAdmin)
 
 class oldPollsAdmin(admin.ModelAdmin):
 
-    list_display = ('id', 'expiryTimestamp', 'question')
+    list_display = ('id', 'question')
     ordering = ('id',)
 
 

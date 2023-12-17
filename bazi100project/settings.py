@@ -50,9 +50,11 @@ INSTALLED_APPS = [
 
 ]
 
-SIMPJWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+CELERY_BEAT_SCHEDULE = {
+    'move-expired-polls': {
+        'task': 'myapp.tasks.move_expired_polls',
+        'schedule': 60,  # Interval in seconds (change as needed)
+    },
 }
 
 

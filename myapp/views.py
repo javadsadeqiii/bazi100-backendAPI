@@ -273,16 +273,15 @@ class pollsViewSet(ModelViewSet):
         try:
             poll = self.get_object()
             old_poll = oldPolls.objects.create(
-                expiryTimestamp=poll.expiryTimestamp,
                 question=poll.question,
                 # Copy choices or any other related fields
             )
             old_poll.choices.add(*poll.choices.all())
             poll.delete()
 
-            return Response({'message': 'نظرسنجی منتقل شد'}, status=status.HTTP_200_OK)
+            return Response({'message': 'نظرسنجی با موفقیت منتقل شد'}, status=status.HTTP_200_OK)
         except Polls.DoesNotExist:
-            return Response({'error': 'نظرسنجی وجود ندارد'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'نظرسنجی یافت نشد'}, status=status.HTTP_404_NOT_FOUND)
 
 
 class oldPollsViewSet(ModelViewSet):

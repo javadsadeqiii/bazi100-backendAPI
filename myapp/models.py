@@ -375,8 +375,10 @@ class advertisements(models.Model):
 
 class Polls(models.Model):
 
-    expiryTimestamp = models.DateTimeField(
-        verbose_name=" تاریخ و ساعت اتمام نظرسنجی")
+    expiryTimestamp = models.DateField(
+        verbose_name=" تاریخ  اتمام نظرسنجی")
+
+    endTime = models.CharField(max_length=8, default='24:00:00')
 
     question = models.CharField(max_length=170, verbose_name="سوال نظر سنجی")
 
@@ -390,9 +392,6 @@ class Polls(models.Model):
 
 
 class oldPolls(models.Model):
-
-    expiryTimestamp = models.DateTimeField(
-        verbose_name=" تاریخ و ساعت اتمام نظرسنجی")
 
     question = models.CharField(max_length=170, verbose_name="سوال نظر سنجی")
     choices = models.ManyToManyField('choice', verbose_name="گزینه ها")
