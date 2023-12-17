@@ -388,18 +388,6 @@ class Polls(models.Model):
 
         verbose_name_plural = "نظرسنجی ها"
 
-    def move_expired_questions_to_old_polls(self):
-        current_time = timezone.now()
-        expired_polls = Polls.objects.filter(expiryTimestamp__lte=current_time)
-
-        for poll in expired_polls:
-            old_poll = oldPolls.objects.create(
-                expiryTimestamp=poll.expiryTimestamp,
-                question=poll.question
-            )
-            old_poll.choices.set(poll.choices.all())
-            poll.delete()
-
 
 class oldPolls(models.Model):
 
@@ -409,10 +397,9 @@ class oldPolls(models.Model):
     question = models.CharField(max_length=170, verbose_name="سوال نظر سنجی")
     choices = models.ManyToManyField('choice', verbose_name="گزینه ها")
 
-
-class Meta:
-    verbose_name = "نظرسنجی قبل"
-    verbose_name_plural = "نظرسنجی های قبلی"
+    class Meta:
+        verbose_name = "نظرسنجی قبل"
+        verbose_name_plural = "نظرسنجی های قبلی"
 
 
 class Choice(models.Model):

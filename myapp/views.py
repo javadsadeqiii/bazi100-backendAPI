@@ -18,12 +18,8 @@ from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.hashers import make_password
 from django.views import View
 from myapp.models import contactUs
-from django.utils import timezone
-from django.db import transaction
+from datetime import datetime
 from rest_framework.decorators import api_view
-from django.shortcuts import get_object_or_404
-from django.db.models import Q
-from django.shortcuts import get_object_or_404
 
 
 DATE_FORMAT = 'Y-m-d'
@@ -260,34 +256,28 @@ def validate_comment_text(value):
         raise ValidationError("کامنت حاوی لینک میباشد")
 
 
-class pollsViewSet(ModelViewSet):
-
+class pollsView(APIView):
     queryset = Polls.objects.all()
     serializer_class = pollsSerializer
     permission_classes = [AllowAny]
 
-    def move_expired_polls_to_old():
-        try:
-            with transaction.atomic():
-                current_time = timezone.now()
+    def move_expired_polls(self):
+        current_time = datetime.now()
+        expired_polls = Polls.objects.filter(expiryTimestamp__lt=current_time)
 
-            # فیلتر کردن نظرسنجی‌های منقضی شده
-            expired_polls = Polls.objects.filter(
-                expiryTimestamp__lte=current_time)
+        for poll in expired_polls:
+            old_poll_data = {
+                'expiryTimestamp': poll.expiryTimestamp,
+                'question': poll.question,
+                'choices': poll.choices.all()
+            }
+            old_poll_serializer = oldPollsSerializer(data=old_poll_data)
+            if old_poll_serializer.is_valid():
+                old_poll_serializer.save()
 
-           # انتقال نظرسنجیا به اولدپولز و ذخیره اونا
-            for poll in expired_polls:
-                old_poll = oldPolls.objects.create(
-                    expiryTimestamp=poll.expiryTimestamp,
-                    question=poll.question,
+        expired_polls.delete()
 
-                )
-                # نظرسنجی های منقضی شده رو از پولز حذف میکنم
-                poll.delete()
-
-        except Exception as e:
-            print(f"خطایی رخ داد: {e}")
-        # اگ مشکلی ایجاد پیغام بده
+        return Response("نظرسنجی منقضی شده و به نظرسنجی های قبلی اضافه شد")
 
 
 class oldPollsViewSet(ModelViewSet):
@@ -316,20 +306,16 @@ def voteChoice(request):
     choice = request.data.get('choice')
 
     try:
-        user = get_object_or_404(User, id=user)
-        poll = get_object_or_404(Polls, id=poll)
-        choice = get_object_or_404(Choice, id=choice)
-    except User.DoesNotExist:
-        return Response({'error': 'کاربر مورد نظر پیدا نشد'}, status=status.HTTP_404_NOT_FOUND)
-    except Polls.DoesNotExist:
-        return Response({'error': 'سوال مورد نظر پیدا نشد'}, status=status.HTTP_404_NOT_FOUND)
-    except Choice.DoesNotExist:
-        return Response({'error': 'گزینه مورد نظر پیدا نشد'}, status=status.HTTP_404_NOT_FOUND)
+        user = User.objects.get(pk=user)
+        poll = Polls.objects.get(pk=poll)
+        choice = Choice.objects.get(pk=choice)
+    except (User.DoesNotExist, Polls.DoesNotExist, Choice.DoesNotExist) as e:
+        raise ValidationError({'error': "یکی از مقادیر نادرست وارد شده"})
 
     user_voted = Vote.objects.filter(
         user=user, poll=poll).exists()
     if user_voted:
-        return Response({'error': 'شما قبلاً برای این سوال رای داده‌اید'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'error': "شما دراین نظرسنجی شرکت کرده اید"}, status=status.HTTP_400_BAD_REQUEST)
 
     # Record the user's vote for the poll
     Vote.objects.create(user=user, poll=poll, choice=choice)
