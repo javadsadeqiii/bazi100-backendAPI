@@ -384,7 +384,7 @@ class Polls(models.Model):
 
     choices = models.ManyToManyField('choice', verbose_name="گزینه ها")
 
-    isActive: models.BooleanField(default=False, null=True)
+    isActive = models.BooleanField(default=False, null=True)
 
     class Meta:
 

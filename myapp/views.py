@@ -261,28 +261,6 @@ class pollsViewSet(ModelViewSet):
     serializer_class = pollsSerializer
     permission_classes = [AllowAny]
 
-    @action(detail=False, methods=['get'])
-    def get_expired_polls(self, request):
-        expired_polls = Polls.objects.filter(
-            expiryTimestamp__lte=timezone.now())
-        serializer = self.get_serializer(expired_polls, many=True)
-        return Response(serializer.data)
-
-    @action(detail=True, methods=['post'])
-    def move_to_old_polls(self, request, pk=None):
-        try:
-            poll = self.get_object()
-            old_poll = oldPolls.objects.create(
-                question=poll.question,
-                # Copy choices or any other related fields
-            )
-            old_poll.choices.add(*poll.choices.all())
-            poll.delete()
-
-            return Response({'message': 'نظرسنجی با موفقیت منتقل شد'}, status=status.HTTP_200_OK)
-        except Polls.DoesNotExist:
-            return Response({'error': 'نظرسنجی یافت نشد'}, status=status.HTTP_404_NOT_FOUND)
-
 
 class choiceViewSet(ModelViewSet):
     queryset = Choice.objects.all()
