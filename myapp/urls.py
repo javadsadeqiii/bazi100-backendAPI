@@ -74,9 +74,9 @@ urlpatterns = [
          name='change-username'),
     path('api/change-password/', ChangePasswordView.as_view(),
          name='change-password'),
-    path('api/contact-us/', ContactUsAPIView.as_view(), name='contact_us'),
+    path('api/contactUs/', ContactUsAPIView.as_view(), name='contact_us'),
     path('ckeditor/', include('ckeditor_uploader.urls')),
-    path('api/polls/', pollsView.as_view(), name='polls-list'),
+    path('api/polls/', pollsAPIView.as_view(), name='polls-list'),
     path('api/vote/', views.voteChoice, name='voteChoice')
 
 

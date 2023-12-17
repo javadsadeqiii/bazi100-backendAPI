@@ -256,12 +256,12 @@ def validate_comment_text(value):
         raise ValidationError("کامنت حاوی لینک میباشد")
 
 
-class pollsView(APIView):
+class pollsAPIView(APIView):
     queryset = Polls.objects.all()
     serializer_class = pollsSerializer
-    permission_classes = [AllowAny]
+  #  permission_classes = [AllowAny]
 
-    def move_expired_polls(self):
+    def post(self):
         current_time = datetime.now()
         expired_polls = Polls.objects.filter(expiryTimestamp__lt=current_time)
 
