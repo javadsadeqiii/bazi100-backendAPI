@@ -223,11 +223,18 @@ class commentView(APIView):
             return Response({"message": "متاسفانه خطایی رخ داده است."}, status=status.HTTP_400_BAD_REQUEST)
 
         if like.objects.filter(user=userId, comment=commentId).exists():
-            return Response({"message": "شما قبلاً این کامنت را لایک کرده‌اید"}, status=status.HTTP_400_BAD_REQUEST)
+
+            like = like.objects.get(user=userId, comment=commentId)
+            like.delete()
+
+            comment.like_count = like.objects.filter(comment=commentId).count()
+            comment.save()
+
+            return Response({"message": "لایک کامنت با موفقیت حذف شد"}, status=status.HTTP_200_OK)
 
         like = like.objects.create(user=userId, comment=commentId)
 
-        comment.likeCount = like.objects.filter(comment=commentId).count()
+        comment.like_count = like.objects.filter(comment=commentId).count()
         comment.save()
 
         return Response({"message": "کامنت با موفقیت لایک شد"}, status=status.HTTP_201_CREATED)

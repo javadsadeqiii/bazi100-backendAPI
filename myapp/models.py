@@ -106,10 +106,6 @@ class allPosts(models.Model):
     comments = models.ManyToManyField(
         comments, related_name='post', verbose_name="کامنت ها", null=True)
 
-    numComments = models.IntegerField(default=0, verbose_name="تعداد کامنت‌ها")
-
-    numReplies = models.IntegerField(default=0, verbose_name="تعداد ریپلای‌ها")
-
     isEvent = models.BooleanField(default=False, null=True)
 
     isArticle = models.BooleanField(default=False, null=True)
