@@ -21,13 +21,12 @@ class commentReply(models.Model):
     userId = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='users', verbose_name="آیدی کاربر")
 
-    replyTo = models.ForeignKey('self', on_delete=models.CASCADE, blank=True,
-                                null=True, related_name='reply', verbose_name="پاسخ برای")
+    replyTo = models.ManyToManyField(
+        'comments', related_name='comment_replies', verbose_name="پاسخ برای")
 
     likeCount = models.IntegerField(default=0, verbose_name="تعداد لایک‌ها")
 
     class Meta:
-        unique_together = ('userId', 'likeCount')
         verbose_name = "پاسخ"
         verbose_name_plural = "پاسخ ها"
 
@@ -45,13 +44,9 @@ class comments(models.Model):
     postId = models.ForeignKey(
         'allPosts', on_delete=models.CASCADE, related_name='comment', verbose_name="آیدی پست")
 
-    commentReplies = models.ForeignKey(
-        commentReply, on_delete=models.CASCADE, related_name='replies', verbose_name="آیدی کامنت")
-
     likeCount = models.IntegerField(default=0, verbose_name="تعداد لایک‌ها")
 
     class Meta:
-        unique_together = ('userId', 'likeCount')
         verbose_name = "کامنت"
         verbose_name_plural = "کامنت ها"
 

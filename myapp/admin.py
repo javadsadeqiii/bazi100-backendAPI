@@ -30,7 +30,7 @@ admin.site.register(platform, platformAdmin)
 
 class pollsAdmin(admin.ModelAdmin):
 
-    list_display = ('id', 'expiryTimestamp', 'question')
+    list_display = ('id', 'expiryTimestamp', 'question', 'isActive')
     ordering = ('id',)
 
 
@@ -40,7 +40,7 @@ admin.site.register(Polls, pollsAdmin)
 class ChoiceAdmin(admin.ModelAdmin):
 
     list_display = ('id', 'title', 'numVotes')
-   # ordering = ('id',)
+    ordering = ('id',)
 
 
 admin.site.register(Choice, ChoiceAdmin)
@@ -49,6 +49,7 @@ admin.site.register(Choice, ChoiceAdmin)
 class VoteAdmin(admin.ModelAdmin):
 
     list_display = ('id', 'user', 'poll')
+    ordering = ('id',)
 
 
 admin.site.register(Vote, VoteAdmin)
@@ -80,18 +81,6 @@ class commentsAdmin(admin.ModelAdmin):
 
 
 admin.site.register(comments, commentsAdmin)
-
-
-class CustomUserAdmin(admin.ModelAdmin):
-
-    list_display = ('id', 'username', 'email', 'first_name',
-                    'last_name', 'date_joined', 'is_staff')
-
-    ordering = ('id',)
-
-
-admin.site.unregister(User)
-admin.site.register(User, CustomUserAdmin)
 
 
 class wallpapersAdmin(admin.ModelAdmin):
@@ -130,22 +119,9 @@ class albumsAdmin(admin.ModelAdmin):
 admin.site.register(albums, albumsAdmin)
 
 
-# class allPostsAdmin(admin.ModelAdmin):
-
-#  list_display = ('id','title','date')
-
-#  list_filter = ('title','id')
-
-#  ordering = ('id',)
-
-# admin.site.register(allPosts,allPostsAdmin)
-
-
 class bazi100TeamAdmin(admin.ModelAdmin):
 
     list_display = ('id', 'position', 'email', 'expertise')
-
-    list_filter = ('id',)
 
     ordering = ('id',)
 

@@ -51,8 +51,6 @@ Including another URLconf
 
 
 router = routers.DefaultRouter()
-router.register(r'comments', views.commentsViewSet)
-router.register(r'commentReply', views.commentReplyViewSet)
 router.register(r'Polls', views.pollsViewSet)
 router.register(r'choice', views.choiceViewSet)
 router.register(r'bazi100Team', views.bazi100TeamViewSet)
@@ -76,9 +74,9 @@ urlpatterns = [
          name='change-password'),
     path('api/contactUs/', ContactUsAPIView.as_view(), name='contact_us'),
     path('ckeditor/', include('ckeditor_uploader.urls')),
-    path('api/vote/', views.voteChoice, name='voteChoice')
-
-
+    path('api/vote/', views.voteChoice, name='voteChoice'),
+    path('api/commentReply/', commentReplyView.as_view(), name='comment-reply'),
+    path('api/comment/', commentView.as_view(), name='comment'),
 
 
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

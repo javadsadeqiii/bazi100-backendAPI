@@ -187,37 +187,62 @@ class bazi100TeamViewSet(ModelViewSet):
     permission_classes = [AllowAny]
 
 
-class commentReplyViewSet(ModelViewSet):
+class commentReplyView(APIView):
 
     queryset = commentReply.objects.all()
     serializer_class = commentReplySerializer
     permission_classes = [AllowAny]
 
+    def post(self, request):
+        replyText = request.data.get('replyText')
+        userId = request.data.get('userId')
 
-# با هر بار لایک کامنت تعداد ان آپدیت میشود
-def update_likes_count(self):
+        try:
+            reply = commentReply.objects.get(id=replyText)
+        except commentReply.DoesNotExist:
+            return Response({"message": "پاسخ کامنت مورد نظر یافت نشد"}, status=status.HTTP_404_NOT_FOUND)
 
-    self.likeCount = self.likes.count()
-    self.save()
+        # چک کردن اینکه کاربر قبلا لایک کرده یا نه
+        if like.objects.filter(user=userId, reply=replyText).exists():
+            return Response({"message": "شما قبلا این کامنت را لایک کرده اید"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # ایجاد لایک جدید برای کاربر
+        like = like.objects.create(user=userId, reply=replyText)
+
+        # به‌روزرسانی تعداد لایک‌های پاسخ کامنت
+        reply.likeCount = like.objects.filter(reply=replyText).count()
+        reply.save()
+
+        return Response({"message": "پاسخ کامنت با موفقیت لایک شد"}, status=status.HTTP_201_CREATED)
 
 
-class commentsViewSet(ModelViewSet):
+class commentView(APIView):
 
     queryset = comments.objects.all()
     serializer_class = commentsSerializer
     permission_classes = [AllowAny]
 
+    def post(self, request):
+        commentText = request.data.get('commentText')
+        userId = request.data.get('userId')
 
-@receiver([post_save, post_delete], sender=comments)
-def update_post_comment_counts(sender, instance, **kwargs):
-    instance.postId.update_comment_counts()
+        try:
+            comment = comments.objects.get(id=commentText)
+        except comments.DoesNotExist:
+            return Response({"message": "کامنت مورد نظر یافت نشد"}, status=status.HTTP_404_NOT_FOUND)
 
+        # چک کردن اینکه کاربر قبلا لایک کرده یا نه
+        if like.objects.filter(user=userId, comment=commentText).exists():
+            return Response({"message": "شما قبلا این کامنت را لایک کرده‌اید"}, status=status.HTTP_400_BAD_REQUEST)
 
-# با هر بار لایک کامنت تعداد ان آپدیت میشود
-def update_likes_count(self):
+        # ایجاد لایک جدید برای کاربر
+        like = like.objects.create(user=userId, comment=commentText)
 
-    self.likeCount = self.likes.count()
-    self.save()
+        # به‌روزرسانی تعداد لایک‌های کامنت
+        comment.likeCount = like.objects.filter(comment=commentText).count()
+        comment.save()
+
+        return Response({"message": "کامنت با موفقیت لایک شد"}, status=status.HTTP_201_CREATED)
 
 
 PROHIBITED_WORDS = ["جمهوری اسلامی", "خامنه ای", "کیر", "کص", "کون", "حرومزاده", "کیری", "کسشر", "فاک", "گاییدم", "مادرتو", "اسکل", "کصخل",

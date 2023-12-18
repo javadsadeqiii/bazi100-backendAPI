@@ -48,7 +48,10 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
 
 
+
+
 ]
+
 
 CELERY_BEAT_SCHEDULE = {
     'move-expired-polls': {
