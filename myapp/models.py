@@ -103,8 +103,8 @@ class allPosts(models.Model):
     memberId = models.ForeignKey(
         'bazi100Team', on_delete=models.CASCADE, verbose_name="آیدی نویسنده")
 
-    comments = models.ForeignKey(comments, on_delete=models.CASCADE,
-                                 related_name='post', verbose_name="کامنت ها", blank=True, null=True)
+    comments = models.ManyToManyField(
+        comments, related_name='post', verbose_name="کامنت ها", null=True)
 
     numComments = models.IntegerField(default=0, verbose_name="تعداد کامنت‌ها")
 

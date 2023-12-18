@@ -193,6 +193,12 @@ class commentView(APIView):
     serializer_class = commentsSerializer
     permission_classes = [AllowAny]
 
+    def get(self, request):
+        # دریافت تمام کامنت‌ها
+        all_comments = comments.objects.all()
+        serializer = commentsSerializer(all_comments, many=True)
+        return Response(serializer.data)
+
     def post(self, request):
         commentId = request.data.get('commentId')
         userId = request.data.get('userId')
