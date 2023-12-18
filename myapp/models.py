@@ -25,7 +25,7 @@ class comments(models.Model):
         'allPosts', on_delete=models.CASCADE, related_name='comment', verbose_name="آیدی پست")
 
     parentId = models.ForeignKey(
-        'self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies', default=None)
+        'self', default=None, on_delete=models.CASCADE, related_name='replies')
 
     likeCount = models.IntegerField(default=0, verbose_name="تعداد لایک‌ها")
 
@@ -104,7 +104,7 @@ class allPosts(models.Model):
         'bazi100Team', on_delete=models.CASCADE, verbose_name="آیدی نویسنده")
 
     comments = models.ManyToManyField(
-        comments, related_name='post', verbose_name="کامنت ها", null=True, blank=True)
+        comments, related_name='post', verbose_name="کامنت ها", blank=True)
 
     isEvent = models.BooleanField(default=False, null=True)
 

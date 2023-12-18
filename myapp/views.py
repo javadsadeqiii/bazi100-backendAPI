@@ -208,7 +208,7 @@ class commentView(APIView):
             try:
                 parent_comment = comments.objects.get(id=parentId)
             except comments.DoesNotExist:
-                return Response({"message": "کامنت والد نیست"}, status=status.HTTP_404_NOT_FOUND)
+                return Response({"error": "کامنت والد نیست"}, status=status.HTTP_404_NOT_FOUND)
         else:
             parent_comment = None
 
@@ -220,7 +220,7 @@ class commentView(APIView):
 
             )
         except Exception as e:
-            return Response({"message": "متاسفانه خطایی رخ داده است."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "متاسفانه خطایی رخ داده است."}, status=status.HTTP_400_BAD_REQUEST)
 
         if like.objects.filter(user=userId, comment=commentId).exists():
 
