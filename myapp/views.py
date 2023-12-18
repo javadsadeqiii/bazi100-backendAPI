@@ -187,35 +187,6 @@ class bazi100TeamViewSet(ModelViewSet):
     permission_classes = [AllowAny]
 
 
-class commentReplyView(APIView):
-
-    queryset = commentReply.objects.all()
-    serializer_class = commentReplySerializer
-    permission_classes = [AllowAny]
-
-    def post(self, request):
-        replyText = request.data.get('replyText')
-        userId = request.data.get('userId')
-
-        try:
-            reply = commentReply.objects.get(id=replyText)
-        except commentReply.DoesNotExist:
-            return Response({"message": "پاسخ کامنت مورد نظر یافت نشد"}, status=status.HTTP_404_NOT_FOUND)
-
-        # چک کردن اینکه کاربر قبلا لایک کرده یا نه
-        if like.objects.filter(user=userId, reply=replyText).exists():
-            return Response({"message": "شما قبلا این کامنت را لایک کرده اید"}, status=status.HTTP_400_BAD_REQUEST)
-
-        # ایجاد لایک جدید برای کاربر
-        like = like.objects.create(user=userId, reply=replyText)
-
-        # به‌روزرسانی تعداد لایک‌های پاسخ کامنت
-        reply.likeCount = like.objects.filter(reply=replyText).count()
-        reply.save()
-
-        return Response({"message": "پاسخ کامنت با موفقیت لایک شد"}, status=status.HTTP_201_CREATED)
-
-
 class commentView(APIView):
 
     queryset = comments.objects.all()
@@ -223,23 +194,23 @@ class commentView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        commentText = request.data.get('commentText')
+        commentId = request.data.get('commentId')
         userId = request.data.get('userId')
 
         try:
-            comment = comments.objects.get(id=commentText)
+            comment = comments.objects.get(id=commentId)
         except comments.DoesNotExist:
             return Response({"message": "کامنت مورد نظر یافت نشد"}, status=status.HTTP_404_NOT_FOUND)
 
         # چک کردن اینکه کاربر قبلا لایک کرده یا نه
-        if like.objects.filter(user=userId, comment=commentText).exists():
+        if like.objects.filter(user=userId, comment=commentId).exists():
             return Response({"message": "شما قبلا این کامنت را لایک کرده‌اید"}, status=status.HTTP_400_BAD_REQUEST)
 
         # ایجاد لایک جدید برای کاربر
-        like = like.objects.create(user=userId, comment=commentText)
+        like = like.objects.create(user=userId, comment=commentId)
 
         # به‌روزرسانی تعداد لایک‌های کامنت
-        comment.likeCount = like.objects.filter(comment=commentText).count()
+        comment.likeCount = like.objects.filter(comment=commentId).count()
         comment.save()
 
         return Response({"message": "کامنت با موفقیت لایک شد"}, status=status.HTTP_201_CREATED)

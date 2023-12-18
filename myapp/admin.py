@@ -64,13 +64,13 @@ class contactUsAdmin(admin.ModelAdmin):
 admin.site.register(contactUs, contactUsAdmin)
 
 
-class commentReplyAdmin(admin.ModelAdmin):
+# class commentReplyAdmin(admin.ModelAdmin):
 
-    list_display = ('id', 'replyText')
-    ordering = ('id',)
+#   list_display = ('id', 'replyText')
+#   ordering = ('id',)
 
 
-admin.site.register(commentReply, commentReplyAdmin)
+# admin.site.register(commentReply, commentReplyAdmin)
 
 
 class commentsAdmin(admin.ModelAdmin):

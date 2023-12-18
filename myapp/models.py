@@ -11,26 +11,6 @@ from django.utils import timezone
 en_formats.DATETIME_FORMAT = 'Y-m-d'
 
 
-class commentReply(models.Model):
-
-    replyText = models.TextField(verbose_name="متن پاسخ")
-
-    createdAt = models.DateTimeField(
-        auto_now_add=True, verbose_name="زمان و تاریخ انتشار پاسخ")
-
-    userId = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='users', verbose_name="آیدی کاربر")
-
-    replyTo = models.ManyToManyField(
-        'comments', related_name='comment_replies', verbose_name="پاسخ برای")
-
-    likeCount = models.IntegerField(default=0, verbose_name="تعداد لایک‌ها")
-
-    class Meta:
-        verbose_name = "پاسخ"
-        verbose_name_plural = "پاسخ ها"
-
-
 class comments(models.Model):
 
     commentText = models.TextField(verbose_name="متن کامنت")
@@ -43,6 +23,9 @@ class comments(models.Model):
 
     postId = models.ForeignKey(
         'allPosts', on_delete=models.CASCADE, related_name='comment', verbose_name="آیدی پست")
+
+    parentComment = models.ForeignKey(
+        'self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
 
     likeCount = models.IntegerField(default=0, verbose_name="تعداد لایک‌ها")
 

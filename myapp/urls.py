@@ -75,7 +75,6 @@ urlpatterns = [
     path('api/contactUs/', ContactUsAPIView.as_view(), name='contact_us'),
     path('ckeditor/', include('ckeditor_uploader.urls')),
     path('api/vote/', views.voteChoice, name='voteChoice'),
-    path('api/commentReply/', commentReplyView.as_view(), name='comment-reply'),
     path('api/comment/', commentView.as_view(), name='comment'),
 
 
