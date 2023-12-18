@@ -24,8 +24,8 @@ class comments(models.Model):
     postId = models.ForeignKey(
         'allPosts', on_delete=models.CASCADE, related_name='comment', verbose_name="آیدی پست")
 
-    parentComment = models.ForeignKey(
-        'self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
+    parentId = models.ForeignKey(
+        'self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies', default=None)
 
     likeCount = models.IntegerField(default=0, verbose_name="تعداد لایک‌ها")
 

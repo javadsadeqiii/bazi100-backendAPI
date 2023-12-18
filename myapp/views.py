@@ -196,60 +196,35 @@ class commentView(APIView):
     def post(self, request):
         commentId = request.data.get('commentId')
         userId = request.data.get('userId')
+        parentId = request.data.get('parentId')
+
+        if parentId:
+            try:
+                parent_comment = comments.objects.get(id=parentId)
+            except comments.DoesNotExist:
+                return Response({"message": "کامنت والد نیست"}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            parent_comment = None
 
         try:
-            comment = comments.objects.get(id=commentId)
-        except comments.DoesNotExist:
-            return Response({"message": "کامنت مورد نظر یافت نشد"}, status=status.HTTP_404_NOT_FOUND)
+            comment = comments.objects.create(
+                commentText=request.data.get('commentText'),
+                userId=userId,
+                parentId=parent_comment,
 
-        # چک کردن اینکه کاربر قبلا لایک کرده یا نه
+            )
+        except Exception as e:
+            return Response({"message": "متاسفانه خطایی رخ داده است."}, status=status.HTTP_400_BAD_REQUEST)
+
         if like.objects.filter(user=userId, comment=commentId).exists():
-            return Response({"message": "شما قبلا این کامنت را لایک کرده‌اید"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": "شما قبلاً این کامنت را لایک کرده‌اید"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # ایجاد لایک جدید برای کاربر
         like = like.objects.create(user=userId, comment=commentId)
 
-        # به‌روزرسانی تعداد لایک‌های کامنت
         comment.likeCount = like.objects.filter(comment=commentId).count()
         comment.save()
 
         return Response({"message": "کامنت با موفقیت لایک شد"}, status=status.HTTP_201_CREATED)
-
-
-PROHIBITED_WORDS = ["جمهوری اسلامی", "خامنه ای", "کیر", "کص", "کون", "حرومزاده", "کیری", "کسشر", "فاک", "گاییدم", "مادرتو", "اسکل", "کصخل",
-                    "fuck", "dick", "pussy", "wtf", "خفه شو", "مادر جنده", "کسخل", "کونی", "سکس", "sex", "porn", "پورن", "جنده", "گی", "ترنس",
-                    "kos", "kon", "koni", "kiri", "kir", "sexy", "فیلم سوپر", "xxx", "لواط", "همجنس بازی", "لز", "لزبین", "عوضی", "خفه شو",
-                    "کس نگو", "siktir"]
-
-# بخش ممنوع کردن کلمات
-
-
-def contains_prohibited_words(text):
-
-    for word in PROHIBITED_WORDS:
-        if word in text:
-            return True
-    return False
-
-
-# بخش ممنوع کردن گذاشتن لینک
-def contains_url(text):
-    url_pattern = re.compile(
-        r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
-    return bool(url_pattern.search(text))
-
-    # بخش اعتبار سنجی کلمات و لینک ها
-
-
-def validate_comment_text(value):
-
-    if contains_prohibited_words(value):
-
-        raise ValidationError("کامنت شامل محتوای نامناسب میباشد")
-
-    if contains_url(value):
-
-        raise ValidationError("کامنت حاوی لینک میباشد")
 
 
 class pollsViewSet(ModelViewSet):
