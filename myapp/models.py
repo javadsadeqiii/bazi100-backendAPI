@@ -104,7 +104,7 @@ class allPosts(models.Model):
         'bazi100Team', on_delete=models.CASCADE, verbose_name="آیدی نویسنده")
 
     comments = models.ManyToManyField(
-        comments, related_name='post', verbose_name="کامنت ها", null=True)
+        comments, related_name='post', verbose_name="کامنت ها", null=True, blank=True)
 
     isEvent = models.BooleanField(default=False, null=True)
 
