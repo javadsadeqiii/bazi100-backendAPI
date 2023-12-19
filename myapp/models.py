@@ -60,7 +60,7 @@ class reply(models.Model):
     commentId = models.ForeignKey(
         comments, on_delete=models.CASCADE, related_name='replies', verbose_name="کامنت")
 
-    parentReplyId = models.ForeignKey('self', default=False, on_delete=models.CASCADE, null=True,
+    parentReplyId = models.ForeignKey('self', default=None, on_delete=models.CASCADE, null=True,
                                       blank=True, related_name='replies', verbose_name="ریپلای والد")
     likeCount = models.IntegerField(default=0, verbose_name="تعداد لایک")
 

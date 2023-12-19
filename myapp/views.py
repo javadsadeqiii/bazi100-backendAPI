@@ -199,7 +199,7 @@ class commentAPIView(APIView):
                        "کس نگو", "siktir"]
 
     def get(self, request):
-        all_comments = comments.objects.all()  # تغییر نام متغیر
+        all_comments = comments.objects.all()
         serializer = commentsSerializer(all_comments, many=True)
         return Response(serializer.data)
 
@@ -216,7 +216,7 @@ class commentAPIView(APIView):
                 if word in commentText:
                     return JsonResponse({'error': 'کامنت حاوی الفاظ نامناسب است'}, status=status.HTTP_400_BAD_REQUEST)
                  # بررسی وجود لینک در متن کامنت
-            if re.search(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', comment_text):
+            if re.search(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', commentText):
                 return JsonResponse({'error': 'قرار دادن لینک در کامنت مجاز نیست'}, status=status.HTTP_400_BAD_REQUEST)
 
             post = allPosts.objects.get(id=postId)
@@ -235,7 +235,7 @@ class commentAPIView(APIView):
             return JsonResponse({'error': 'مشکلی در ثبت کامنت رخ داد'}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class CommentLikeAPIView(APIView):
+class commentLikeAPIView(APIView):
 
     queryset = commentLike.objects.all()
     serializer_class = commentLikeSerializer
@@ -278,7 +278,7 @@ class replyAPIView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
-        all_replies = reply.objects.all()  # تغییر نام متغیر
+        all_replies = reply.objects.all()
         serializer = replySerializer(all_replies, many=True)
         return Response(serializer.data)
 
@@ -287,19 +287,19 @@ class replyAPIView(APIView):
         replyText = request.data.get('replyText')
         userId = request.data.get('userId')
         commentId = request.data.get('commentId')
-        parentReplyId = request.data.get('parentReplyId')
+       # parentReplyId = request.data.get('parentReplyId')
 
-        if replyText and userId and commentId and parentReplyId:
+        if replyText and userId and commentId:  # and parentReplyId:
             user = User.objects.get(id=userId)
             comment = comments.objects.get(id=commentId)
-            parentReply = reply.objects.get(id=parentReplyId)
+           # parentReply = reply.objects.get(id=parentReplyId)
 
             new_reply = reply.objects.create(
 
                 replyText=replyText,
                 userId=user,
                 commentId=comment,
-                parentReplyId=parentReply
+                # parentReplyId=parentReply
 
             )
             new_reply.save()
