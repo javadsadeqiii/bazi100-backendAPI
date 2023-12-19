@@ -56,7 +56,6 @@ class commentsSerializer(ModelSerializer):
                         "kos", "kon", "koni", "kiri", "kir", "sexy", "فیلم سوپر", "xxx", "لواط", "همجنس بازی", "لز", "لزبین", "عوضی", "خفه شو",
                         "کس نگو", "siktir"]
 
-   # Validator برای جلوگیری از کلمات ممنوعه
     restricted_word_validator = RegexValidator(
         regex='|'.join(restricted_words),
         message='استفاده از کلمات ممنوعه مجاز نیست!'
@@ -67,25 +66,74 @@ class commentsSerializer(ModelSerializer):
         message='آپلود هرگونه لینک مجاز نیست'
     )
 
-    comment_text = serializers.CharField(
+    commentText = serializers.CharField(
         validators=[
             restricted_word_validator,
             link_validator,
-
         ]
     )
 
     class Meta:
-
         model = comments
         fields = ('__all__')
 
-    def validate_comment_text(self, value):
+    def validate_commentText(self, value):
         for word in self.restricted_words:
             if word in value:
                 raise serializers.ValidationError(
                     'استفاده از کلمات ممنوعه مجاز نیست!')
         return value
+
+
+class commentLikeSerializer(ModelSerializer):
+
+    class Meta:
+        model = commentLike
+        fields = ('__all__')
+
+
+class replySerializer(ModelSerializer):
+
+    restricted_words = ["جمهوری اسلامی", "خامنه ای", "کیر", "کص", "کون", "حرومزاده", "کیری", "کسشر", "فاک", "گاییدم", "مادرتو", "اسکل", "کصخل",
+                        "fuck", "dick", "pussy", "wtf", "خفه شو", "مادر جنده", "کسخل", "کونی", "سکس", "sex", "porn", "پورن", "جنده", "گی", "ترنس",
+                        "kos", "kon", "koni", "kiri", "kir", "sexy", "فیلم سوپر", "xxx", "لواط", "همجنس بازی", "لز", "لزبین", "عوضی", "خفه شو",
+                        "کس نگو", "siktir"]
+
+    # Validator برای جلوگیری از کلمات ممنوعه
+    restricted_word_validator = RegexValidator(
+        regex='|'.join(restricted_words),
+        message='استفاده از کلمات ممنوعه مجاز نیست!'
+    )
+
+    link_validator = RegexValidator(
+        regex=r'^((?!http[s]?://).)*$',
+        message='آپلود هرگونه لینک مجاز نیست'
+    )
+
+    replyText = serializers.CharField(
+        validators=[
+            restricted_word_validator,
+            link_validator,
+        ]
+    )
+
+    class Meta:
+        model = reply
+        fields = ('__all__')
+
+    def validate_replyText(self, value):
+        for word in self.restricted_words:
+            if word in value:
+                raise serializers.ValidationError(
+                    'استفاده از کلمات ممنوعه مجاز نیست!')
+        return value
+
+
+class replyLikeSerializer(ModelSerializer):
+
+    class Meta:
+        model = replyLike
+        fields = ('__all__')
 
 
 class contactUsSerializer(ModelSerializer):

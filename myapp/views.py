@@ -18,7 +18,7 @@ from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.hashers import make_password
 from django.views import View
 from myapp.models import contactUs
-from rest_framework.decorators import action
+from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
 
 
@@ -187,57 +187,161 @@ class bazi100TeamViewSet(ModelViewSet):
     permission_classes = [AllowAny]
 
 
-class commentView(APIView):
+class commentAPIView(APIView):
 
     queryset = comments.objects.all()
     serializer_class = commentsSerializer
     permission_classes = [AllowAny]
 
+    forbidden_words = ["جمهوری اسلامی", "خامنه ای", "کیر", "کص", "کون", "حرومزاده", "کیری", "کسشر", "فاک", "گاییدم", "مادرتو", "اسکل", "کصخل",
+                       "fuck", "dick", "pussy", "wtf", "خفه شو", "مادر جنده", "کسخل", "کونی", "سکس", "sex", "porn", "پورن", "جنده", "گی", "ترنس",
+                       "kos", "kon", "koni", "kiri", "kir", "sexy", "فیلم سوپر", "xxx", "لواط", "همجنس بازی", "لز", "لزبین", "عوضی", "خفه شو",
+                       "کس نگو", "siktir"]
+
     def get(self, request):
-        # دریافت تمام کامنت‌ها
-        all_comments = comments.objects.all()
+        all_comments = comments.objects.all()  # تغییر نام متغیر
         serializer = commentsSerializer(all_comments, many=True)
         return Response(serializer.data)
 
+    # ثبت کامنت جدید
     def post(self, request):
-        commentId = request.data.get('commentId')
+        commentText = request.data.get('commentText')
         userId = request.data.get('userId')
-        parentId = request.data.get('parentId')
+        postId = request.data.get('postId')
+       # commentId = request.data.get('commentId')
 
-        if parentId:
-            try:
-                parent_comment = comments.objects.get(id=parentId)
-            except comments.DoesNotExist:
-                return Response({"error": "کامنت والد نیست"}, status=status.HTTP_404_NOT_FOUND)
+        if commentText and userId and postId:
+
+            for word in self.forbidden_words:
+                if word in commentText:
+                    return JsonResponse({'error': 'کامنت حاوی الفاظ نامناسب است'}, status=status.HTTP_400_BAD_REQUEST)
+                 # بررسی وجود لینک در متن کامنت
+            if re.search(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', comment_text):
+                return JsonResponse({'error': 'قرار دادن لینک در کامنت مجاز نیست'}, status=status.HTTP_400_BAD_REQUEST)
+
+            post = allPosts.objects.get(id=postId)
+            user = User.objects.get(id=userId)
+            # comment = comments.objects.get(id=commentId)
+            new_comment = comments.objects.create(
+
+                commentText=commentText,
+                userId=user,
+                postId=post,
+                #  commentId=comment
+            )
+            new_comment.save()
+            return JsonResponse({'message': 'کامنت با موفقیت ثبت شد'}, status=status.HTTP_201_CREATED)
         else:
-            parent_comment = None
+            return JsonResponse({'error': 'مشکلی در ثبت کامنت رخ داد'}, status=status.HTTP_400_BAD_REQUEST)
 
-        try:
-            comment = comments.objects.create(
-                commentText=request.data.get('commentText'),
-                userId=userId,
-                parentId=parent_comment,
+
+class CommentLikeAPIView(APIView):
+
+    queryset = commentLike.objects.all()
+    serializer_class = commentLikeSerializer
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        userId = request.data.get('userId')
+        commentId = request.data.get('commentId')
+
+        if userId and commentId:
+
+            like_exists = commentLike.objects.filter(
+                userId=userId, commentId=commentId).exists()
+
+            if like_exists:
+
+                commentLike.objects.filter(
+                    userId=userId, commentId=commentId).delete()
+                return Response({'message': 'لایک حذف شد'}, status=status.HTTP_200_OK)
+            else:
+
+                new_like = commentLike.objects.create(
+                    userId=userId, commentId=commentId)
+                new_like.save()
+
+                comment = get_object_or_404(comments, id=commentId)
+                comment.likeCount = commentLike.objects.filter(
+                    commentId=commentId).count()
+                comment.save()
+
+                return Response({'message': 'لایک با موفقیت ثبت شد'}, status=status.HTTP_201_CREATED)
+        else:
+            return Response({'error': 'اطلاعات کاربر غلط است'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class replyAPIView(APIView):
+
+    queryset = reply.objects.all()
+    serializer_class = replySerializer
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        all_replies = reply.objects.all()  # تغییر نام متغیر
+        serializer = replySerializer(all_replies, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+
+        replyText = request.data.get('replyText')
+        userId = request.data.get('userId')
+        commentId = request.data.get('commentId')
+        parentReplyId = request.data.get('parentReplyId')
+
+        if replyText and userId and commentId and parentReplyId:
+            user = User.objects.get(id=userId)
+            comment = comments.objects.get(id=commentId)
+            parentReply = reply.objects.get(id=parentReplyId)
+
+            new_reply = reply.objects.create(
+
+                replyText=replyText,
+                userId=user,
+                commentId=comment,
+                parentReplyId=parentReply
 
             )
-        except Exception as e:
-            return Response({"error": "متاسفانه خطایی رخ داده است."}, status=status.HTTP_400_BAD_REQUEST)
+            new_reply.save()
+            return JsonResponse({'message': 'پاسخ با موفقیت ثبت شد'}, status=status.HTTP_201_CREATED)
+        else:
+            return JsonResponse({'message': 'مشکلی در ثبت پاسخ رخ داد'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if like.objects.filter(user=userId, comment=commentId).exists():
 
-            like = like.objects.get(user=userId, comment=commentId)
-            like.delete()
+class replyLikeAPIView(APIView):
 
-            comment.like_count = like.objects.filter(comment=commentId).count()
-            comment.save()
+    queryset = replyLike.objects.all()
+    serializer_class = replyLikeSerializer
+    permission_classes = [AllowAny]
 
-            return Response({"message": "لایک کامنت با موفقیت حذف شد"}, status=status.HTTP_200_OK)
+    def post(self, request):
+        userId = request.data.get('userId')
+        replyId = request.data.get('replyId')
 
-        like = like.objects.create(user=userId, comment=commentId)
+        if userId and replyId:
 
-        comment.like_count = like.objects.filter(comment=commentId).count()
-        comment.save()
+            like_exists = commentLike.objects.filter(
+                userId=userId, replyId=replyId).exists()
 
-        return Response({"message": "کامنت با موفقیت لایک شد"}, status=status.HTTP_201_CREATED)
+            if like_exists:
+
+                commentLike.objects.filter(
+                    userId=userId, replyId=replyId).delete()
+                return Response({'message': 'لایک حذف شد'}, status=status.HTTP_200_OK)
+            else:
+
+                new_like = commentLike.objects.create(
+                    userId=userId, replyId=replyId)
+                new_like.save()
+
+                comment = get_object_or_404(comments, id=replyId)
+                comment.likeCount = commentLike.objects.filter(
+                    replyId=replyId).count()
+                comment.save()
+
+                return Response({'message': 'لایک ریپلای با موفقیت ثبت شد'}, status=status.HTTP_201_CREATED)
+        else:
+            return Response({'error': 'اطلاعات کاربر غلط است'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class pollsViewSet(ModelViewSet):

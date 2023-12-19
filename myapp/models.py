@@ -24,14 +24,65 @@ class comments(models.Model):
     postId = models.ForeignKey(
         'allPosts', on_delete=models.CASCADE, related_name='comment', verbose_name="آیدی پست")
 
-    parentId = models.ForeignKey(
-        'self', default=None, on_delete=models.CASCADE, related_name='replies')
+    likeCount = models.IntegerField(default=0, verbose_name="تعداد لایک")
 
-    likeCount = models.IntegerField(default=0, verbose_name="تعداد لایک‌ها")
+    def __str__(self):
+        return f"Comment by {self.userId} on Post {self.postId}"
+    # نشان میدهد که کامنت توسط کدام کاربر بر روی کدام پست ایجاد شده
 
     class Meta:
         verbose_name = "کامنت"
         verbose_name_plural = "کامنت ها"
+
+
+class commentLike(models.Model):
+
+    userId = models.ForeignKey(
+        User, on_delete=models.CASCADE, verbose_name="آیدی کاربر")
+    commentId = models.ForeignKey(
+        comments, on_delete=models.CASCADE, verbose_name="آیدی کامنت")
+
+    class Meta:
+        verbose_name = "لایک های کامنت"
+        verbose_name_plural = "لایک های کامنت"
+
+
+class reply(models.Model):
+
+    replyText = models.TextField(verbose_name="متن پاسخ")
+
+    createdAt = models.DateTimeField(
+        auto_now_add=True, verbose_name="زمان و تاریخ انتشار پاسخ")
+
+    userId = models.ForeignKey(User, on_delete=models.CASCADE,
+                               related_name='user_replies', verbose_name="آیدی کاربر")
+
+    commentId = models.ForeignKey(
+        comments, on_delete=models.CASCADE, related_name='replies', verbose_name="کامنت")
+
+    parentReplyId = models.ForeignKey('self', default=False, on_delete=models.CASCADE, null=True,
+                                      blank=True, related_name='replies', verbose_name="ریپلای والد")
+    likeCount = models.IntegerField(default=0, verbose_name="تعداد لایک")
+
+    def __str__(self):
+        return f"Reply by {self.userId} to Comment {self.comment.id}"
+# نشان میدهد که این پاسخ توسط کدام کاربر به کدام کامنت با استفاده از آیدی آن مرتبط است
+
+    class Meta:
+        verbose_name = "ریپلای"
+        verbose_name_plural = "ریپلای ها"
+
+
+class replyLike(models.Model):
+
+    userId = models.ForeignKey(
+        User, on_delete=models.CASCADE, verbose_name="آیدی کاربر")
+    replyId = models.ForeignKey(
+        reply, on_delete=models.CASCADE, verbose_name="آیدی کامنت")
+
+    class Meta:
+        verbose_name = "لایک های ریپلای"
+        verbose_name_plural = "لایک های ریپلای"
 
 
 class platform(models.Model):

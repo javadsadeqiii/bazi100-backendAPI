@@ -64,23 +64,41 @@ class contactUsAdmin(admin.ModelAdmin):
 admin.site.register(contactUs, contactUsAdmin)
 
 
-# class commentReplyAdmin(admin.ModelAdmin):
-
-#   list_display = ('id', 'replyText')
-#   ordering = ('id',)
-
-
-# admin.site.register(commentReply, commentReplyAdmin)
-
-
 class commentsAdmin(admin.ModelAdmin):
 
-    list_display = ('id', 'userId', 'postId', 'likeCount')
+    list_display = ('id', 'userId', 'postId')
 
     ordering = ('id',)
 
 
 admin.site.register(comments, commentsAdmin)
+
+
+class commentLikeAdmin(admin.ModelAdmin):
+
+    list_display = ('id', 'commentId', 'userId')
+    ordering = ('id',)
+
+
+admin.site.register(commentLike, commentLikeAdmin)
+
+
+class replyAdmin(admin.ModelAdmin):
+
+    list_display = ('id', 'userId', 'replyText')
+    ordering = ('id',)
+
+
+admin.site.register(reply, replyAdmin)
+
+
+class replyLikeAdmin(admin.ModelAdmin):
+
+    list_display = ('id', 'replyId', 'userId')
+    ordering = ('id',)
+
+
+admin.site.register(replyLike, replyLikeAdmin)
 
 
 class wallpapersAdmin(admin.ModelAdmin):
