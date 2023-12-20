@@ -82,13 +82,13 @@ class CommentsAdmin(admin.ModelAdmin):
 admin.site.register(Comments, CommentsAdmin)
 
 
-# class commentLikeAdmin(admin.ModelAdmin):
+class CommentLikeAdmin(admin.ModelAdmin):
 
-#   list_display = ('id', 'likeCounter')
-#  ordering = ('id',)
+    list_display = ('id', 'userId')
+    ordering = ('id',)
 
 
-# admin.site.register(commentLike, commentLikeAdmin)
+admin.site.register(CommentLike, CommentLikeAdmin)
 
 
 class replyAdmin(admin.ModelAdmin):

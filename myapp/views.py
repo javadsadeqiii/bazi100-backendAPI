@@ -235,10 +235,51 @@ class commentAPIView(APIView):
                 userId=user,
                 post=post,
             )
+
             new_comment.save()
             return JsonResponse({'message': 'کامنت با موفقیت ثبت شد'}, status=status.HTTP_201_CREATED)
         else:
             return JsonResponse({'error': 'مشکلی در ثبت کامنت رخ داد'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class LikeCommentAPIView(APIView):
+
+    queryset = CommentLike.objects.all()
+    serializer_class = CommentLikeSerializer
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        likes = CommentLike.objects.all()
+        serializer = CommentLikeSerializer(likes, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        commentId = request.data.get('commentId')
+        userId = request.data.get('userId')
+
+        try:
+            comment = Comments.objects.get(id=commentId)
+            user = User.objects.get(id=userId)
+
+            # چک کردن وجود لایک و حذف یا ایجاد آن
+            like, created = CommentLike.objects.get_or_create(
+                comment=comment, user=user)
+            if created:
+                comment.likeCount += 1
+                comment.save()
+                return Response({'message': 'کامنت با موفقیت لایک شد'}, status=status.HTTP_201_CREATED)
+            else:
+                like.delete()
+                comment.likeCount -= 1
+                comment.save()
+                return Response({'message': 'لایک کامنت حذف شد'}, status=status.HTTP_200_OK)
+
+        except Comments.DoesNotExist:
+            return Response({'error': 'کامنت موردنظر پیدا نشد'}, status=status.HTTP_404_NOT_FOUND)
+        except User.DoesNotExist:
+            return Response({'error': 'کاربر موردنظر پیدا نشد'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class CommentDetailAPIView(APIView):
@@ -271,47 +312,6 @@ class UserDetailsAPIView(APIView):
             return Response(user_data)
         except User.DoesNotExist:
             return Response({'error': 'کاربر مورد نظر یافت نشد'}, status=status.HTTP_404_NOT_FOUND)
-
-
-class LikeCommentAPIView(APIView):
-
-    queryset = Comments.objects.all()
-    serializer_class = CommentsSerializer
-    permission_classes = [AllowAny]
-
-    def get(self, request):
-
-        all_comments = Comments.objects.all()
-        serializer = CommentsSerializer(all_comments, many=True)
-        return Response(serializer.data)
-
-    def post(self, request):
-        try:
-            commentText = Comments.objects.get('commentText')
-            userId = Comments.request.data.get('userId')
-
-            # Check if the user has already liked this comment
-            existing_like = Comments.objects.filter(
-                commentText=commentText, userId=userId).first()
-
-            if existing_like:
-                # If the user has already liked, remove the previous like
-                existing_like.delete()
-                Comments.likeCount -= 1
-                Comments.save()
-                return Response({'message': 'لایک کامنت حذف شد'}, status=status.HTTP_200_OK)
-            else:
-                # If the user hasn't liked, create a new like
-                Comments.objects.create(commentText=commentText, userId=userId)
-                Comments.likeCount += 1
-                Comments.save()
-                return Response({'message': 'کامنت با موفقیت لایک شد'}, status=status.HTTP_201_CREATED)
-
-        except Comments.DoesNotExist:
-            return Response({'error': 'کامنت موردنظر پیدا نشد'}, status=status.HTTP_404_NOT_FOUND)
-
-        except Exception as e:
-            return Response({'error': "خطایی رخ داد"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class replyAPIView(APIView):

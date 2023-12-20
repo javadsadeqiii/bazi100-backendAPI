@@ -16,6 +16,21 @@ en_formats.DATETIME_FORMAT = 'Y-m-d'
 #   comment = models.ForeignKey('comments', on_delete=models.CASCADE)
 
 
+class CommentLike(models.Model):
+
+    userId = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='userliker', verbose_name="آیدی کاربر")
+
+    commentId = models.ForeignKey(
+        'Comments', on_delete=models.CASCADE, default=None, related_name='likecount', verbose_name="آیدی کامنت")
+
+    likeCount = models.IntegerField(default=0, verbose_name="تعداد لایک")
+
+    class Meta:
+        verbose_name = "لایک کامنت ها"
+        verbose_name_plural = "لایک کامنت ها"
+
+
 class Comments(models.Model):
 
     commentText = models.TextField(verbose_name="متن کامنت")
@@ -28,8 +43,6 @@ class Comments(models.Model):
 
     post = models.ForeignKey(
         'allPosts', on_delete=models.CASCADE, default=None, related_name='post', verbose_name="آیدی پست")
-
-    likeCount = models.IntegerField(default=0, verbose_name="تعداد لایک")
 
     def __str__(self):
         return f"Comment by {self.userId} on Post {self.post}"
