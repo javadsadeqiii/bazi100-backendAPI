@@ -239,7 +239,7 @@ class CommentDetailAPIView(APIView):
     serializer_class = commentsSerializer
     permission_classes = [AllowAny]
 
-    def get(self, pk):
+    def get(self, request, pk):
         try:
             comment = comments.objects.get(pk=pk)
             serializer = commentsSerializer(comment)
