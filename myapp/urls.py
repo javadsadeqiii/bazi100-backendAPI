@@ -85,9 +85,9 @@ urlpatterns = [
     path('api/replyLike/', replyAPIView.as_view(), name='replyLike'),
     path('api/posts/<int:post_id>/comments/',
          PostCommentsView.as_view(), name='post-comments'),
-    path('api/allPosts/<slug:slug>/',
-         allPostsDetailView.as_view(), name='allposts-detail'),
-    path('api/albums/<slug:slug>/',
+    path('api/AllPosts/<slug:slug>/',
+         AllPostsDetailView.as_view(), name='allposts-detail'),
+    path('api/Albums/<slug:slug>/',
          AlbumsDetailView.as_view(), name='albums-detail'),
 
 

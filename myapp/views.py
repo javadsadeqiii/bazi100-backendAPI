@@ -432,7 +432,7 @@ def voteChoice(request):
     return Response({'message': 'انتخاب شما با موفقیت ثبت شد'}, status=status.HTTP_200_OK)
 
 
-class allPostsDetailView(generics.RetrieveAPIView):
+class AllPostsDetailView(generics.RetrieveAPIView):
     queryset = AllPosts.objects.all()
     serializer_class = AllPostsSerializer
     lookup_field = 'slug'
