@@ -49,10 +49,10 @@ class ChoiceSerializer(ModelSerializer):
         fields = ('__all__')
 
 
-class commentsSerializer(ModelSerializer):
+class CommentsSerializer(ModelSerializer):
 
     class Meta:
-        model = comments
+        model = Comments
         fields = ('__all__')
 
 
@@ -108,10 +108,10 @@ class contactUsSerializer(ModelSerializer):
         fields = ('__all__')
 
 
-class allPostsSerializer(ModelSerializer):
+class AllPostsSerializer(ModelSerializer):
 
     class Meta:
-        model = allPosts
+        model = AllPosts
         fields = ('__all__')
 
 

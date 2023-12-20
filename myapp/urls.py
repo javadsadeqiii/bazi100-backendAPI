@@ -82,7 +82,9 @@ urlpatterns = [
          CommentDetailAPIView.as_view(), name='comment-detail'),
     path('api/reply/', replyAPIView.as_view(), name='reply'),
     path('api/LikeComment/', LikeCommentAPIView.as_view(), name='LikeComment'),
-    path('api/replyLike/', replyAPIView.as_view(), name='replyLike')
+    path('api/replyLike/', replyAPIView.as_view(), name='replyLike'),
+    path('api/posts/<int:post_id>/comments/',
+         PostCommentsView.as_view(), name='post-comments')
 
 
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

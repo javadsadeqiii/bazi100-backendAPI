@@ -187,10 +187,18 @@ class bazi100TeamViewSet(ModelViewSet):
     permission_classes = [AllowAny]
 
 
+class PostCommentsView(APIView):
+    def get(self, request, post_id):
+        post = get_object_or_404(AllPosts, pk=post_id)
+        post_comments = Comments.objects.filter(post=post)
+        serializer = CommentsSerializer(post_comments, many=True)
+        return Response(serializer.data)
+
+
 class commentAPIView(APIView):
 
-    queryset = comments.objects.all()
-    serializer_class = commentsSerializer
+    queryset = Comments.objects.all()
+    serializer_class = CommentsSerializer
     permission_classes = [AllowAny]
 
     forbidden_words = ["جمهوری اسلامی", "ولایت فقیه", "خمینی", "خامنه ای", "کیر", "کص", "کون", "حرومزاده", "کیری", "کسشر", "فاک", "گاییدم", "مادرتو", "اسکل", "کصخل",
@@ -199,8 +207,8 @@ class commentAPIView(APIView):
                        "کس نگو", "siktir"]
 
     def get(self, request):
-        all_comments = comments.objects.all()
-        serializer = commentsSerializer(all_comments, many=True)
+        all_comments = Comments.objects.all()
+        serializer = CommentsSerializer(all_comments, many=True)
         return Response(serializer.data)
 
     # ثبت کامنت جدید
@@ -219,15 +227,12 @@ class commentAPIView(APIView):
             if re.search(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', commentText):
                 return JsonResponse({'error': 'قرار دادن لینک در کامنت مجاز نیست'}, status=status.HTTP_400_BAD_REQUEST)
 
-            post = allPosts.objects.get(id=postId)
+            post = AllPosts.objects.get(id=postId)
             user = User.objects.get(id=userId)
-            # comment = comments.objects.get(id=commentId)
-            new_comment = comments.objects.create(
-
+            new_comment = Comments.objects.create(
                 commentText=commentText,
                 userId=user,
-                postId=post,
-                #  commentId=comment
+                post=post,
             )
             new_comment.save()
             return JsonResponse({'message': 'کامنت با موفقیت ثبت شد'}, status=status.HTTP_201_CREATED)
@@ -236,15 +241,15 @@ class commentAPIView(APIView):
 
 
 class CommentDetailAPIView(APIView):
-    serializer_class = commentsSerializer
+    serializer_class = CommentsSerializer
     permission_classes = [AllowAny]
 
     def get(self, request, pk):
         try:
-            comment = comments.objects.get(pk=pk)
-            serializer = commentsSerializer(comment)
+            comment = Comments.objects.get(pk=pk)
+            serializer = CommentsSerializer(comment)
             return Response(serializer.data)
-        except comments.DoesNotExist:
+        except Comments.DoesNotExist:
             return Response({'error': 'کامنت یافت نشد'}, status=status.HTTP_404_NOT_FOUND)
 
 
@@ -269,39 +274,39 @@ class UserDetailsAPIView(APIView):
 
 class LikeCommentAPIView(APIView):
 
-    queryset = comments.objects.all()
-    serializer_class = commentsSerializer
+    queryset = Comments.objects.all()
+    serializer_class = CommentsSerializer
     permission_classes = [AllowAny]
 
     def get(self, request):
 
-        all_comments = comments.objects.all()
-        serializer = commentsSerializer(all_comments, many=True)
+        all_comments = Comments.objects.all()
+        serializer = CommentsSerializer(all_comments, many=True)
         return Response(serializer.data)
 
     def post(self, request):
         try:
-            commentText = comments.objects.get('commentText')
-            userId = comments.request.data.get('userId')
+            commentText = Comments.objects.get('commentText')
+            userId = Comments.request.data.get('userId')
 
             # Check if the user has already liked this comment
-            existing_like = comments.objects.filter(
+            existing_like = Comments.objects.filter(
                 commentText=commentText, userId=userId).first()
 
             if existing_like:
                 # If the user has already liked, remove the previous like
                 existing_like.delete()
-                comments.likeCount -= 1
-                comments.save()
+                Comments.likeCount -= 1
+                Comments.save()
                 return Response({'message': 'لایک کامنت حذف شد'}, status=status.HTTP_200_OK)
             else:
                 # If the user hasn't liked, create a new like
-                comments.objects.create(commentText=commentText, userId=userId)
-                comments.likeCount += 1
-                comments.save()
+                Comments.objects.create(commentText=commentText, userId=userId)
+                Comments.likeCount += 1
+                Comments.save()
                 return Response({'message': 'کامنت با موفقیت لایک شد'}, status=status.HTTP_201_CREATED)
 
-        except comments.DoesNotExist:
+        except Comments.DoesNotExist:
             return Response({'error': 'کامنت موردنظر پیدا نشد'}, status=status.HTTP_404_NOT_FOUND)
 
         except Exception as e:
@@ -328,7 +333,7 @@ class replyAPIView(APIView):
 
         if replyText and userId and comment:  # and parentReplyId:
             user = User.objects.get(id=userId)
-            comment = comments.objects.get(id=comment)
+            comment = Comments.objects.get(id=comment)
            # parentReply = reply.objects.get(id=parentReplyId)
 
             new_reply = reply.objects.create(
@@ -428,8 +433,8 @@ def voteChoice(request):
 
 class allPostsViewSet(ModelViewSet):
 
-    queryset = allPosts.objects.all()
-    serializer_class = allPostsSerializer
+    queryset = AllPosts.objects.all()
+    serializer_class = AllPostsSerializer
     permission_classes = [AllowAny]
 
 

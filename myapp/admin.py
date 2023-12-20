@@ -10,14 +10,22 @@ from django.contrib.auth.admin import UserAdmin
 
 # Register your models here.
 
+# class PostCommentAdmin(admin.ModelAdmin):
 
-class allPostsAdmin(admin.ModelAdmin):
+#  list_display = ('id', 'post', 'comment')
+# ordering = ('id',)
+
+
+# admin.site.register(PostComment, PostCommentAdmin)
+
+
+class AllPostsAdmin(admin.ModelAdmin):
 
     list_display = ('id', 'title', 'date', 'tags')
     ordering = ('id',)
 
 
-admin.site.register(allPosts, allPostsAdmin)
+admin.site.register(AllPosts, AllPostsAdmin)
 
 
 class platformAdmin(admin.ModelAdmin):
@@ -64,14 +72,14 @@ class contactUsAdmin(admin.ModelAdmin):
 admin.site.register(contactUs, contactUsAdmin)
 
 
-class commentsAdmin(admin.ModelAdmin):
+class CommentsAdmin(admin.ModelAdmin):
 
     list_display = ('id', 'userId')
 
     ordering = ('id',)
 
 
-admin.site.register(comments, commentsAdmin)
+admin.site.register(Comments, CommentsAdmin)
 
 
 # class commentLikeAdmin(admin.ModelAdmin):
