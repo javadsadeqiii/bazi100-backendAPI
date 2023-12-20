@@ -20,6 +20,7 @@ from django.views import View
 from myapp.models import contactUs
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
+from rest_framework import generics
 
 
 DATE_FORMAT = 'Y-m-d'
@@ -431,6 +432,12 @@ def voteChoice(request):
     return Response({'message': 'انتخاب شما با موفقیت ثبت شد'}, status=status.HTTP_200_OK)
 
 
+class allPostsDetailView(generics.RetrieveAPIView):
+    queryset = AllPosts.objects.all()
+    serializer_class = AllPostsSerializer
+    lookup_field = 'slug'
+
+
 class allPostsViewSet(ModelViewSet):
 
     queryset = AllPosts.objects.all()
@@ -438,17 +445,17 @@ class allPostsViewSet(ModelViewSet):
     permission_classes = [AllowAny]
 
 
-def update_comment_counts(self):
-    self.numComments = self.comments.count()
-    self.numReplies = self.comments.exclude(commentReply=None).count()
-    self.save()
-
-
 class wallpapersViewSet(ModelViewSet):
 
     queryset = wallpapers.objects.all()
     serializer_class = wallpapersSerializer
     permission_classes = [AllowAny]
+
+
+class AlbumsDetailView(generics.RetrieveAPIView):
+    queryset = albums.objects.all()
+    serializer_class = albumsSerializer
+    lookup_field = 'slug'
 
 
 class albumsViewSet(ModelViewSet):

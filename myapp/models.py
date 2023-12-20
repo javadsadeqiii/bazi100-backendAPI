@@ -157,9 +157,6 @@ class AllPosts(models.Model):
     memberId = models.ForeignKey(
         'bazi100Team', on_delete=models.CASCADE, verbose_name="آیدی نویسنده")
 
-    relatedComments = models.ManyToManyField(
-        Comments, related_name='relatedComments', verbose_name="کامنت ها", blank=True)
-
     isEvent = models.BooleanField(default=False, null=True)
 
     isArticle = models.BooleanField(default=False, null=True)
@@ -169,11 +166,6 @@ class AllPosts(models.Model):
     isNews = models.BooleanField(default=False, null=True)
 
     isStory = models.BooleanField(default=False, null=True)
-
-    def update_comment_counts(self):
-        self.numComments = self.comments.count()
-        self.numReplies = self.comments.exclude(commentReply=None).count()
-        self.save()
 
     class Meta:
 

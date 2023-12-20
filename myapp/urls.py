@@ -84,7 +84,11 @@ urlpatterns = [
     path('api/LikeComment/', LikeCommentAPIView.as_view(), name='LikeComment'),
     path('api/replyLike/', replyAPIView.as_view(), name='replyLike'),
     path('api/posts/<int:post_id>/comments/',
-         PostCommentsView.as_view(), name='post-comments')
+         PostCommentsView.as_view(), name='post-comments'),
+    path('api/allPosts/<slug:slug>/',
+         allPostsDetailView.as_view(), name='allposts-detail'),
+    path('api/albums/<slug:slug>/',
+         AlbumsDetailView.as_view(), name='albums-detail'),
 
 
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
