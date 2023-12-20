@@ -215,10 +215,10 @@ class commentAPIView(APIView):
     def post(self, request):
         commentText = request.data.get('commentText')
         userId = request.data.get('userId')
-        postId = request.data.get('postId')
+        post = request.data.get('post')
        # commentId = request.data.get('commentId')
 
-        if commentText and userId and postId:
+        if commentText and userId and post:
 
             for word in self.forbidden_words:
                 if word in commentText:
@@ -227,7 +227,7 @@ class commentAPIView(APIView):
             if re.search(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', commentText):
                 return JsonResponse({'error': 'قرار دادن لینک در کامنت مجاز نیست'}, status=status.HTTP_400_BAD_REQUEST)
 
-            post = AllPosts.objects.get(id=postId)
+            post = AllPosts.objects.get(id=post)
             user = User.objects.get(id=userId)
             new_comment = Comments.objects.create(
                 commentText=commentText,

@@ -157,8 +157,8 @@ class AllPosts(models.Model):
     memberId = models.ForeignKey(
         'bazi100Team', on_delete=models.CASCADE, verbose_name="آیدی نویسنده")
 
-  #  relatedComments = models.ManyToManyField(
-    #    Comments, related_name='relatedComments', verbose_name="کامنت ها", blank=True)
+    relatedComments = models.ManyToManyField(
+        Comments, related_name='relatedComments', verbose_name="کامنت ها", blank=True)
 
     isEvent = models.BooleanField(default=False, null=True)
 
