@@ -76,6 +76,8 @@ urlpatterns = [
     path('ckeditor/', include('ckeditor_uploader.urls')),
     path('api/vote/', views.voteChoice, name='voteChoice'),
     path('api/comment/', commentAPIView.as_view(), name='comment'),
+    path('api/comment/<int:pk>/',
+         CommentDetailAPIView.as_view(), name='comment-detail'),
     path('api/reply/', replyAPIView.as_view(), name='reply'),
     path('api/LikeComment/', LikeCommentAPIView.as_view(), name='LikeComment'),
     path('api/replyLike/', replyAPIView.as_view(), name='replyLike')

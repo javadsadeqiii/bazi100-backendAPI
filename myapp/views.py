@@ -235,6 +235,19 @@ class commentAPIView(APIView):
             return JsonResponse({'error': 'مشکلی در ثبت کامنت رخ داد'}, status=status.HTTP_400_BAD_REQUEST)
 
 
+class CommentDetailAPIView(APIView):
+    serializer_class = commentsSerializer
+    permission_classes = [AllowAny]
+
+    def get(self, pk):
+        try:
+            comment = comments.objects.get(pk=pk)
+            serializer = commentsSerializer(comment)
+            return Response(serializer.data)
+        except comments.DoesNotExist:
+            return Response({'error': 'کامنت یافت نشد'}, status=status.HTTP_404_NOT_FOUND)
+
+
 class LikeCommentAPIView(APIView):
 
     queryset = comments.objects.all()

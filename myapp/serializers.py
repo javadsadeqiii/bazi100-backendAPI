@@ -56,13 +56,6 @@ class commentsSerializer(ModelSerializer):
         fields = ('__all__')
 
 
-class commentLikeSerializer(ModelSerializer):
-
-    class Meta:
-        model = commentLike
-        fields = ('__all__')
-
-
 class replySerializer(ModelSerializer):
 
     restricted_words = ["جمهوری اسلامی", "خامنه ای", "کیر", "کص", "کون", "حرومزاده", "کیری", "کسشر", "فاک", "گاییدم", "مادرتو", "اسکل", "کصخل",
