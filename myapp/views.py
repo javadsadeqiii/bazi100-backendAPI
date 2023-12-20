@@ -181,6 +181,13 @@ class ContactUsAPIView(APIView):
             return JsonResponse({'error': 'خطایی در ذخیره‌سازی اطلاعات رخ داده است.'}, status=500)
 
 
+class Bazi100TeamByUsernameView(APIView):
+    def get(self, request, username):
+        team_member = get_object_or_404(bazi100Team, username=username)
+        serializer = bazi100TeamSerializer(team_member)
+        return Response(serializer.data)
+
+
 class bazi100TeamViewSet(ModelViewSet):
 
     queryset = bazi100Team.objects.all()
@@ -280,6 +287,22 @@ class LikeCommentAPIView(APIView):
             return Response({'error': 'کاربر موردنظر پیدا نشد'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class CommentLikeDetailAPIView(APIView):
+    queryset = CommentLike.objects.all()
+    serializer_class = CommentLikeSerializer
+    permission_classes = [AllowAny]
+
+    def get(self, request, commentId):
+        try:
+            comment = Comments.objects.get(id=commentId)
+            likes = CommentLike.objects.filter(comment=comment)
+            serializer = CommentLikeSerializer(likes, many=True)
+            return Response(serializer.data)
+
+        except Comments.DoesNotExist:
+            return Response({'error': 'کامنت موردنظر پیدا نشد'}, status=status.HTTP_404_NOT_FOUND)
 
 
 class CommentDetailAPIView(APIView):
