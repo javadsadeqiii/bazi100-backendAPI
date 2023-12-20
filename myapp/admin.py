@@ -66,7 +66,7 @@ admin.site.register(contactUs, contactUsAdmin)
 
 class commentsAdmin(admin.ModelAdmin):
 
-    list_display = ('id', 'userId', 'postId')
+    list_display = ('id', 'userId')
 
     ordering = ('id',)
 

@@ -42,7 +42,7 @@ class comments(models.Model):
 
   #  class Meta:
    #     verbose_name = "لایک های کامنت"
-   #     verbose_name_plural = "لایک های کامنت"
+     #   verbose_name_plural = "لایک های کامنت"
 
 
 class reply(models.Model):
@@ -151,10 +151,9 @@ class allPosts(models.Model):
 
     memberId = models.ForeignKey(
         'bazi100Team', on_delete=models.CASCADE, verbose_name="آیدی نویسنده")
-
-    comments = models.ManyToManyField(
-        comments, related_name='post', verbose_name="کامنت ها", blank=True)
-
+    comments = models.ForeignKey(
+        'comments', on_delete=models.CASCADE, related_name='post', verbose_name="کامنت ها", blank=True, null=True
+    )
     isEvent = models.BooleanField(default=False, null=True)
 
     isArticle = models.BooleanField(default=False, null=True)

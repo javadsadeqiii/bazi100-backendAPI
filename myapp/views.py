@@ -193,7 +193,7 @@ class commentAPIView(APIView):
     serializer_class = commentsSerializer
     permission_classes = [AllowAny]
 
-    forbidden_words = ["جمهوری اسلامی", "خامنه ای", "کیر", "کص", "کون", "حرومزاده", "کیری", "کسشر", "فاک", "گاییدم", "مادرتو", "اسکل", "کصخل",
+    forbidden_words = ["جمهوری اسلامی", "ولایت فقیه", "خمینی", "خامنه ای", "کیر", "کص", "کون", "حرومزاده", "کیری", "کسشر", "فاک", "گاییدم", "مادرتو", "اسکل", "کصخل",
                        "fuck", "dick", "pussy", "wtf", "خفه شو", "مادر جنده", "کسخل", "کونی", "سکس", "sex", "porn", "پورن", "جنده", "گی", "ترنس",
                        "kos", "kon", "koni", "kiri", "kir", "sexy", "فیلم سوپر", "xxx", "لواط", "همجنس بازی", "لز", "لزبین", "عوضی", "خفه شو",
                        "کس نگو", "siktir"]
@@ -246,6 +246,25 @@ class CommentDetailAPIView(APIView):
             return Response(serializer.data)
         except comments.DoesNotExist:
             return Response({'error': 'کامنت یافت نشد'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class UserDetailsAPIView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, user_id):
+        try:
+            user = User.objects.get(id=user_id)
+
+            user_data = {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'password': user.password
+
+            }
+            return Response(user_data)
+        except User.DoesNotExist:
+            return Response({'error': 'کاربر مورد نظر یافت نشد'}, status=status.HTTP_404_NOT_FOUND)
 
 
 class LikeCommentAPIView(APIView):
