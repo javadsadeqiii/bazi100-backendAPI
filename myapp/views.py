@@ -235,40 +235,45 @@ class commentAPIView(APIView):
             return JsonResponse({'error': 'مشکلی در ثبت کامنت رخ داد'}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class commentLikeAPIView(APIView):
+class LikeCommentAPIView(APIView):
 
-    queryset = commentLike.objects.all()
-    serializer_class = commentLikeSerializer
+    queryset = comments.objects.all()
+    serializer_class = commentsSerializer
     permission_classes = [AllowAny]
 
+    def get(self, request):
+
+        all_comments = comments.objects.all()
+        serializer = commentsSerializer(all_comments, many=True)
+        return Response(serializer.data)
+
     def post(self, request):
-        userId = request.data.get('userId')
-        commentId = request.data.get('commentId')
+        try:
+            commentText = comments.objects.get('commentText')
+            userId = comments.request.data.get('userId')
 
-        if userId and commentId:
+            # Check if the user has already liked this comment
+            existing_like = comments.objects.filter(
+                commentText=commentText, userId=userId).first()
 
-            like_exists = commentLike.objects.filter(
-                userId=userId, commentId=commentId).exists()
-
-            if like_exists:
-
-                commentLike.objects.filter(
-                    userId=userId, commentId=commentId).delete()
-                return Response({'message': 'لایک حذف شد'}, status=status.HTTP_200_OK)
+            if existing_like:
+                # If the user has already liked, remove the previous like
+                existing_like.delete()
+                comments.likeCount -= 1
+                comments.save()
+                return Response({'message': 'لایک کامنت حذف شد'}, status=status.HTTP_200_OK)
             else:
+                # If the user hasn't liked, create a new like
+                comments.objects.create(commentText=commentText, userId=userId)
+                comments.likeCount += 1
+                comments.save()
+                return Response({'message': 'کامنت با موفقیت لایک شد'}, status=status.HTTP_201_CREATED)
 
-                new_like = commentLike.objects.create(
-                    userId=userId, commentId=commentId)
-                new_like.save()
+        except comments.DoesNotExist:
+            return Response({'error': 'کامنت موردنظر پیدا نشد'}, status=status.HTTP_404_NOT_FOUND)
 
-                comment = get_object_or_404(comments, id=commentId)
-                comment.likeCount = commentLike.objects.filter(
-                    commentId=commentId).count()
-                comment.save()
-
-                return Response({'message': 'لایک با موفقیت ثبت شد'}, status=status.HTTP_201_CREATED)
-        else:
-            return Response({'error': 'اطلاعات کاربر غلط است'}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'error': "خطایی رخ داد"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class replyAPIView(APIView):
@@ -286,12 +291,12 @@ class replyAPIView(APIView):
 
         replyText = request.data.get('replyText')
         userId = request.data.get('userId')
-        commentId = request.data.get('commentId')
+        comment = request.data.get('comment')
        # parentReplyId = request.data.get('parentReplyId')
 
-        if replyText and userId and commentId:  # and parentReplyId:
+        if replyText and userId and comment:  # and parentReplyId:
             user = User.objects.get(id=userId)
-            comment = comments.objects.get(id=commentId)
+            comment = comments.objects.get(id=comment)
            # parentReply = reply.objects.get(id=parentReplyId)
 
             new_reply = reply.objects.create(
@@ -308,40 +313,40 @@ class replyAPIView(APIView):
             return JsonResponse({'message': 'مشکلی در ثبت پاسخ رخ داد'}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class replyLikeAPIView(APIView):
+# class replyLikeAPIView(APIView):
 
-    queryset = replyLike.objects.all()
-    serializer_class = replyLikeSerializer
-    permission_classes = [AllowAny]
+   # queryset = replyLike.objects.all()
+   # serializer_class = replyLikeSerializer
+   # permission_classes = [AllowAny]
 
-    def post(self, request):
-        userId = request.data.get('userId')
-        replyId = request.data.get('replyId')
+   # def post(self, request):
+    #    userId = request.data.get('userId')
+     #   replyId = request.data.get('replyId')
 
-        if userId and replyId:
+       # if userId and replyId:
 
-            like_exists = commentLike.objects.filter(
-                userId=userId, replyId=replyId).exists()
+        #    like_exists = commentLike.objects.filter(
+        #        userId=userId, replyId=replyId).exists()
 
-            if like_exists:
+           # if like_exists:
 
-                commentLike.objects.filter(
-                    userId=userId, replyId=replyId).delete()
-                return Response({'message': 'لایک حذف شد'}, status=status.HTTP_200_OK)
-            else:
+          #      commentLike.objects.filter(
+           #         userId=userId, replyId=replyId).delete()
+            #  return Response({'message': 'لایک حذف شد'}, status=status.HTTP_200_OK)
+           # else:
 
-                new_like = commentLike.objects.create(
-                    userId=userId, replyId=replyId)
-                new_like.save()
+            #    new_like = commentLike.objects.create(
+            #   userId=userId, replyId=replyId)
+            #  new_like.save()
 
-                comment = get_object_or_404(comments, id=replyId)
-                comment.likeCount = commentLike.objects.filter(
-                    replyId=replyId).count()
-                comment.save()
+            #  comment = get_object_or_404(comments, id=replyId)
+            #  comment.likeCount = commentLike.objects.filter(
+            #      replyId=replyId).count()
+            #  comment.save()
 
-                return Response({'message': 'لایک ریپلای با موفقیت ثبت شد'}, status=status.HTTP_201_CREATED)
-        else:
-            return Response({'error': 'اطلاعات کاربر غلط است'}, status=status.HTTP_400_BAD_REQUEST)
+            #    return Response({'message': 'لایک ریپلای با موفقیت ثبت شد'}, status=status.HTTP_201_CREATED)
+       # else:
+        #    return Response({'error': 'اطلاعات کاربر غلط است'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class pollsViewSet(ModelViewSet):

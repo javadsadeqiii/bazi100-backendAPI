@@ -51,38 +51,9 @@ class ChoiceSerializer(ModelSerializer):
 
 class commentsSerializer(ModelSerializer):
 
-    restricted_words = ["جمهوری اسلامی", "خامنه ای", "کیر", "کص", "کون", "حرومزاده", "کیری", "کسشر", "فاک", "گاییدم", "مادرتو", "اسکل", "کصخل",
-                        "fuck", "dick", "pussy", "wtf", "خفه شو", "مادر جنده", "کسخل", "کونی", "سکس", "sex", "porn", "پورن", "جنده", "گی", "ترنس",
-                        "kos", "kon", "koni", "kiri", "kir", "sexy", "فیلم سوپر", "xxx", "لواط", "همجنس بازی", "لز", "لزبین", "عوضی", "خفه شو",
-                        "کس نگو", "siktir"]
-
-    restricted_word_validator = RegexValidator(
-        regex='|'.join(restricted_words),
-        message='استفاده از کلمات ممنوعه مجاز نیست!'
-    )
-
-    link_validator = RegexValidator(
-        regex=r'^((?!http[s]?://).)*$',
-        message='آپلود هرگونه لینک مجاز نیست'
-    )
-
-    commentText = serializers.CharField(
-        validators=[
-            restricted_word_validator,
-            link_validator,
-        ]
-    )
-
     class Meta:
         model = comments
         fields = ('__all__')
-
-    def validate_commentText(self, value):
-        for word in self.restricted_words:
-            if word in value:
-                raise serializers.ValidationError(
-                    'استفاده از کلمات ممنوعه مجاز نیست!')
-        return value
 
 
 class commentLikeSerializer(ModelSerializer):

@@ -24,7 +24,7 @@ class comments(models.Model):
     postId = models.ForeignKey(
         'allPosts', on_delete=models.CASCADE, related_name='comment', verbose_name="آیدی پست")
 
-    likeCount = models.IntegerField(default=0, verbose_name="تعداد لایک")
+   # likeCount = models.IntegerField(default=0, verbose_name="تعداد لایک")
 
     def __str__(self):
         return f"Comment by {self.userId} on Post {self.postId}"
@@ -37,9 +37,7 @@ class comments(models.Model):
 
 class commentLike(models.Model):
 
-    userId = models.ForeignKey(
-        User, on_delete=models.CASCADE, verbose_name="آیدی کاربر")
-    commentId = models.ForeignKey(
+    likeCounter = models.ForeignKey(
         comments, on_delete=models.CASCADE, verbose_name="آیدی کامنت")
 
     class Meta:
@@ -57,7 +55,7 @@ class reply(models.Model):
     userId = models.ForeignKey(User, on_delete=models.CASCADE,
                                related_name='user_replies', verbose_name="آیدی کاربر")
 
-    commentId = models.ForeignKey(
+    comment = models.ForeignKey(
         comments, on_delete=models.CASCADE, related_name='replies', verbose_name="کامنت")
 
     parentReplyId = models.ForeignKey('self', default=None, on_delete=models.CASCADE, null=True,

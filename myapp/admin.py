@@ -76,7 +76,7 @@ admin.site.register(comments, commentsAdmin)
 
 class commentLikeAdmin(admin.ModelAdmin):
 
-    list_display = ('id', 'commentId', 'userId')
+    list_display = ('id', 'likeCounter')
     ordering = ('id',)
 
 
