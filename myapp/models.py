@@ -31,8 +31,8 @@ class CommentLike(models.Model):
     userId = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='userliker', verbose_name="آیدی کاربر")
 
-    commentId = models.ForeignKey('Comments', on_delete=models.CASCADE,
-                                  default=None, related_name='likecount', verbose_name="آیدی کامنت")
+    commentId = models.ForeignKey(
+        'Comments', on_delete=models.CASCADE, default=None, related_name='likecount', verbose_name="آیدی کامنت")
 
     likeCount = models.IntegerField(default=0, verbose_name="تعداد لایک")
 

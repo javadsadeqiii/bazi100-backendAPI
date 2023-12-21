@@ -294,6 +294,29 @@ class LikeCommentAPIView(APIView):
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+class CommentLikesAPIView(APIView):
+    def get(self, request, comment_id):
+        # ابتدا همه‌ی لایک‌های مربوط به آیدی کامنت را دریافت می‌کنیم
+        comment_likes = CommentLikeHistory.objects.filter(
+            comment_id=comment_id)
+
+        # ساخت یک لیست برای ذخیره اطلاعات لایک‌ها
+        likes_info = []
+        for like in comment_likes:
+            # اضافه کردن اطلاعات هر لایک به لیست
+            like_info = {
+                'like_id': like.id,
+                'user_id': like.user_id,
+                'comment_id': like.comment_id,
+                # تبدیل به فرمت مورد نظر
+                'liked_at': like.liked_at.strftime('%Y-%m-%d %H:%M:%S')
+            }
+            likes_info.append(like_info)
+
+        # بازگرداندن اطلاعات به عنوان JSON response
+        return JsonResponse({'comment_likes': likes_info})
+
+
 class CommentLikeDetailAPIView(APIView):
     queryset = CommentLike.objects.all()
     serializer_class = CommentLikeSerializer
@@ -301,8 +324,8 @@ class CommentLikeDetailAPIView(APIView):
 
     def get(self, request, commentId):
         try:
-            #    comment = Comments.objects.get(id=commentId)
-            likes = CommentLike.objects.filter(commentId=commentId)
+            comment = Comments.objects.get(id=commentId)
+            likes = CommentLike.objects.filter(comment=comment)
             serializer = CommentLikeSerializer(likes, many=True)
             return Response(serializer.data)
 

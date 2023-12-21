@@ -90,11 +90,12 @@ urlpatterns = [
     path('api/Albums/<slug:slug>/',
          AlbumsDetailView.as_view(), name='albums-detail'),
     path('api/LikeComment/', LikeCommentAPIView.as_view(), name='like-comment'),
-    path('api/LikeComment/<int:commentId>/',
-         CommentLikeDetailAPIView.as_view(), name='comment-like'),
+    # path('api/LikeComment/<int:commentId>/',
+    #    CommentLikeDetailAPIView.as_view(), name='comment-like'),
     path('api/Bazi100Team/<username>/',
          Bazi100TeamByUsernameView.as_view(), name='team-member-by-username'),
-
+    path('api/commentLike/<int:comment_id>/likes/',
+         CommentLikesAPIView.as_view(), name='comment_likes_api')
 
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

@@ -21,7 +21,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 class CommentLikeHistoryAdmin(admin.ModelAdmin):
 
-    list_display = ['user', 'comment']
+    list_display = ['user', 'comment', 'liked_at']
 
 
 admin.site.register(CommentLikeHistory, CommentLikeHistoryAdmin)
