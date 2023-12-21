@@ -301,8 +301,8 @@ class CommentLikeDetailAPIView(APIView):
 
     def get(self, request, commentId):
         try:
-            comment = Comments.objects.get(id=commentId)
-            likes = CommentLike.objects.filter(comment=comment)
+            #    comment = Comments.objects.get(id=commentId)
+            likes = CommentLike.objects.filter(commentId=commentId)
             serializer = CommentLikeSerializer(likes, many=True)
             return Response(serializer.data)
 
