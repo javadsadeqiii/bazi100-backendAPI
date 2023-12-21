@@ -5,7 +5,7 @@ from typing import Self
 from django.contrib import admin
 from .models import *
 from django.contrib.auth.models import User
-from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 
 # Register your models here.
@@ -17,6 +17,25 @@ from django.contrib.auth.admin import UserAdmin
 
 
 # admin.site.register(PostComment, PostCommentAdmin)
+
+
+class CommentLikeHistoryAdmin(admin.ModelAdmin):
+
+    list_display = ['user', 'comment']
+
+
+admin.site.register(CommentLikeHistory, CommentLikeHistoryAdmin)
+
+
+class CustomUserAdmin(BaseUserAdmin):
+    # فیلدهای مورد نیاز خود را اضافه کنید
+    list_display = ['id', 'username', 'email']
+    ordering = ('id',)
+
+
+admin.site.unregister(User)
+
+admin.site.register(User, CustomUserAdmin)
 
 
 class AllPostsAdmin(admin.ModelAdmin):
@@ -82,13 +101,13 @@ class CommentsAdmin(admin.ModelAdmin):
 admin.site.register(Comments, CommentsAdmin)
 
 
-class CommentLikeAdmin(admin.ModelAdmin):
+# class CommentLikeAdmin(admin.ModelAdmin):
 
-    list_display = ('id', 'userId')
-    ordering = ('id',)
+#   list_display = ('id', 'userId', 'likeCount')
+#  ordering = ('id',)
 
 
-admin.site.register(CommentLike, CommentLikeAdmin)
+# admin.site.register(CommentLike, CommentLikeAdmin)
 
 
 class replyAdmin(admin.ModelAdmin):

@@ -5,6 +5,13 @@ from django.core.validators import RegexValidator
 from rest_framework import serializers
 
 
+class CommentLikeHistorySerializer(ModelSerializer):
+
+    class Meta:
+        model = CommentLikeHistory
+        fields = ('__all__')
+
+
 class platformSeriallizer(ModelSerializer):
 
     class Meta:

@@ -268,18 +268,23 @@ class LikeCommentAPIView(APIView):
             comment = Comments.objects.get(id=commentId)
             user = User.objects.get(id=userId)
 
-            # چک کردن وجود لایک و حذف یا ایجاد آن
-            like, created = CommentLike.objects.get_or_create(
-                comment=comment, user=user)
-            if created:
-                comment.likeCount += 1
-                comment.save()
-                return Response({'message': 'کامنت با موفقیت لایک شد'}, status=status.HTTP_201_CREATED)
-            else:
-                like.delete()
+            # چک کردن آیا کاربر قبلا این کامنت را لایک کرده یا نه
+            has_liked_before = CommentLikeHistory.objects.filter(
+                user=user, comment=comment).exists()
+
+            if has_liked_before:
+                # اگر قبلا لایک شده بود، حذف لایک و کاهش تعداد لایک‌ها
+                CommentLikeHistory.objects.filter(
+                    user=user, comment=comment).delete()
                 comment.likeCount -= 1
                 comment.save()
                 return Response({'message': 'لایک کامنت حذف شد'}, status=status.HTTP_200_OK)
+            else:
+                # اگر قبلا لایک نشده بود، ایجاد لایک جدید و افزایش تعداد لایک‌ها
+                CommentLikeHistory.objects.create(user=user, comment=comment)
+                comment.likeCount += 1
+                comment.save()
+                return Response({'message': 'کامنت با موفقیت لایک شد'}, status=status.HTTP_201_CREATED)
 
         except Comments.DoesNotExist:
             return Response({'error': 'کامنت موردنظر پیدا نشد'}, status=status.HTTP_404_NOT_FOUND)
