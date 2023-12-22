@@ -5,6 +5,14 @@ from django.core.validators import RegexValidator
 from rest_framework import serializers
 
 
+class ReplyLikeHistorySerializer(ModelSerializer):
+
+    class Meta:
+
+        model = ReplyLikeHistory
+        fields = ('__all__')
+
+
 class CommentLikeHistorySerializer(ModelSerializer):
 
     class Meta:
@@ -58,6 +66,8 @@ class ChoiceSerializer(ModelSerializer):
 
 class CommentsSerializer(ModelSerializer):
 
+    createdAt = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
+
     class Meta:
         model = Comments
         fields = ('__all__')
@@ -70,47 +80,19 @@ class CommentLikeSerializer(ModelSerializer):
         fields = ('__all__')
 
 
-class replySerializer(ModelSerializer):
+class ReplySerializer(ModelSerializer):
 
-    restricted_words = ["جمهوری اسلامی", "خامنه ای", "کیر", "کص", "کون", "حرومزاده", "کیری", "کسشر", "فاک", "گاییدم", "مادرتو", "اسکل", "کصخل",
-                        "fuck", "dick", "pussy", "wtf", "خفه شو", "مادر جنده", "کسخل", "کونی", "سکس", "sex", "porn", "پورن", "جنده", "گی", "ترنس",
-                        "kos", "kon", "koni", "kiri", "kir", "sexy", "فیلم سوپر", "xxx", "لواط", "همجنس بازی", "لز", "لزبین", "عوضی", "خفه شو",
-                        "کس نگو", "siktir"]
-
-    # Validator برای جلوگیری از کلمات ممنوعه
-    restricted_word_validator = RegexValidator(
-        regex='|'.join(restricted_words),
-        message='استفاده از کلمات ممنوعه مجاز نیست!'
-    )
-
-    link_validator = RegexValidator(
-        regex=r'^((?!http[s]?://).)*$',
-        message='آپلود هرگونه لینک مجاز نیست'
-    )
-
-    replyText = serializers.CharField(
-        validators=[
-            restricted_word_validator,
-            link_validator,
-        ]
-    )
+    createdAt = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
 
     class Meta:
-        model = reply
+        model = Reply
         fields = ('__all__')
 
-    def validate_replyText(self, value):
-        for word in self.restricted_words:
-            if word in value:
-                raise serializers.ValidationError(
-                    'استفاده از کلمات ممنوعه مجاز نیست!')
-        return value
 
-
-class replyLikeSerializer(ModelSerializer):
+class ReplyLikeSerializer(ModelSerializer):
 
     class Meta:
-        model = replyLike
+        model = ReplyLike
         fields = ('__all__')
 
 

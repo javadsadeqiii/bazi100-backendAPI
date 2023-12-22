@@ -219,19 +219,17 @@ class commentAPIView(APIView):
         serializer = CommentsSerializer(all_comments, many=True)
         return Response(serializer.data)
 
-    # ثبت کامنت جدید
     def post(self, request):
         commentText = request.data.get('commentText')
         userId = request.data.get('userId')
         post = request.data.get('post')
-       # commentId = request.data.get('commentId')
 
         if commentText and userId and post:
 
             for word in self.forbidden_words:
                 if word in commentText:
                     return JsonResponse({'error': 'کامنت حاوی الفاظ نامناسب است'}, status=status.HTTP_400_BAD_REQUEST)
-                 # بررسی وجود لینک در متن کامنت
+
             if re.search(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', commentText):
                 return JsonResponse({'error': 'قرار دادن لینک در کامنت مجاز نیست'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -312,25 +310,23 @@ class CommentLikesAPIView(APIView):
                 'liked_at': like.liked_at.strftime('%Y-%m-%d %H:%M:%S')
             }
             likes_info.append(like_info)
-
-        # بازگرداندن اطلاعات به عنوان JSON response
         return JsonResponse({'comment_likes': likes_info})
 
 
-class CommentLikeDetailAPIView(APIView):
-    queryset = CommentLike.objects.all()
-    serializer_class = CommentLikeSerializer
-    permission_classes = [AllowAny]
+# class CommentLikeDetailAPIView(APIView):
+  #  queryset = CommentLike.objects.all()
+  #  serializer_class = CommentLikeSerializer
+  #  permission_classes = [AllowAny]
 
-    def get(self, request, commentId):
-        try:
-            comment = Comments.objects.get(id=commentId)
-            likes = CommentLike.objects.filter(comment=comment)
-            serializer = CommentLikeSerializer(likes, many=True)
-            return Response(serializer.data)
+  #  def get(self, request, commentId):
+  #      try:
+   #         comment = Comments.objects.get(id=commentId)
+   #         likes = CommentLike.objects.filter(comment=comment)
+   #         serializer = CommentLikeSerializer(likes, many=True)
+   #         return Response(serializer.data)
 
-        except Comments.DoesNotExist:
-            return Response({'error': 'کامنت موردنظر پیدا نشد'}, status=status.HTTP_404_NOT_FOUND)
+   #     except Comments.DoesNotExist:
+    #        return Response({'error': 'کامنت موردنظر پیدا نشد'}, status=status.HTTP_404_NOT_FOUND)
 
 
 class CommentDetailAPIView(APIView):
@@ -365,77 +361,138 @@ class UserDetailsAPIView(APIView):
             return Response({'error': 'کاربر مورد نظر یافت نشد'}, status=status.HTTP_404_NOT_FOUND)
 
 
-class replyAPIView(APIView):
+class PostReplyView(APIView):
+    def get(self, request, post_id):
+        post = get_object_or_404(AllPosts, pk=post_id)
+        post_replies = Reply.objects.filter(post=post)
+        serializer = ReplySerializer(post_replies, many=True)
+        return Response(serializer.data)
 
-    queryset = reply.objects.all()
-    serializer_class = replySerializer
+
+class CommentRepliesAPIView(APIView):
+    def get(self, request, comment_id):
+        # یافتن تمام ریپلای‌های مرتبط با آیدی کامنت
+        replies = Reply.objects.filter(commentId=comment_id)
+        # سریالایز کردن داده‌ها
+        # YourReplySerializer را با جزئیات سریالایزر مورد نیاز خود جایگزین کنید
+        serializer = ReplySerializer(replies, many=True)
+        return Response(serializer.data)
+
+
+class ReplyAPIView(APIView):
+
+    queryset = Reply.objects.all()
+    serializer_class = ReplySerializer
     permission_classes = [AllowAny]
 
+    forbidden_words = ["جمهوری اسلامی", "ولایت فقیه", "خمینی", "خامنه ای", "کیر", "کص", "کون", "حرومزاده", "کیری", "کسشر", "فاک", "گاییدم", "مادرتو", "اسکل", "کصخل",
+                       "fuck", "dick", "pussy", "wtf", "خفه شو", "مادر جنده", "کسخل", "کونی", "سکس", "sex", "porn", "پورن", "جنده", "گی", "ترنس",
+                       "kos", "kon", "koni", "kiri", "kir", "sexy", "فیلم سوپر", "xxx", "لواط", "همجنس بازی", "لز", "لزبین", "عوضی", "خفه شو",
+                       "کس نگو", "siktir"]
+
     def get(self, request):
-        all_replies = reply.objects.all()
-        serializer = replySerializer(all_replies, many=True)
+        all_replies = Reply.objects.all()
+        serializer = ReplySerializer(all_replies, many=True)
         return Response(serializer.data)
 
     def post(self, request):
-
         replyText = request.data.get('replyText')
+        commentId = request.data.get('commentId')
         userId = request.data.get('userId')
-        comment = request.data.get('comment')
-       # parentReplyId = request.data.get('parentReplyId')
+        post = request.data.get('post')
 
-        if replyText and userId and comment:  # and parentReplyId:
+        if replyText and commentId and userId and post:
+
+            for word in self.forbidden_words:
+                if word in replyText:
+                    return JsonResponse({'error': "پاسخ حاوی الفاظ نامناسب است"}, status=status.HTTP_400_BAD_REQUEST)
+
+            if re.search(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', replyText):
+                return JsonResponse({'error': 'قرار دادن لینک در پاسخ مجاز نیست'}, status=status.HTTP_400_BAD_REQUEST)
+
+            post = AllPosts.objects.get(id=post)
+           # comment = Comments.objects.get(id=commentId)
             user = User.objects.get(id=userId)
-            comment = Comments.objects.get(id=comment)
-           # parentReply = reply.objects.get(id=parentReplyId)
-
-            new_reply = reply.objects.create(
-
+            new_reply = Reply.objects.create(
                 replyText=replyText,
                 userId=user,
-                commentId=comment,
-                # parentReplyId=parentReply
-
+                post=post,
+                # commentId=comment
             )
+
+            comment = Comments.objects.get(id=commentId)
+            new_reply.commentId.set([comment])  #
+
             new_reply.save()
-            return JsonResponse({'message': 'پاسخ با موفقیت ثبت شد'}, status=status.HTTP_201_CREATED)
+            return JsonResponse({'message': "پاسخ با موفقیت ثبت شد"}, status=status.HTTP_201_CREATED)
         else:
-            return JsonResponse({'message': 'مشکلی در ثبت پاسخ رخ داد'}, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse({'error': 'مشکلی در ثبت پاسخ رخ داد'}, status=status.HTTP_400_BAD_REQUEST)
 
 
-# class replyLikeAPIView(APIView):
+class ReplyLikeAPIView(APIView):
 
-   # queryset = replyLike.objects.all()
-   # serializer_class = replyLikeSerializer
-   # permission_classes = [AllowAny]
+    queryset = ReplyLike.objects.all()
+    serializer_class = ReplyLikeSerializer
+    permission_classes = [AllowAny]
 
-   # def post(self, request):
-    #    userId = request.data.get('userId')
-     #   replyId = request.data.get('replyId')
+    def get(self, request):
+        likes = ReplyLike.objects.all()
+        serializer = ReplyLikeSerializer(likes, many=True)
+        return Response(serializer.data)
 
-       # if userId and replyId:
+    def post(self, request):
+        replyId = request.data.get('replyId')
+        userId = request.data.get('userId')
 
-        #    like_exists = commentLike.objects.filter(
-        #        userId=userId, replyId=replyId).exists()
+        try:
+            reply = Reply.objects.get(id=replyId)
+            user = User.objects.get(id=userId)
 
-           # if like_exists:
+            # چک کردن آیا کاربر قبلا این کامنت را لایک کرده یا نه
+            has_liked_before = ReplyLikeHistory.objects.filter(
+                user=user, reply=reply).exists()
 
-          #      commentLike.objects.filter(
-           #         userId=userId, replyId=replyId).delete()
-            #  return Response({'message': 'لایک حذف شد'}, status=status.HTTP_200_OK)
-           # else:
+            if has_liked_before:
+                # اگر قبلا لایک شده بود، حذف لایک و کاهش تعداد لایک‌ها
+                ReplyLikeHistory.objects.filter(
+                    user=user, reply=reply).delete()
+                reply.likeCount -= 1
+                reply.save()
+                return Response({'message': 'لایک کامنت حذف شد'}, status=status.HTTP_200_OK)
+            else:
+                # اگر قبلا لایک نشده بود، ایجاد لایک جدید و افزایش تعداد لایک‌ها
+                ReplyLikeHistory.objects.create(user=user, reply=reply)
+                reply.likeCount += 1
+                reply.save()
+                return Response({'message': 'کامنت با موفقیت لایک شد'}, status=status.HTTP_201_CREATED)
 
-            #    new_like = commentLike.objects.create(
-            #   userId=userId, replyId=replyId)
-            #  new_like.save()
+        except reply.DoesNotExist:
+            return Response({'error': 'کامنت موردنظر پیدا نشد'}, status=status.HTTP_404_NOT_FOUND)
+        except User.DoesNotExist:
+            return Response({'error': 'کاربر موردنظر پیدا نشد'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-            #  comment = get_object_or_404(comments, id=replyId)
-            #  comment.likeCount = commentLike.objects.filter(
-            #      replyId=replyId).count()
-            #  comment.save()
 
-            #    return Response({'message': 'لایک ریپلای با موفقیت ثبت شد'}, status=status.HTTP_201_CREATED)
-       # else:
-        #    return Response({'error': 'اطلاعات کاربر غلط است'}, status=status.HTTP_400_BAD_REQUEST)
+class ReplyLikesDetailAPIView(APIView):
+    def get(self, request, reply_id):
+        # ابتدا همه‌ی لایک‌های مربوط به آیدی کامنت را دریافت می‌کنیم
+        reply_likes = ReplyLikeHistory.objects.filter(
+            reply_id=reply_id)
+
+        # ساخت یک لیست برای ذخیره اطلاعات لایک‌ها
+        likes_info = []
+        for like in reply_likes:
+            # اضافه کردن اطلاعات هر لایک به لیست
+            like_info = {
+                'like_id': like.id,
+                'user_id': like.user_id,
+                'reply_id': like.reply_id,
+                # تبدیل به فرمت مورد نظر
+                'liked_at': like.liked_at.strftime('%Y-%m-%d %H:%M:%S')
+            }
+            likes_info.append(like_info)
+        return JsonResponse({'reply_likes': likes_info})
 
 
 class pollsViewSet(ModelViewSet):

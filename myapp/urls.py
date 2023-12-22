@@ -80,18 +80,29 @@ urlpatterns = [
     path('api/comment/', commentAPIView.as_view(), name='comment'),
     path('api/comment/<int:pk>/',
          CommentDetailAPIView.as_view(), name='comment-detail'),
-    path('api/reply/', replyAPIView.as_view(), name='reply'),
+    path('api/reply/', ReplyAPIView.as_view(), name='reply'),
 
-    path('api/replyLike/', replyAPIView.as_view(), name='replyLike'),
+    path('api/replyLike/', ReplyLikeAPIView.as_view(), name='replyLike'),
+
+    path('api/CommentReplies/<int:comment_id>/',
+         CommentRepliesAPIView.as_view(), name='comment-replies'),
+
+    path('api/posts/<int:post_id>/replies/',
+         PostReplyView.as_view(), name='post-replies'),
+
+    path('api/replyLikedetail/<int:reply_id>/likes/',
+         ReplyLikesDetailAPIView.as_view(), name='reply_likes_api'),
+
     path('api/posts/<int:post_id>/comments/',
          PostCommentsView.as_view(), name='post-comments'),
+
     path('api/AllPosts/<slug:slug>/',
          AllPostsDetailView.as_view(), name='allposts-detail'),
+
     path('api/Albums/<slug:slug>/',
          AlbumsDetailView.as_view(), name='albums-detail'),
+
     path('api/LikeComment/', LikeCommentAPIView.as_view(), name='like-comment'),
-    # path('api/LikeComment/<int:commentId>/',
-    #    CommentLikeDetailAPIView.as_view(), name='comment-like'),
     path('api/Bazi100Team/<username>/',
          Bazi100TeamByUsernameView.as_view(), name='team-member-by-username'),
     path('api/commentLike/<int:comment_id>/likes/',

@@ -11,11 +11,6 @@ from django.utils import timezone
 en_formats.DATETIME_FORMAT = 'Y-m-d'
 
 
-# class PostComment(models.Model):
-#   post = models.ForeignKey('allPosts', on_delete=models.CASCADE)
-#   comment = models.ForeignKey('comments', on_delete=models.CASCADE)
-
-
 class CommentLikeHistory(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     comment = models.ForeignKey('Comments', on_delete=models.CASCADE)
@@ -52,7 +47,7 @@ class Comments(models.Model):
         User, on_delete=models.CASCADE, related_name='user', verbose_name="آیدی کاربر")
 
     post = models.ForeignKey(
-        'allPosts', on_delete=models.CASCADE, default=None, related_name='post', verbose_name="آیدی پست")
+        'AllPosts', on_delete=models.CASCADE, default=None, related_name='post', verbose_name="آیدی پست")
 
     likeCount = models.IntegerField(default=0, verbose_name="تعداد لایک")
 
@@ -65,17 +60,7 @@ class Comments(models.Model):
         verbose_name_plural = "کامنت ها"
 
 
-# class commentLike(models.Model):
-
-    # likeCounter = models.ForeignKey(
-       # comments, on_delete=models.CASCADE, verbose_name="آیدی کامنت")
-
-  #  class Meta:
-   #     verbose_name = "لایک های کامنت"
-     #   verbose_name_plural = "لایک های کامنت"
-
-
-class reply(models.Model):
+class Reply(models.Model):
 
     replyText = models.TextField(verbose_name="متن پاسخ")
 
@@ -85,15 +70,16 @@ class reply(models.Model):
     userId = models.ForeignKey(User, on_delete=models.CASCADE,
                                related_name='user_replies', verbose_name="آیدی کاربر")
 
-    comment = models.ForeignKey(
-        Comments, on_delete=models.CASCADE, related_name='replies', verbose_name="کامنت")
+    commentId = models.ManyToManyField(
+        Comments, related_name='replies_comment', verbose_name="کامنت")
 
-    parentReplyId = models.ForeignKey('self', default=None, on_delete=models.CASCADE, null=True,
-                                      blank=True, related_name='replies', verbose_name="ریپلای والد")
+    post = models.ForeignKey(
+        'AllPosts', on_delete=models.CASCADE, default=None, related_name='postreply', verbose_name="آیدی پست")
+
     likeCount = models.IntegerField(default=0, verbose_name="تعداد لایک")
 
     def __str__(self):
-        return f"Reply by {self.userId} to Comment {self.comment.id}"
+        return f"Reply by {self.userId} to Comment {self.commentId}"
 # نشان میدهد که این پاسخ توسط کدام کاربر به کدام کامنت با استفاده از آیدی آن مرتبط است
 
     class Meta:
@@ -101,12 +87,27 @@ class reply(models.Model):
         verbose_name_plural = "ریپلای ها"
 
 
-class replyLike(models.Model):
+class ReplyLikeHistory(models.Model):
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    reply = models.ForeignKey(Reply, on_delete=models.CASCADE)
+
+    liked_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "لایک ریپلای"
+        verbose_name_plural = "لایک ریپلای ها"
+
+
+class ReplyLike(models.Model):
 
     userId = models.ForeignKey(
         User, on_delete=models.CASCADE, verbose_name="آیدی کاربر")
     replyId = models.ForeignKey(
-        reply, on_delete=models.CASCADE, verbose_name="آیدی کامنت")
+        Reply, on_delete=models.CASCADE, verbose_name="آیدی کامنت")
+
+    likeCount = models.IntegerField(default=0, verbose_name="تعداد لایک")
 
     class Meta:
         verbose_name = "لایک های ریپلای"

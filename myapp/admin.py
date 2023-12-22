@@ -8,17 +8,6 @@ from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 
-# Register your models here.
-
-# class PostCommentAdmin(admin.ModelAdmin):
-
-#  list_display = ('id', 'post', 'comment')
-# ordering = ('id',)
-
-
-# admin.site.register(PostComment, PostCommentAdmin)
-
-
 class CommentLikeHistoryAdmin(admin.ModelAdmin):
 
     list_display = ['user', 'comment', 'liked_at']
@@ -28,7 +17,6 @@ admin.site.register(CommentLikeHistory, CommentLikeHistoryAdmin)
 
 
 class CustomUserAdmin(BaseUserAdmin):
-    # فیلدهای مورد نیاز خود را اضافه کنید
     list_display = ['id', 'username', 'email']
     ordering = ('id',)
 
@@ -101,31 +89,30 @@ class CommentsAdmin(admin.ModelAdmin):
 admin.site.register(Comments, CommentsAdmin)
 
 
-# class CommentLikeAdmin(admin.ModelAdmin):
-
-#   list_display = ('id', 'userId', 'likeCount')
-#  ordering = ('id',)
-
-
-# admin.site.register(CommentLike, CommentLikeAdmin)
-
-
-class replyAdmin(admin.ModelAdmin):
+class ReplyAdmin(admin.ModelAdmin):
 
     list_display = ('id', 'userId', 'replyText')
     ordering = ('id',)
 
 
-admin.site.register(reply, replyAdmin)
+admin.site.register(Reply, ReplyAdmin)
 
 
-class replyLikeAdmin(admin.ModelAdmin):
+class ReplyLikeHistoryAdmin(admin.ModelAdmin):
 
-    list_display = ('id', 'replyId', 'userId')
-    ordering = ('id',)
+    list_display = ('id', 'user', 'reply', 'liked_at')
 
 
-admin.site.register(replyLike, replyLikeAdmin)
+admin.site.register(ReplyLikeHistory, ReplyLikeHistoryAdmin)
+
+
+# class replyLikeAdmin(admin.ModelAdmin):
+
+#  list_display = ('id', 'replyId', 'userId')
+#  ordering = ('id',)
+
+
+# admin.site.register(replyLike, replyLikeAdmin)
 
 
 class wallpapersAdmin(admin.ModelAdmin):
