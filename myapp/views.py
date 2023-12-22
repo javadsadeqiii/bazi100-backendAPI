@@ -495,6 +495,22 @@ class ReplyLikesDetailAPIView(APIView):
         return JsonResponse({'reply_likes': likes_info})
 
 
+class ParentReplyWithChildReplies(generics.RetrieveAPIView):
+    serializer_class = ReplySerializer
+
+    def get_queryset(self):
+        parent_reply_id = self.kwargs.get('pk')
+        # بازیابی پاسخ اصلی و پاسخ‌های فرزندش
+        queryset = Reply.objects.filter(
+            pk=parent_reply_id).prefetch_related('reply_set')
+        return queryset
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
+
 class pollsViewSet(ModelViewSet):
     queryset = Polls.objects.all()
     serializer_class = pollsSerializer
