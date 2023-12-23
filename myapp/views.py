@@ -424,7 +424,7 @@ class ReplyAPIView(APIView):
 
         if replyText and commentId and userId and post:
 
-            if parentReplyId and parentReplyId.isdigit():
+            if parentReplyId and str(parentReplyId).isdigit():
                 try:
                     parentReplyId = Reply.objects.get(id=parentReplyId)
                 except Reply.DoesNotExist:
