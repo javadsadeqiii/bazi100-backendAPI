@@ -458,6 +458,7 @@ class ReplyAPIView(APIView):
                 replyText=replyText,
                 userId=user,
                 post=post,
+                parentReplyId=parentReplyId
                 # commentId=comment
             )
 
