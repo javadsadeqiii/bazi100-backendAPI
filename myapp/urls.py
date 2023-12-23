@@ -84,8 +84,11 @@ urlpatterns = [
 
     path('api/replyLike/', ReplyLikeAPIView.as_view(), name='replyLike'),
 
-    path('api/mainreply/<int:comment_id>/main_replies/',
-         MainRepliesView.as_view(), name='main-replies'),
+    path('api/parentreply/<int:comment_id>/replies/',
+         CommentRepliesAPIView.as_view(), name='comment-replies'),
+
+    path('api/childreplies/<int:reply_id>/child/',
+         RetrieveChildRepliesAPIView.as_view(), name='retrieve-child-replies'),
 
     path('api/posts/<int:post_id>/replies/',
          PostReplyView.as_view(), name='post-replies'),

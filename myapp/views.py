@@ -370,16 +370,33 @@ class PostReplyView(APIView):
         return Response(serializer.data)
 
 
-class MainRepliesView(APIView):
+class CommentRepliesAPIView(APIView):
+    serializer_class = ReplySerializer
+    permission_classes = [AllowAny]
+
     def get(self, request, comment_id):
-        main_replies = Reply.objects.filter(
-            commentId__id=comment_id, parentReply=None)
+        # فیلتر کردن ریپلای‌های مرتبط با کامنت مورد نظر که parentReplyId آن‌ها None باشد
+        replies = Reply.objects.filter(
+            commentId=comment_id, parentReplyId=None)
+        serializer = ReplySerializer(replies, many=True)
+        return Response(serializer.data)
 
-        serialized_main_replies = ReplySerializer(main_replies, many=True).data
+# پیدا کردن فرزند ها
 
-        return Response({
-            'main_replies': serialized_main_replies
-        })
+
+class RetrieveChildRepliesAPIView(APIView):
+    queryset = Reply.objects.all()
+    serializer_class = ReplySerializer
+    permission_classes = [AllowAny]
+
+    def get(self, request, reply_id):
+        try:
+            # بدست آوردن همه ریپلای‌هایی که parentReplyId آن‌ها برابر با آیدی ارسال شده است
+            child_replies = Reply.objects.filter(parentReplyId=reply_id)
+            serializer = ReplySerializer(child_replies, many=True)
+            return Response(serializer.data)
+        except Reply.DoesNotExist:
+            return JsonResponse({'error': 'ریپلای مورد نظر یافت نشد'}, status=status.HTTP_404_NOT_FOUND)
 
 
 class ReplyAPIView(APIView):
@@ -400,11 +417,20 @@ class ReplyAPIView(APIView):
 
     def post(self, request):
         replyText = request.data.get('replyText')
+        parentReplyId = request.data.get('parentReplyId')
         commentId = request.data.get('commentId')
         userId = request.data.get('userId')
         post = request.data.get('post')
 
         if replyText and commentId and userId and post:
+
+            if parentReplyId and parentReplyId.isdigit():
+                try:
+                    parentReplyId = Reply.objects.get(id=parentReplyId)
+                except Reply.DoesNotExist:
+                    return JsonResponse({'error': 'پاسخ والد معتبر نیست'}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                parentReplyId = None
 
             for word in self.forbidden_words:
                 if word in replyText:
