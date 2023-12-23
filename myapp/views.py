@@ -375,10 +375,10 @@ class CommentRepliesAPIView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request, comment_id):
-        # فیلتر کردن ریپلای‌های مرتبط با کامنت مورد نظر که parentReplyId آن‌ها None باشد
-        replies = Reply.objects.filter(
-            commentId=comment_id, parentReplyId=None)
-        serializer = ReplySerializer(replies, many=True)
+        # Filter replies that are children (with a parentReplyId)
+        child_replies = Reply.objects.filter(
+            commentId=comment_id).exclude(parentReplyId=None)
+        serializer = ReplySerializer(child_replies, many=True)
         return Response(serializer.data)
 
 # پیدا کردن فرزند ها
@@ -411,9 +411,8 @@ class ReplyAPIView(APIView):
                        "کس نگو", "siktir"]
 
     def get(self, request):
-        # انتخاب کامنت‌های والد یا اصلی (کامنت‌هایی که parentReplyId آن‌ها خالی است)
-        parent_replies = Reply.objects.filter(parentReplyId__isnull=True)
-        serializer = self.serializer_class(parent_replies, many=True)
+        null_replies = Reply.objects.filter(parentReplyId__isnull=True)
+        serializer = ReplySerializer(null_replies, many=True)
         return Response(serializer.data)
 
     def post(self, request):
@@ -425,11 +424,12 @@ class ReplyAPIView(APIView):
 
         if replyText and commentId and userId and post:
 
-            if parentReplyId and str(parentReplyId).isdigit():
+            if parentReplyId is not None and str(parentReplyId).isdigit():
                 try:
-                    parentReplyId = Reply.objects.get(id=parentReplyId)
+                    parentReply = Reply.objects.get(id=parentReplyId)
+                    parentReplyId = parentReply  # Set the actual parent Reply object
                 except Reply.DoesNotExist:
-                    return JsonResponse({'error': 'پاسخ والد معتبر نیست'}, status=status.HTTP_400_BAD_REQUEST)
+                    return JsonResponse({'error': 'ریپلای والد نادرست'}, status=status.HTTP_400_BAD_REQUEST)
             else:
                 parentReplyId = None
 
