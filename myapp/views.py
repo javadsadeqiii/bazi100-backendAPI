@@ -370,18 +370,28 @@ class PostReplyView(APIView):
         return Response(serializer.data)
 
 
+# class CommentRepliesAPIView(APIView):
+  #  serializer_class = ReplySerializer
+   # permission_classes = [AllowAny]
+
+   # def get(self, request, comment_id):
+        # Filter replies that are children (with a parentReplyId)
+     #   child_replies = Reply.objects.filter(
+      #      commentId=comment_id).exclude(parentReplyId=None)
+     #   serializer = ReplySerializer(child_replies, many=True)
+      #  return Response(serializer.data)
+
+
 class CommentRepliesAPIView(APIView):
     serializer_class = ReplySerializer
     permission_classes = [AllowAny]
 
     def get(self, request, comment_id):
-        # Filter replies that are children (with a parentReplyId)
-        child_replies = Reply.objects.filter(
-            commentId=comment_id).exclude(parentReplyId=None)
-        serializer = ReplySerializer(child_replies, many=True)
+        # Filter main replies (where parentReplyId is None)
+        main_replies = Reply.objects.filter(
+            commentId=comment_id, parentReplyId=None)
+        serializer = ReplySerializer(main_replies, many=True)
         return Response(serializer.data)
-
-# پیدا کردن فرزند ها
 
 
 class RetrieveChildRepliesAPIView(APIView):
@@ -411,8 +421,9 @@ class ReplyAPIView(APIView):
                        "کس نگو", "siktir"]
 
     def get(self, request):
-        null_replies = Reply.objects.filter(parentReplyId__isnull=True)
-        serializer = ReplySerializer(null_replies, many=True)
+
+        all_replies = Reply.objects.all()
+        serializer = ReplySerializer(all_replies, many=True)
         return Response(serializer.data)
 
     def post(self, request):
