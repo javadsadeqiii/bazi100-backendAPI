@@ -60,7 +60,14 @@ class Comments(models.Model):
         verbose_name_plural = "کامنت ها"
 
 
+class ReplyManager(models.Manager):
+    def main_replies(self, comment_id):
+        return self.filter(commentId__id=comment_id, parentReply=None)
+
+
 class Reply(models.Model):
+
+    objects = ReplyManager()
 
     replyText = models.TextField(verbose_name="متن پاسخ")
 
@@ -72,6 +79,9 @@ class Reply(models.Model):
 
     commentId = models.ManyToManyField(
         Comments, related_name='replies_comment', verbose_name="کامنت")
+
+    parentReply = models.ForeignKey('self', on_delete=models.CASCADE, null=True,
+                                    blank=True, related_name='replies', verbose_name="پاسخ والد")
 
     post = models.ForeignKey(
         'AllPosts', on_delete=models.CASCADE, default=None, related_name='postreply', verbose_name="آیدی پست")

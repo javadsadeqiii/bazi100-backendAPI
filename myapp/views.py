@@ -21,6 +21,7 @@ from myapp.models import contactUs
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework import generics
+from django.db.models import Count
 
 
 DATE_FORMAT = 'Y-m-d'
@@ -369,14 +370,16 @@ class PostReplyView(APIView):
         return Response(serializer.data)
 
 
-class CommentRepliesAPIView(APIView):
+class MainRepliesView(APIView):
     def get(self, request, comment_id):
-        # یافتن تمام ریپلای‌های مرتبط با آیدی کامنت
-        replies = Reply.objects.filter(commentId=comment_id)
-        # سریالایز کردن داده‌ها
-        # YourReplySerializer را با جزئیات سریالایزر مورد نیاز خود جایگزین کنید
-        serializer = ReplySerializer(replies, many=True)
-        return Response(serializer.data)
+        main_replies = Reply.objects.filter(
+            commentId__id=comment_id, parentReply=None)
+
+        serialized_main_replies = ReplySerializer(main_replies, many=True).data
+
+        return Response({
+            'main_replies': serialized_main_replies
+        })
 
 
 class ReplyAPIView(APIView):
@@ -493,22 +496,6 @@ class ReplyLikesDetailAPIView(APIView):
             }
             likes_info.append(like_info)
         return JsonResponse({'reply_likes': likes_info})
-
-
-class ParentReplyWithChildReplies(generics.RetrieveAPIView):
-    serializer_class = ReplySerializer
-
-    def get_queryset(self):
-        parent_reply_id = self.kwargs.get('pk')
-        # بازیابی پاسخ اصلی و پاسخ‌های فرزندش
-        queryset = Reply.objects.filter(
-            pk=parent_reply_id).prefetch_related('reply_set')
-        return queryset
-
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
 
 
 class pollsViewSet(ModelViewSet):
