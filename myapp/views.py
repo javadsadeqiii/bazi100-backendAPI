@@ -411,8 +411,9 @@ class ReplyAPIView(APIView):
                        "کس نگو", "siktir"]
 
     def get(self, request):
-        all_replies = Reply.objects.all()
-        serializer = ReplySerializer(all_replies, many=True)
+        # انتخاب کامنت‌های والد یا اصلی (کامنت‌هایی که parentReplyId آن‌ها خالی است)
+        parent_replies = Reply.objects.filter(parentReplyId__isnull=True)
+        serializer = self.serializer_class(parent_replies, many=True)
         return Response(serializer.data)
 
     def post(self, request):
