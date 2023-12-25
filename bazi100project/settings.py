@@ -49,16 +49,7 @@ INSTALLED_APPS = [
 
 
 
-
 ]
-
-
-CELERY_BEAT_SCHEDULE = {
-    'move-expired-polls': {
-        'task': 'myapp.tasks.move_expired_polls',
-        'schedule': 60,  # Interval in seconds (change as needed)
-    },
-}
 
 
 CKEDITOR_UPLOAD_PATH = 'uploads/'
@@ -162,6 +153,15 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# EMAIL_USER = 'valoranttt200@gmail.com'
+# EMAIL_PASS = 'cnetrwuyqgkdazqr'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587  # Use the appropriate port for your email host
+EMAIL_HOST_USER = 'valoranttt200@gmail.com'
+EMAIL_HOST_PASSWORD = 'eglijfdujnmwtmii'
+EMAIL_USE_TLS = True  # Set to True for most email providers
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
@@ -203,13 +203,4 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
 # Google account
-
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'javadjs197@gmail.com'
-EMAIL_PORT = 587
-EMAIL_HOST_PASSWORD = 'zkzlglvbjayghiyz'
-EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL = 'Bazi100 website'

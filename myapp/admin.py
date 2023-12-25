@@ -8,9 +8,20 @@ from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 
+class SubscriberAdmin(admin.ModelAdmin):
+
+    list_display = ('email', 'subscribed_at')
+    ordering = ('id',)
+
+
+admin.site.register(Subscriber, SubscriberAdmin)
+
+
 class CommentLikeHistoryAdmin(admin.ModelAdmin):
 
     list_display = ['user', 'comment', 'liked_at']
+
+    ordering = ('id',)
 
 
 admin.site.register(CommentLikeHistory, CommentLikeHistoryAdmin)
@@ -104,15 +115,6 @@ class ReplyLikeHistoryAdmin(admin.ModelAdmin):
 
 
 admin.site.register(ReplyLikeHistory, ReplyLikeHistoryAdmin)
-
-
-# class replyLikeAdmin(admin.ModelAdmin):
-
-#  list_display = ('id', 'replyId', 'userId')
-#  ordering = ('id',)
-
-
-# admin.site.register(replyLike, replyLikeAdmin)
 
 
 class wallpapersAdmin(admin.ModelAdmin):

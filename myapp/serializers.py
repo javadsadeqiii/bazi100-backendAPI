@@ -1,8 +1,34 @@
 from rest_framework.serializers import ModelSerializer
 from .models import *
 from rest_framework import serializers
-from django.core.validators import RegexValidator
+# from django.core.validators import RegexValidator
 from rest_framework import serializers
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError as DjangoValidationError
+
+
+class SubscriberSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subscriber
+        fields = '__all__'
+
+    def validate_email(self, value):
+
+        try:
+            validate_email(value)
+        except DjangoValidationError:
+            raise serializers.ValidationError("فرمت ایمیل نادرست است")
+        existing_subscriber = Subscriber.objects.filter(email=value).exists()
+        existing_user = User.objects.filter(email=value).exists()
+
+        if existing_subscriber or existing_user:
+            raise serializers.ValidationError(
+                "ایمیل وارد شده وجود دارد")
+
+        return value
+
+    def create(self, validated_data):
+        return Subscriber.objects.create(**validated_data)
 
 
 class ReplyLikeHistorySerializer(ModelSerializer):

@@ -6,9 +6,21 @@ from django.core.validators import FileExtensionValidator
 from django_jsonform.models.fields import ArrayField
 from ckeditor_uploader.fields import RichTextUploadingField
 from django.db import models
-from django.utils import timezone
+# from django.utils import timezone
 
 en_formats.DATETIME_FORMAT = 'Y-m-d'
+
+
+class Subscriber(models.Model):
+    email = models.EmailField(unique=True)
+    subscribed_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.email
+
+    class Meta:
+        verbose_name = "خبرنامه"
+        verbose_name_plural = "خبرنامه"
 
 
 class CommentLikeHistory(models.Model):

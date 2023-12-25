@@ -59,11 +59,12 @@ router.register(r'wallpapers', views.wallpapersViewSet)
 router.register(r'albums', views.albumsViewSet)
 router.register(r'advertisements', views.advertisementsViewSet)
 router.register(r'tracks', views.tracksViewSet)
+router.register(r'subscribers', SubscriberViewSet, basename='subscribers')
 
 
 urlpatterns = [
-
-
+    path('api/send-emails/',
+         SubscriberViewSet.as_view({'get': 'send_newsletter'}), name='send_emails'),
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
     path('api/signup/', SignUpView.as_view(), name='signup'),
@@ -109,7 +110,11 @@ urlpatterns = [
     path('api/Bazi100Team/<username>/',
          Bazi100TeamByUsernameView.as_view(), name='team-member-by-username'),
     path('api/commentLike/<int:comment_id>/likes/',
-         CommentLikesAPIView.as_view(), name='comment_likes_api')
+         CommentLikesAPIView.as_view(), name='comment_likes_api'),
+    path('public-posts/<slug:slug>/',
+         AllPostsDetailView.as_view(), name='public-posts-detail')
+
+
 
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

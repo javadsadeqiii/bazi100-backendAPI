@@ -1,11 +1,12 @@
+from subprocess import Popen
 from django.http import JsonResponse
 from rest_framework.viewsets import ModelViewSet
 from . models import *
 from .serializers import *
 import re
 from django.http import JsonResponse
-from django.db.models.signals import post_save, post_delete
-from django.dispatch import receiver
+# from django.db.models.signals import post_save, post_delete
+# from django.dispatch import receiver
 from django.core.mail import send_mail
 from django.contrib.auth.models import User
 from rest_framework.permissions import AllowAny
@@ -21,11 +22,47 @@ from myapp.models import contactUs
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework import generics
-from django.db.models import Count
-
+from rest_framework import viewsets
+from rest_framework.decorators import action
+from django.conf import settings
+from django.urls import reverse
 
 DATE_FORMAT = 'Y-m-d'
 DATETIME_FORMAT = 'Y-m-d H:i:s'
+
+
+class SubscriberViewSet(viewsets.ModelViewSet):
+
+    queryset = Subscriber.objects.all()
+    serializer_class = SubscriberSerializer
+
+    @action(detail=False, methods=['post'])
+    def subscribe(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'])
+    def send_newsletter(self, request):
+
+        subscribers = Subscriber.objects.all()
+        all_users = User.objects.all()
+        combined_recipients = list(subscribers) + list(all_users)
+        subject = 'تازه ترین مطالب سایت بازینکس'
+        from_email = settings.EMAIL_HOST_USER
+        recipient_list = [recipient.email for recipient in combined_recipients]
+
+        try:
+
+            post = AllPosts.objects.last()
+            post_url = reverse('public-posts-detail',
+                               kwargs={'slug': post.slug})
+            message = f"Title: {post.title}\nSummary: {post.postSummary}\nLink: {request.build_absolute_uri(post_url)}\n"
+            send_mail(subject, message, from_email, recipient_list)
+            return Response({'message': 'خبرنامه با موفقیت ارسال شد'}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'message': 'خطا در ارسال خبرنامه', 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class SignUpView(APIView):
@@ -55,10 +92,9 @@ class SignUpView(APIView):
         if password != confirmPassword:
             return Response({'error': 'رمز عبور و تایید آن باید یکسان باشند'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if len(password) < 8:
-            return Response({'error': "رمز عبور نمیتواند کمتر از 8 کاراکتر باشد"}, status=status.HTTP_400_BAD_REQUEST)
+       # if len(password) < 8:
+         #   return Response({'error': "رمز عبور نمیتواند کمتر از 8 کاراکتر باشد"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # ساخت کاربر با هش شده کردن رمز عبور
         user = User.objects.create(
             username=username, password=make_password(password), email=email)
 
@@ -314,22 +350,6 @@ class CommentLikesAPIView(APIView):
         return JsonResponse({'comment_likes': likes_info})
 
 
-# class CommentLikeDetailAPIView(APIView):
-  #  queryset = CommentLike.objects.all()
-  #  serializer_class = CommentLikeSerializer
-  #  permission_classes = [AllowAny]
-
-  #  def get(self, request, commentId):
-  #      try:
-   #         comment = Comments.objects.get(id=commentId)
-   #         likes = CommentLike.objects.filter(comment=comment)
-   #         serializer = CommentLikeSerializer(likes, many=True)
-   #         return Response(serializer.data)
-
-   #     except Comments.DoesNotExist:
-    #        return Response({'error': 'کامنت موردنظر پیدا نشد'}, status=status.HTTP_404_NOT_FOUND)
-
-
 class CommentDetailAPIView(APIView):
     serializer_class = CommentsSerializer
     permission_classes = [AllowAny]
@@ -368,18 +388,6 @@ class PostReplyView(APIView):
         post_replies = Reply.objects.filter(post=post)
         serializer = ReplySerializer(post_replies, many=True)
         return Response(serializer.data)
-
-
-# class CommentRepliesAPIView(APIView):
-  #  serializer_class = ReplySerializer
-   # permission_classes = [AllowAny]
-
-   # def get(self, request, comment_id):
-        # Filter replies that are children (with a parentReplyId)
-     #   child_replies = Reply.objects.filter(
-      #      commentId=comment_id).exclude(parentReplyId=None)
-     #   serializer = ReplySerializer(child_replies, many=True)
-      #  return Response(serializer.data)
 
 
 class CommentRepliesAPIView(APIView):
@@ -463,7 +471,7 @@ class ReplyAPIView(APIView):
             )
 
             comment = Comments.objects.get(id=commentId)
-            new_reply.commentId.set([comment])  #
+            new_reply.commentId.set([comment])
 
             new_reply.save()
             return JsonResponse({'message': "پاسخ با موفقیت ثبت شد"}, status=status.HTTP_201_CREATED)
