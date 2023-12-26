@@ -46,9 +46,9 @@ class PasswordResetView(APIView):
             
                 token = secrets.token_urlsafe(32)  # ساخت توکن یونیک برا کاربر
 
-                # ذخیره توکن کاربر
-               # user.reset_token = token
-              #  user.save()
+                 #ذخیره توکن کاربر
+                user.token = token
+                user.save()
 
                 reset_link = f"http://localhost:3000/forgotpassword/{token}"
                 send_mail(
@@ -80,7 +80,7 @@ class PasswordResetConfirmView(APIView):
             confirmPassword = serializer.validated_data['confirmPassword']
 
             try:
-                user = User.objects.get(reset_token=token)
+                user = User.objects.get(token)
                 
                 timestamp_str = token[-10:]
                 token_timestamp = timezone.datetime.fromtimestamp(int(timestamp_str))
