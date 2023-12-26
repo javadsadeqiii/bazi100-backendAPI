@@ -47,8 +47,8 @@ class PasswordResetView(APIView):
                 token = secrets.token_urlsafe(32)  # ساخت توکن یونیک برا کاربر
 
                 # ذخیره توکن کاربر
-                user.reset_token = token
-                user.save()
+               # user.reset_token = token
+              #  user.save()
 
                 reset_link = f"http://localhost:3000/forgotpassword/{token}"
                 send_mail(
