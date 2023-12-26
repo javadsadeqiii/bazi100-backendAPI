@@ -26,7 +26,7 @@ from django.urls import reverse
 from django.contrib.auth.tokens import default_token_generator
 import secrets
 from django.http import Http404
-
+from django.utils import timezone
 
 
 DATE_FORMAT = 'Y-m-d'
@@ -81,22 +81,24 @@ class PasswordResetConfirmView(APIView):
 
             try:
                 user = User.objects.get(reset_token=token)
+                
+                timestamp_str = token[-10:]
+                token_timestamp = timezone.datetime.fromtimestamp(int(timestamp_str))
 
-                # چک کردن توکن یوزر
-                if default_token_generator.check_token(user, token):
+                #چک کردن توکن و منقضی کردنش بعد 15 دقیقه
+                if default_token_generator.check_token(user, token) and timezone.now() <= token_timestamp + timezone.timedelta(minutes=15):
                   
                     if newPassword == confirmPassword:
                         
                         user.set_password(newPassword)
-                        user.reset_token = None  #منقضی کردن توکن
                         user.save()
                         return Response({'message': 'رمزعبور با موفقیت تغییر یافت'}, status=status.HTTP_200_OK)
                     else:
-                        raise ValidationError('رمزعبور مطابقت ندارد')
+                        return Response({'error':'رمزعبور مطابقت ندارد'})
                 else:
-                    raise Http404('توکن منقضی شده است')
+                    return Response({'error':'توکن منقضی شده است'})
 
-            except (User.DoesNotExist, ValidationError, Http404) as e:
+            except (User.DoesNotExist, ValidationError, Http404,IndexError, ValueError) as e:
                 return Response({'error': 'خطایی در فرآیند تغییر رمز عبور رخ داد'}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
