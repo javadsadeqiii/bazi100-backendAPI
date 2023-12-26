@@ -72,19 +72,20 @@ class PasswordResetView(APIView):
 class PasswordResetConfirmView(APIView):
     
     
-   def post(self, request):
+    def post(self, request):
         serializer = PasswordResetConfirmSerializer(data=request.data)
         if serializer.is_valid():
             token = serializer.validated_data['token']
             newPassword = serializer.validated_data['newPassword']
             confirmPassword = serializer.validated_data['confirmPassword']
-
+            
+            User = get_user_model()
             try:
-                user = User.objects.get(reset_token=token)  
+               
+                user = User.objects.get(first_name=token)  
                 timestamp_str = token[-10:]
                 token_timestamp = timezone.datetime.fromtimestamp(int(timestamp_str))
 
-               
                 if default_token_generator.check_token(user, token) and timezone.now() <= token_timestamp + timezone.timedelta(minutes=15):
                     if newPassword == confirmPassword:
                         user.set_password(newPassword)

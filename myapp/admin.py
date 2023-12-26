@@ -29,17 +29,10 @@ class CommentLikeHistoryAdmin(admin.ModelAdmin):
 admin.site.register(CommentLikeHistory, CommentLikeHistoryAdmin)
 
 
-
-#class User(AbstractBaseUser):
-    
-  #  reset_token = models.CharField(max_length=100, null=True, blank=True)
-    
-#admin.site.register(User, UserAdmin)
-    
       
 class CustomUserAdmin(BaseUserAdmin):
     
-    reset_token = models.CharField(max_length=100, null=True, blank=True)
+  
     list_display = ['id', 'username', 'email']
     ordering = ('id',)
 
