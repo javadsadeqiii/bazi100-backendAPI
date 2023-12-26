@@ -55,10 +55,10 @@ class PasswordResetView(APIView):
                     fail_silently=False,
                 )
 
-                return Response({'message': 'لینک بازیابی رمزعبور به ایمیلتان ارسال شد'}, status=status.HTTP_200_OK)
+                return Response({'error': 'لینک بازیابی رمزعبور به ایمیلتان ارسال شد'}, status=status.HTTP_200_OK)
 
             except User.DoesNotExist:
-                return Response({'message': 'کاربر با این ایمیل یافت نشد'}, status=status.HTTP_404_NOT_FOUND)
+                return Response({'error': 'کاربر با این ایمیل یافت نشد'}, status=status.HTTP_404_NOT_FOUND)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
