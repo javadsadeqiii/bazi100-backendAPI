@@ -73,35 +73,33 @@ class PasswordResetView(APIView):
 
 
 class PasswordResetConfirmView(APIView):
-    
     def post(self, request):
         token = request.data.get('token')
         newPassword = request.data.get('newPassword')
         confirmPassword = request.data.get('confirmPassword')
 
         if not token or not newPassword or not confirmPassword:
-            return Response({'error': 'توکن یا رمزعبور وارد نشده'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'توکن یا رمزعبور دریافت نشد'}, status=status.HTTP_400_BAD_REQUEST)
 
         User = get_user_model()
 
         try:
-            uidb64, token = token.split('-')  
+            uidb64, token = token.split('-')
             uid = urlsafe_base64_decode(uidb64).decode()
             user = User.objects.get(pk=uid)
-            token = token.encode()  
 
-            if default_token_generator.check_token(user, token) and timezone.now() <= user.reset_password_expire:
+            if default_token_generator.check_token(user, token):
                 if newPassword == confirmPassword:
                     user.set_password(newPassword)
                     user.save()
                     return Response({'message': 'رمز عبور با موفقیت تغییر یافت'}, status=status.HTTP_200_OK)
                 else:
-                    return Response({'error': 'پسوورد ها مطابقت ندارند'}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({'error': 'رمز عبور مطابقت ندارد'}, status=status.HTTP_400_BAD_REQUEST)
             else:
                 return Response({'error': 'توکن منقضی شده'}, status=status.HTTP_400_BAD_REQUEST)
 
         except (User.DoesNotExist, ValidationError, Http404, ValueError):
-            return Response({'error': 'کاربری با این توکن یافت نشد'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'کاربر یا توکن یافت نشد'}, status=status.HTTP_404_NOT_FOUND)
 
 
 
@@ -132,6 +130,8 @@ class SubscriberViewSet(viewsets.ModelViewSet):
                 return Response({'message': 'کاربری با این ایمیل پیدا نشد'}, status=status.HTTP_404_NOT_FOUND)
         return Response({'message': 'لغو عضویت ناموفق بود', 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
+
+
     @action(detail=False, methods=['post'])
     def subscribe(self, request):
         serializer = self.get_serializer(data=request.data)
@@ -142,24 +142,30 @@ class SubscriberViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def send_newsletter(self, request):
 
-        subscribers = Subscriber.objects.all()
-        all_users = User.objects.all()
-        combined_recipients = list(subscribers) + list(all_users)
+       
+        latest_posts = AllPosts.objects.all().order_by('-date')[:3]
+
         subject = 'تازه ترین مطالب سایت بازینکس'
         from_email = settings.EMAIL_HOST_USER
-        recipient_list = [recipient.email for recipient in combined_recipients]
+        recipient_list = []
+       
+        subscribers = Subscriber.objects.values_list('email', flat=True)
+        recipient_list.extend(subscribers)
+       
+        all_users = User.objects.values_list('email', flat=True)
+        recipient_list.extend(all_users)
 
-        try:
-
-            post = AllPosts.objects.all().order_by(
-                '-created_at')[:3]  # سه تا پست آخر
-            post_url = reverse('public-posts-detail',
-                               kwargs={'slug': post.slug})
+    
+        for post in latest_posts:
+            post_url = reverse('public-posts-detail', kwargs={'slug': post.slug})
             message = f"Title: {post.title}\nSummary: {post.postSummary}\nLink: {request.build_absolute_uri(post_url)}\n"
+
             send_mail(subject, message, from_email, recipient_list)
-            return Response({'message': 'خبرنامه با موفقیت ارسال شد'}, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({'message': 'خطا در ارسال خبرنامه', 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response({'message': 'خبرنامه با موفقیت ارسال شد'}, status=status.HTTP_200_OK)
+
+
+
 
 
 class SignUpView(APIView):
