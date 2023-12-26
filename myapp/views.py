@@ -69,38 +69,37 @@ class PasswordResetView(APIView):
 
 
 
+
 class PasswordResetConfirmView(APIView):
-    
-    
     def post(self, request):
-        serializer = PasswordResetConfirmSerializer(data=request.data)
-        if serializer.is_valid():
-            token = serializer.validated_data['token']
-            newPassword = serializer.validated_data['newPassword']
-            confirmPassword = serializer.validated_data['confirmPassword']
+        token = request.data.get('token')
+        newPassword = request.data.get('new_password')
+        confirmPassword = request.data.get('confirm_password')
+
+        if not token or not newPassword or not confirmPassword:
+            return Response({'error': 'توکن یا رمزعبور وارد نشده'}, status=status.HTTP_400_BAD_REQUEST)
+
+        User = get_user_model()
+
+        try:
+            user = User.objects.get(first_name=token)
+            timestamp_str = token[-10:]
+            token_timestamp = timezone.datetime.fromtimestamp(int(timestamp_str))
+
             
-            User = get_user_model()
-            try:
-               
-                user = User.objects.get(first_name=token)  
-                timestamp_str = token[-10:]
-                token_timestamp = timezone.datetime.fromtimestamp(int(timestamp_str))
-
-                if default_token_generator.check_token(user, token) and timezone.now() <= token_timestamp + timezone.timedelta(minutes=15):
-                    if newPassword == confirmPassword:
-                        user.set_password(newPassword)
-                        user.save()
-                        return Response({'message': 'رمزعبور با موفقیت تغییر یافت'}, status=status.HTTP_200_OK)
-                    else:
-                        return Response({'error': 'رمزعبور مطابقت ندارد'})
+            if default_token_generator.check_token(user, token) and timezone.now() <= token_timestamp + timezone.timedelta(minutes=15):
+                if newPassword == confirmPassword:
+                    user.set_password(newPassword)
+                    user.token = None  
+                    user.save()
+                    return Response({'message': 'رمز عبور با موفقیت تغییر یافت'}, status=status.HTTP_200_OK)
                 else:
-                    return Response({'error': 'توکن منقضی شده است'})
+                    return Response({'error': 'پسوورد ها مطابقت ندارند'}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({'error': 'توکن منقضی شده'}, status=status.HTTP_400_BAD_REQUEST)
 
-            except User.DoesNotExist:
-                pass
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+        except User.DoesNotExist:
+            return Response({'error': 'کاربری با این توکن یافت نشد'}, status=status.HTTP_404_NOT_FOUND)
 
 
 
