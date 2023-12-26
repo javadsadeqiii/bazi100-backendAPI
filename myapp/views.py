@@ -71,7 +71,8 @@ class PasswordResetView(APIView):
 
 class PasswordResetConfirmView(APIView):
     
-    def post(self, request):
+    
+  def post(self, request):
         
         serializer = PasswordResetConfirmSerializer(data=request.data)
         if serializer.is_valid():
@@ -79,24 +80,30 @@ class PasswordResetConfirmView(APIView):
             newPassword = serializer.validated_data['newPassword']
             confirmPassword = serializer.validated_data['confirmPassword']
 
-            #دیکود کردن توکن
-            user_id, timestamp = token.split('-')
-            user = User.objects.get(pk=user_id)
-            
-            token_timestamp = timezone.datetime.fromtimestamp(int(timestamp))
+            try:
+                user = User.objects.get(token)
+                
+                timestamp_str = token[-10:]
+                token_timestamp = timezone.datetime.fromtimestamp(int(timestamp_str))
 
-            # چک کردن توکن و منقضی کردنش بعد 15 دقیقه
-            if default_token_generator.check_token(user, token) and timezone.now() <= token_timestamp + timezone.timedelta(minutes=15):
-              
-                if newPassword == confirmPassword:
-                    
-                    user.set_password(newPassword)
-                    user.save()
-                    return Response({'message': 'رمزعبور با موفقیت تغییر یافت'}, status=status.HTTP_200_OK)
+                # چک کردن توکن 
+                if default_token_generator.check_token(user, token) and timezone.now() <= token_timestamp + timezone.timedelta(minutes=15):
+                  
+                    if newPassword == confirmPassword:
+                        
+                        user.set_password(newPassword)
+                        user.save()
+                        return Response({'message': 'رمزعبور با موفقیت تغییر یافت'}, status=status.HTTP_200_OK)
+                    else:
+                        return Response({'error':'رمزعبور مطابقت ندارد'})
                 else:
-                    return Response({'error':'رمزعبور مطابقت ندارد'}, status=status.HTTP_400_BAD_REQUEST)
-            else:
-                return Response({'error':'توکن منقضی شده است'}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({'error':'توکن منقضی شده است'})
+
+            except User.DoesNotExist:
+                pass
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
     
 
