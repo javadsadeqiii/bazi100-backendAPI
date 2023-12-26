@@ -79,31 +79,26 @@ class PasswordResetConfirmView(APIView):
             newPassword = serializer.validated_data['newPassword']
             confirmPassword = serializer.validated_data['confirmPassword']
 
-            try:
-                user = User.objects.get(token)
-                
-                timestamp_str = token[-10:]
-                token_timestamp = timezone.datetime.fromtimestamp(int(timestamp_str))
+            # Decode the token and process
+            user_id, timestamp = token.split('-')
+            user = User.objects.get(pk=user_id)
+            
+            token_timestamp = timezone.datetime.fromtimestamp(int(timestamp))
 
-                #چک کردن توکن و منقضی کردنش بعد 15 دقیقه
-                if default_token_generator.check_token(user, token) and timezone.now() <= token_timestamp + timezone.timedelta(minutes=15):
-                  
-                    if newPassword == confirmPassword:
-                        
-                        user.set_password(newPassword)
-                        user.save()
-                        return Response({'message': 'رمزعبور با موفقیت تغییر یافت'}, status=status.HTTP_200_OK)
-                    else:
-                        return Response({'error':'رمزعبور مطابقت ندارد'})
+            # Check token validity and expiration (15 minutes duration)
+            if default_token_generator.check_token(user, token) and timezone.now() <= token_timestamp + timezone.timedelta(minutes=15):
+              
+                if newPassword == confirmPassword:
+                    
+                    user.set_password(newPassword)
+                    user.save()
+                    return Response({'message': 'رمزعبور با موفقیت تغییر یافت'}, status=status.HTTP_200_OK)
                 else:
-                    return Response({'error':'توکن منقضی شده است'})
+                    return Response({'error':'رمزعبور مطابقت ندارد'}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({'error':'توکن منقضی شده است'}, status=status.HTTP_400_BAD_REQUEST)
 
-            except (User.DoesNotExist, ValidationError, Http404,IndexError, ValueError) as e:
-                return Response({'error': 'خطایی در فرآیند تغییر رمز عبور رخ داد'}, status=status.HTTP_400_BAD_REQUEST)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
+    
 
 
 
