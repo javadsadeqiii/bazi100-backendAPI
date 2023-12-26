@@ -6,6 +6,8 @@ from django.contrib import admin
 from .models import *
 from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.base_user import AbstractBaseUser
+from django.contrib.auth.admin import UserAdmin
 
 
 class SubscriberAdmin(admin.ModelAdmin):
@@ -27,7 +29,17 @@ class CommentLikeHistoryAdmin(admin.ModelAdmin):
 admin.site.register(CommentLikeHistory, CommentLikeHistoryAdmin)
 
 
+
+#class User(AbstractBaseUser):
+    
+  #  reset_token = models.CharField(max_length=100, null=True, blank=True)
+    
+#admin.site.register(User, UserAdmin)
+    
+      
 class CustomUserAdmin(BaseUserAdmin):
+    
+    reset_token = models.CharField(max_length=100, null=True, blank=True)
     list_display = ['id', 'username', 'email']
     ordering = ('id',)
 

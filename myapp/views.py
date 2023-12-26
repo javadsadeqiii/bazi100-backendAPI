@@ -72,8 +72,7 @@ class PasswordResetView(APIView):
 class PasswordResetConfirmView(APIView):
     
     
-  def post(self, request):
-        
+   def post(self, request):
         serializer = PasswordResetConfirmSerializer(data=request.data)
         if serializer.is_valid():
             token = serializer.validated_data['token']
@@ -81,31 +80,26 @@ class PasswordResetConfirmView(APIView):
             confirmPassword = serializer.validated_data['confirmPassword']
 
             try:
-                user = User.objects.get(token)
-                
+                user = User.objects.get(reset_token=token)  
                 timestamp_str = token[-10:]
                 token_timestamp = timezone.datetime.fromtimestamp(int(timestamp_str))
 
-                # چک کردن توکن 
+               
                 if default_token_generator.check_token(user, token) and timezone.now() <= token_timestamp + timezone.timedelta(minutes=15):
-                  
                     if newPassword == confirmPassword:
-                        
                         user.set_password(newPassword)
                         user.save()
                         return Response({'message': 'رمزعبور با موفقیت تغییر یافت'}, status=status.HTTP_200_OK)
                     else:
-                        return Response({'error':'رمزعبور مطابقت ندارد'})
+                        return Response({'error': 'رمزعبور مطابقت ندارد'})
                 else:
-                    return Response({'error':'توکن منقضی شده است'})
+                    return Response({'error': 'توکن منقضی شده است'})
 
             except User.DoesNotExist:
                 pass
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-    
 
 
 
