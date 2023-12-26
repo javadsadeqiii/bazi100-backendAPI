@@ -42,11 +42,10 @@ class PasswordResetView(APIView):
             try:
                 user = User.objects.get(email=email)
 
-                uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
-                token = default_token_generator.make_token(user)
+              #  uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+              #  token = default_token_generator.make_token(user)
 
-                reset_link = f"http://127.0.0.1:8000/reset/{uidb64}/{token}/"  # Replace with your frontend reset link
-
+                reset_link = f"http://localhost:3000/resetpassword/utftyuftyufuyu"
                 send_mail(
                     'بازیابی رمز عبور',
                     f'برای بازیابی رمز عبور وارد لینک شوید: {reset_link}',
@@ -149,8 +148,6 @@ class SignUpView(APIView):
         if password != confirmPassword:
             return Response({'error': 'رمز عبور و تایید آن باید یکسان باشند'}, status=status.HTTP_400_BAD_REQUEST)
 
-       # if len(password) < 8:
-         #   return Response({'error': "رمز عبور نمیتواند کمتر از 8 کاراکتر باشد"}, status=status.HTTP_400_BAD_REQUEST)
 
         user = User.objects.create(
             username=username, password=make_password(password), email=email)

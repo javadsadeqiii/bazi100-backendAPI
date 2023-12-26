@@ -1,11 +1,13 @@
 from rest_framework.serializers import ModelSerializer
 from .models import *
 from rest_framework import serializers
-# from django.core.validators import RegexValidator
 from rest_framework import serializers
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.contrib.auth.forms import PasswordResetForm
+
+
+
 
 
 class PasswordResetSerializer(serializers.Serializer):
@@ -34,13 +36,14 @@ class SubscriberSerializer(serializers.ModelSerializer):
         existing_user = User.objects.filter(email=value).exists()
 
         if existing_subscriber or existing_user:
-            raise serializers.ValidationError(
-                "ایمیل وارد شده وجود دارد")
+            raise serializers.ValidationError("ایمیل وارد شده وجود دارد")
 
         return value
 
     def create(self, validated_data):
         return Subscriber.objects.create(**validated_data)
+
+
 
 
 class ReplyLikeHistorySerializer(ModelSerializer):
