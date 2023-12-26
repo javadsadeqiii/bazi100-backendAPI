@@ -5,9 +5,21 @@ from rest_framework import serializers
 from rest_framework import serializers
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError as DjangoValidationError
+from django.contrib.auth.forms import PasswordResetForm
+
+
+class PasswordResetSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        PasswordResetForm({'email': value})  
+        return value
+
 
 
 class SubscriberSerializer(serializers.ModelSerializer):
+    
+    createdAt = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
     class Meta:
         model = Subscriber
         fields = '__all__'

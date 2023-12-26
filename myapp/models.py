@@ -13,7 +13,7 @@ en_formats.DATETIME_FORMAT = 'Y-m-d'
 
 class Subscriber(models.Model):
     email = models.EmailField(unique=True)
-    subscribed_at = models.DateTimeField(auto_now_add=True)
+    createdAt = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.email

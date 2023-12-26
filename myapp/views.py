@@ -1,12 +1,9 @@
-from subprocess import Popen
 from django.http import JsonResponse
 from rest_framework.viewsets import ModelViewSet
 from . models import *
 from .serializers import *
 import re
 from django.http import JsonResponse
-# from django.db.models.signals import post_save, post_delete
-# from django.dispatch import receiver
 from django.core.mail import send_mail
 from django.contrib.auth.models import User
 from rest_framework.permissions import AllowAny
@@ -26,15 +23,68 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from django.conf import settings
 from django.urls import reverse
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
 
 DATE_FORMAT = 'Y-m-d'
 DATETIME_FORMAT = 'Y-m-d H:i:s'
+
+
+
+
+class PasswordResetView(APIView):
+    def post(self, request):
+        serializer = PasswordResetSerializer(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data['email']
+            user = User.objects.get(email=email)
+
+            uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+            token = default_token_generator.make_token(user)
+
+            reset_link = f"http://yourdomain.com/reset/{uidb64}/{token}/"  #ارسال لینک ریست از فرانت اند
+
+            
+            send_mail(
+                'بازیابی رمز عبور',
+                f'برای بازیابی رمز عبور وارد لینک شوید: {reset_link}',
+                settings.DEFAULT_FROM_EMAIL,
+                [email],
+                fail_silently=False,
+            )
+
+            return Response({'message': 'لینک بازیابی رمزعبور به ایمیلتان ارسال شد'}, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class SubscriberViewSet(viewsets.ModelViewSet):
 
     queryset = Subscriber.objects.all()
     serializer_class = SubscriberSerializer
+
+    def create(self, request):
+        serializer = SubscriberSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            success_message = "شما با موفقیت در خبرنامه عضو شدید"
+            return Response({'message': success_message, 'data': serializer.data}, status=status.HTTP_201_CREATED)
+        error_message = "عضویت در خبرنامه ناموفق بود لطفا ایمیل خود را چک کرده و دوباره وارد کنید"
+        return Response({'message': error_message, 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+    def unsubscribe(self, request):
+        serializer = SubscriberSerializer(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data['email']
+            try:
+                subscriber = Subscriber.objects.get(email=email)
+                subscriber.delete()
+                success_message = "عضویت شما در خبرنامه با موفقیت لغو شد"
+                return Response({'message': success_message}, status=status.HTTP_200_OK)
+            except Subscriber.DoesNotExist:
+                return Response({'message': 'کاربری با این ایمیل پیدا نشد'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'message': 'لغو عضویت ناموفق بود', 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=False, methods=['post'])
     def subscribe(self, request):
@@ -55,7 +105,8 @@ class SubscriberViewSet(viewsets.ModelViewSet):
 
         try:
 
-            post = AllPosts.objects.last()
+            post = AllPosts.objects.all().order_by(
+                '-created_at')[:3]  # سه تا پست آخر
             post_url = reverse('public-posts-detail',
                                kwargs={'slug': post.slug})
             message = f"Title: {post.title}\nSummary: {post.postSummary}\nLink: {request.build_absolute_uri(post_url)}\n"
