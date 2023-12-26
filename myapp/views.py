@@ -73,8 +73,8 @@ class PasswordResetView(APIView):
 class PasswordResetConfirmView(APIView):
     def post(self, request):
         token = request.data.get('token')
-        newPassword = request.data.get('new_password')
-        confirmPassword = request.data.get('confirm_password')
+        newPassword = request.data.get('newPassword')
+        confirmPassword = request.data.get('confirmPassword')
 
         if not token or not newPassword or not confirmPassword:
             return Response({'error': 'توکن یا رمزعبور وارد نشده'}, status=status.HTTP_400_BAD_REQUEST)
