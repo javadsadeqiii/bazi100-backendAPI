@@ -29,7 +29,7 @@ class PasswordResetSerializer(serializers.Serializer):
 
 class SubscriberSerializer(serializers.ModelSerializer):
     
-    createdAt = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
+
     class Meta:
         model = Subscriber
         fields = '__all__'

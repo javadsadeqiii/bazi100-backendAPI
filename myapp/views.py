@@ -115,7 +115,7 @@ class SubscriberViewSet(viewsets.ModelViewSet):
             success_message = "شما با موفقیت در خبرنامه عضو شدید"
             return Response({'message': success_message, 'data': serializer.data}, status=status.HTTP_201_CREATED)
         error_message = "عضویت در خبرنامه ناموفق بود لطفا ایمیل خود را چک کرده و دوباره وارد کنید"
-        return Response({'message': error_message, 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'error': error_message, 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
     def unsubscribe(self, request):
         serializer = SubscriberSerializer(data=request.data)

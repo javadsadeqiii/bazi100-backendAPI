@@ -16,7 +16,7 @@ from django.contrib.auth.admin import UserAdmin
 
 class SubscriberAdmin(admin.ModelAdmin):
 
-    list_display = ('email', 'date')
+    list_display = ('email',)
     ordering = ('id',)
 
 
