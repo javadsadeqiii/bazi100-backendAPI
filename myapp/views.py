@@ -79,13 +79,13 @@ class PasswordResetConfirmView(APIView):
             newPassword = serializer.validated_data['newPassword']
             confirmPassword = serializer.validated_data['confirmPassword']
 
-            # Decode the token and process
+            #دیکود کردن توکن
             user_id, timestamp = token.split('-')
             user = User.objects.get(pk=user_id)
             
             token_timestamp = timezone.datetime.fromtimestamp(int(timestamp))
 
-            # Check token validity and expiration (15 minutes duration)
+            # چک کردن توکن و منقضی کردنش بعد 15 دقیقه
             if default_token_generator.check_token(user, token) and timezone.now() <= token_timestamp + timezone.timedelta(minutes=15):
               
                 if newPassword == confirmPassword:
