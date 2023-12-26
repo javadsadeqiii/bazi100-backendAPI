@@ -8,6 +8,14 @@ from django.contrib.auth.forms import PasswordResetForm
 
 
 
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    
+    token = serializers.CharField()
+    newPassword = serializers.CharField()
+    confirmPassword = serializers.CharField()
+
+
+
 
 
 class PasswordResetSerializer(serializers.Serializer):
