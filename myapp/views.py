@@ -27,6 +27,8 @@ from django.contrib.auth.tokens import default_token_generator
 import secrets
 from django.http import Http404
 from django.utils import timezone
+from django.utils.http import urlsafe_base64_decode
+from django.utils.encoding import force_bytes
 
 
 DATE_FORMAT = 'Y-m-d'
@@ -71,6 +73,7 @@ class PasswordResetView(APIView):
 
 
 class PasswordResetConfirmView(APIView):
+    
     def post(self, request):
         token = request.data.get('token')
         newPassword = request.data.get('newPassword')
@@ -82,15 +85,14 @@ class PasswordResetConfirmView(APIView):
         User = get_user_model()
 
         try:
-            user = User.objects.get(first_name=token)
-            timestamp_str = token[-10:]
-            token_timestamp = timezone.datetime.fromtimestamp(int(timestamp_str))
+            uidb64, token = token.split('-')  
+            uid = urlsafe_base64_decode(uidb64).decode()
+            user = User.objects.get(pk=uid)
+            token = token.encode()  
 
-            
-            if default_token_generator.check_token(user, token) and timezone.now() <= token_timestamp + timezone.timedelta(minutes=15):
+            if default_token_generator.check_token(user, token) and timezone.now() <= user.reset_password_expire:
                 if newPassword == confirmPassword:
                     user.set_password(newPassword)
-                    user.token = None  
                     user.save()
                     return Response({'message': 'رمز عبور با موفقیت تغییر یافت'}, status=status.HTTP_200_OK)
                 else:
@@ -98,9 +100,8 @@ class PasswordResetConfirmView(APIView):
             else:
                 return Response({'error': 'توکن منقضی شده'}, status=status.HTTP_400_BAD_REQUEST)
 
-        except User.DoesNotExist:
+        except (User.DoesNotExist, ValidationError, Http404, ValueError):
             return Response({'error': 'کاربری با این توکن یافت نشد'}, status=status.HTTP_404_NOT_FOUND)
-
 
 
 
