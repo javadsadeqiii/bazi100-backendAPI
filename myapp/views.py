@@ -38,25 +38,31 @@ class PasswordResetView(APIView):
         serializer = PasswordResetSerializer(data=request.data)
         if serializer.is_valid():
             email = serializer.validated_data['email']
-            user = User.objects.get(email=email)
 
-            uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
-            token = default_token_generator.make_token(user)
+            try:
+                user = User.objects.get(email=email)
 
-            reset_link = f"http://yourdomain.com/reset/{uidb64}/{token}/"  #ارسال لینک ریست از فرانت اند
+                uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+                token = default_token_generator.make_token(user)
 
-            
-            send_mail(
-                'بازیابی رمز عبور',
-                f'برای بازیابی رمز عبور وارد لینک شوید: {reset_link}',
-                settings.DEFAULT_FROM_EMAIL,
-                [email],
-                fail_silently=False,
-            )
+                reset_link = f"http://yourdomain.com/reset/{uidb64}/{token}/"  # Replace with your frontend reset link
 
-            return Response({'message': 'لینک بازیابی رمزعبور به ایمیلتان ارسال شد'}, status=status.HTTP_200_OK)
+                send_mail(
+                    'بازیابی رمز عبور',
+                    f'برای بازیابی رمز عبور وارد لینک شوید: {reset_link}',
+                    settings.DEFAULT_FROM_EMAIL,
+                    [email],
+                    fail_silently=False,
+                )
+
+                return Response({'message': 'لینک بازیابی رمزعبور به ایمیلتان ارسال شد'}, status=status.HTTP_200_OK)
+
+            except User.DoesNotExist:
+                return Response({'message': 'کاربر با این ایمیل یافت نشد'}, status=status.HTTP_404_NOT_FOUND)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 
 class SubscriberViewSet(viewsets.ModelViewSet):
