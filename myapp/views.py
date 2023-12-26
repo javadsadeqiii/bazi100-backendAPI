@@ -45,7 +45,7 @@ class PasswordResetView(APIView):
                 uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
                 token = default_token_generator.make_token(user)
 
-                reset_link = f"http://yourdomain.com/reset/{uidb64}/{token}/"  # Replace with your frontend reset link
+                reset_link = f"http://127.0.0.1:8000/reset/{uidb64}/{token}/"  # Replace with your frontend reset link
 
                 send_mail(
                     'بازیابی رمز عبور',
@@ -55,7 +55,7 @@ class PasswordResetView(APIView):
                     fail_silently=False,
                 )
 
-                return Response({'error': 'لینک بازیابی رمزعبور به ایمیلتان ارسال شد'}, status=status.HTTP_200_OK)
+                return Response({'message': 'لینک بازیابی رمزعبور به ایمیلتان ارسال شد'}, status=status.HTTP_200_OK)
 
             except User.DoesNotExist:
                 return Response({'error': 'کاربر با این ایمیل یافت نشد'}, status=status.HTTP_404_NOT_FOUND)
