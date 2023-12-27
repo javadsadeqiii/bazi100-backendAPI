@@ -12,7 +12,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 class PasswordResetLinkAdmin(admin.ModelAdmin):
     
     
-    list_display = ('__all__',)
+    list_display = ('user','used')
     
 admin.site.register(PasswordResetLink, PasswordResetLinkAdmin)
 
