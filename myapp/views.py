@@ -28,6 +28,7 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_decode
 from django.http import Http404
 import base64
+from django.utils import timezone
 
 
 
@@ -71,33 +72,36 @@ class PasswordResetView(APIView):
 
 class PasswordResetConfirmView(APIView):
     
-    def post(self, request, unique_id):  
+       def post(self, request, unique_id):  
         serializer = PasswordResetConfirmSerializer(data=request.data)
         if serializer.is_valid():
             newPassword = serializer.validated_data['newPassword']
             confirmPassword = serializer.validated_data['confirmPassword']
 
             if newPassword != confirmPassword:
-                return Response({'error':"رمز عبور شما مطابقت ندارد "})
+                return Response({'error':"رمزعبور شما با تایید آن مطابقت ندارد"})
 
             try:
                 user_id_bytes = urlsafe_base64_decode(unique_id)  
                 user_id = user_id_bytes.decode('utf-8')  
                 user = User.objects.get(pk=user_id)
 
-                
-                if User.password_reset_consumed:
-                    return Response({'error': ' لینک بازیابی رمزعبور شما مقضی شده دوباره تلاش کنید'}, status=status.HTTP_400_BAD_REQUEST)
+              
+                reset_timestamp = user.password_reset_timestamp
+                expiration_time = timezone.now() - timezone.timedelta(minutes=1) 
 
-               
+                if reset_timestamp and reset_timestamp < expiration_time:
+                    return Response({'error': ' لینک بازیابی رمزعبور شما منقضی شده لطفا دوباره تلاش کنید'}, status=status.HTTP_400_BAD_REQUEST)
+
+    
                 user.set_password(newPassword)
-                user.password_reset_consumed = True 
+                user.password_reset_timestamp = timezone.now()  
                 user.save()
 
-                return Response({'message': 'بازبینی رمز عبور با موفقیت انجام شد'}, status=status.HTTP_200_OK)
+                return Response({'message': 'بازیابی رمزعبور با موفقیت انجام شد'}, status=status.HTTP_200_OK)
 
             except (User.DoesNotExist, ValueError, OverflowError, base64.binascii.Error):
-                return Response ({'error':"کاربر عزیز اطلاعات وارد شده صحیح نمیباشد"})
+                return Response({'error':"کاربر عزیز اطلاعات وارد شده صحیح نیست "})
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
