@@ -23,8 +23,13 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from django.conf import settings
 from django.urls import reverse
-from django.core.cache import cache
-import secrets
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_decode
+from django.http import Http404
+import base64
+
+
 
 
 DATE_FORMAT = 'Y-m-d'
@@ -42,16 +47,10 @@ class PasswordResetView(APIView):
             try:
                 user = User.objects.get(email=email)
 
-            
-                token = "salambache"  # ساخت توکن یونیک برا کاربر
-                
-                
+               
+                unique_id = urlsafe_base64_encode(force_bytes(user.pk))
 
-                 #ذخیره توکن کاربر
-                user.token = token
-                user.save()
-
-                reset_link = f"http://localhost:3000/resetpassword/{token}"
+                reset_link = f"http://localhost:3000/resetpassword/{unique_id}"
                 send_mail(
                     'بازیابی رمز عبور',
                     f'برای بازیابی رمز عبور وارد لینک شوید: {reset_link}',
@@ -72,35 +71,29 @@ class PasswordResetView(APIView):
 
 class PasswordResetConfirmView(APIView):
     
-    
-    def post(self, request):
-        
+    def post(self, request, unique_id):  
         serializer = PasswordResetConfirmSerializer(data=request.data)
         if serializer.is_valid():
-            token = serializer.validated_data['token']
+            
             newPassword = serializer.validated_data['newPassword']
             confirmPassword = serializer.validated_data['confirmPassword']
 
             if newPassword != confirmPassword:
                 return Response("رمزعبور شما با تایید آن مطابقت ندارد")
 
-            user_id = cache.get(token)
-            if user_id:
-                try:
-                    user = User.objects.get(pk=user_id)
-                    user.set_password(newPassword)
-                    user.save()
-                    cache.delete(token)  # پاک کردن توکن از کش
-                    return Response({'message': 'بازیابی رمزعبور شما با موفقیت انجام شد'}, status=status.HTTP_200_OK)
+            try:
+                user_id_bytes = urlsafe_base64_decode(unique_id)  
+                user_id = user_id_bytes.decode('utf-8')  
+                user = User.objects.get(pk=user_id)
+                user.set_password(newPassword)
+                user.save()
 
-                except User.DoesNotExist:
-                    return Response ({'error':"اطلاعات دریافتی از شما قابل بررسی نیست لطفا دوباره تلاش کنید"})
+                return Response({'message': 'بازیابی رمزعبور شما با موفقیت انجام شد'}, status=status.HTTP_200_OK)
 
-            return Response({'error': 'توکن شما منقضی شده لطفا یکبار دیگر امتحان کنید'}, status=status.HTTP_404_NOT_FOUND)
+            except (User.DoesNotExist, ValueError, OverflowError, base64.binascii.Error):
+                raise Http404("لینک بازیابی رمزعبور نامعتبر است یا منقضی شده است")
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
 
 
 
