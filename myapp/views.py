@@ -86,7 +86,7 @@ class PasswordResetConfirmView(APIView):
                 user = User.objects.get(pk=user_id)
 
                 
-                if user.password_reset_consumed:
+                if User.password_reset_consumed:
                     return Response({'error': ' لینک بازیابی رمزعبور شما مقضی شده دوباره تلاش کنید'}, status=status.HTTP_400_BAD_REQUEST)
 
                
