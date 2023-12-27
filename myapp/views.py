@@ -74,27 +74,32 @@ class PasswordResetConfirmView(APIView):
     def post(self, request, unique_id):  
         serializer = PasswordResetConfirmSerializer(data=request.data)
         if serializer.is_valid():
-            
             newPassword = serializer.validated_data['newPassword']
             confirmPassword = serializer.validated_data['confirmPassword']
 
             if newPassword != confirmPassword:
-                return Response("رمزعبور شما با تایید آن مطابقت ندارد")
+                return Response({'error':"رمز عبور شما مطابقت ندارد "})
 
             try:
                 user_id_bytes = urlsafe_base64_decode(unique_id)  
                 user_id = user_id_bytes.decode('utf-8')  
                 user = User.objects.get(pk=user_id)
+
+                
+                if user.password_reset_consumed:
+                    return Response({'error': ' لینک بازیابی رمزعبور شما مقضی شده دوباره تلاش کنید'}, status=status.HTTP_400_BAD_REQUEST)
+
+               
                 user.set_password(newPassword)
+                user.password_reset_consumed = True 
                 user.save()
 
-                return Response({'message': 'بازیابی رمزعبور شما با موفقیت انجام شد'}, status=status.HTTP_200_OK)
+                return Response({'message': 'بازبینی رمز عبور با موفقیت انجام شد'}, status=status.HTTP_200_OK)
 
             except (User.DoesNotExist, ValueError, OverflowError, base64.binascii.Error):
-                raise Http404("لینک بازیابی رمزعبور نامعتبر است یا منقضی شده است")
+                return Response ({'error':"کاربر عزیز اطلاعات وارد شده صحیح نمیباشد"})
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 

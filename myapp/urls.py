@@ -86,7 +86,7 @@ urlpatterns = [
     
     path('api/passwordreset/', PasswordResetView.as_view(), name='password_reset'),
     
-    path('passwordresetconfirm/<str:unique_id>/', PasswordResetConfirmView.as_view(), name='password_reset_confirm')
+    path('api/passwordresetconfirm/<str:unique_id>/', PasswordResetConfirmView.as_view(), name='password_reset_confirm')
   
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
