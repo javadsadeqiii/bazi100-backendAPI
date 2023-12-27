@@ -23,12 +23,8 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from django.conf import settings
 from django.urls import reverse
-from django.contrib.auth.tokens import default_token_generator
+from django.core.cache import cache
 import secrets
-from django.http import Http404
-from django.utils import timezone
-from django.utils.http import urlsafe_base64_decode
-from django.utils.encoding import force_bytes
 
 
 DATE_FORMAT = 'Y-m-d'
@@ -37,6 +33,7 @@ DATETIME_FORMAT = 'Y-m-d H:i:s'
 
 
 class PasswordResetView(APIView):
+    
     def post(self, request):
         serializer = PasswordResetSerializer(data=request.data)
         if serializer.is_valid():
@@ -52,7 +49,7 @@ class PasswordResetView(APIView):
                 user.token = token
                 user.save()
 
-                reset_link = f"http://localhost:3000/forgotpassword/{token}"
+                reset_link = f"http://localhost:3000/resetpassword/{token}"
                 send_mail(
                     'بازیابی رمز عبور',
                     f'برای بازیابی رمز عبور وارد لینک شوید: {reset_link}',
@@ -72,34 +69,43 @@ class PasswordResetView(APIView):
 
 
 
+
+
 class PasswordResetConfirmView(APIView):
+    
+    
     def post(self, request):
-        token = request.data.get('token')
-        newPassword = request.data.get('newPassword')
-        confirmPassword = request.data.get('confirmPassword')
+        
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+        if serializer.is_valid():
+            token = serializer.validated_data['token']
+            newPassword = serializer.validated_data['newPassword']
+            confirmPassword = serializer.validated_data['confirmPassword']
 
-        if not token or not newPassword or not confirmPassword:
-            return Response({'error': 'توکن یا رمزعبور دریافت نشد'}, status=status.HTTP_400_BAD_REQUEST)
+            if newPassword != confirmPassword:
+                return Response("رمزعبور شما با تایید آن مطابقت ندارد")
 
-        User = get_user_model()
-
-        try:
-            uidb64, token = token.split('-')
-            uid = urlsafe_base64_decode(uidb64).decode()
-            user = User.objects.get(pk=uid)
-
-            if default_token_generator.check_token(user, token):
-                if newPassword == confirmPassword:
+            user_id = cache.get(token)
+            if user_id:
+                try:
+                    user = User.objects.get(pk=user_id)
                     user.set_password(newPassword)
                     user.save()
-                    return Response({'message': 'رمز عبور با موفقیت تغییر یافت'}, status=status.HTTP_200_OK)
-                else:
-                    return Response({'error': 'رمز عبور مطابقت ندارد'}, status=status.HTTP_400_BAD_REQUEST)
-            else:
-                return Response({'error': 'توکن منقضی شده'}, status=status.HTTP_400_BAD_REQUEST)
+                    cache.delete(token)  # پاک کردن توکن از کش
+                    return Response({'message': 'بازیابی رمزعبور شما با موفقیت انجام شد'}, status=status.HTTP_200_OK)
 
-        except (User.DoesNotExist, ValidationError, Http404, ValueError):
-            return Response({'error': 'کاربر یا توکن یافت نشد'}, status=status.HTTP_404_NOT_FOUND)
+                except User.DoesNotExist:
+                    return Response ({'error':"اطلاعات دریافتی از شما قابل بررسی نیست لطفا دوباره تلاش کنید"})
+
+            return Response({'error': 'توکن شما منقضی شده لطفا یکبار دیگر امتحان کنید'}, status=status.HTTP_404_NOT_FOUND)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
+
 
 
 
