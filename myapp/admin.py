@@ -1,9 +1,23 @@
 from django.contrib import admin
-
 from django.contrib import admin
 from .models import *
 from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+
+
+
+
+
+
+class PasswordResetLinkAdmin(admin.ModelAdmin):
+    
+    
+    list_display = ('__all__')
+    
+admin.site.register(PasswordResetLink, PasswordResetLinkAdmin)
+
+
+
 
 
 

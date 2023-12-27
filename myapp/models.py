@@ -6,15 +6,20 @@ from django.core.validators import FileExtensionValidator
 from django_jsonform.models.fields import ArrayField
 from ckeditor_uploader.fields import RichTextUploadingField
 from django.db import models
+from django.contrib.auth import get_user_model
 # from django.utils import timezone
 
 en_formats.DATETIME_FORMAT = 'Y-m-d'
 
 
+class PasswordResetLink(models.Model):
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
+    used = models.BooleanField(default=False)
 
-class User(models.Model):
-    password_reset_timestamp = models.DateTimeField(null=True, blank=True)
 
+    def mark_as_used(self):
+        self.used = True
+        self.save()
 
 
 

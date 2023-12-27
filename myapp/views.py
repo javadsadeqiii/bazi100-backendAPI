@@ -28,6 +28,7 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_decode
 from django.http import Http404
 import base64
+User = get_user_model()
 
 
 
@@ -47,13 +48,15 @@ class PasswordResetView(APIView):
             try:
                 user = User.objects.get(email=email)
 
-               
-                unique_id = urlsafe_base64_encode(force_bytes(user.pk))
+                
+                reset_link = PasswordResetLink.objects.create(user=user)
 
-                reset_link = f"http://localhost:3000/resetpassword/{unique_id}"
+                
+                reset_link_id = urlsafe_base64_encode(force_bytes(reset_link.pk))
+                reset_link_url = f"http://localhost:3000/resetpassword/{reset_link_id}"
                 send_mail(
                     'بازیابی رمز عبور',
-                    f'برای بازیابی رمز عبور وارد لینک شوید: {reset_link}',
+                    f'برای بازیابی رمز عبور وارد لینک شوید: {reset_link_url}',
                     settings.DEFAULT_FROM_EMAIL,
                     [email],
                     fail_silently=False,
@@ -67,40 +70,34 @@ class PasswordResetView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
-
 class PasswordResetConfirmView(APIView):
     
-   def post(self, request, unique_id):  
+    def post(self, request, unique_id):
         serializer = PasswordResetConfirmSerializer(data=request.data)
         if serializer.is_valid():
-            newPassword = serializer.validated_data['newPassword']
-            confirmPassword = serializer.validated_data['confirmPassword']
+            new_password = serializer.validated_data['new_password']
+            confirm_password = serializer.validated_data['confirm_password']
 
-            if newPassword != confirmPassword:
-                return Response({'error': "رمز عبور شما مطابقت ندارد"})
+            if new_password != confirm_password:
+                return Response("رمزعبور شما با تایید آن مطابقت ندارد", status=status.HTTP_400_BAD_REQUEST)
 
             try:
-                user_id_bytes = urlsafe_base64_decode(unique_id)  
-                user_id = user_id_bytes.decode('utf-8')  
-                user = User.objects.get(pk=user_id)
+                reset_link_id = urlsafe_base64_decode(unique_id)
+                reset_link = get_object_or_404(PasswordResetLink, pk=reset_link_id, used=False)
+                user = reset_link.user
 
                 
-                reset_timestamp_before = user.password_reset_timestamp
-
-                user.set_password(newPassword)
+                user.set_password(new_password)
                 user.save()
+                reset_link.mark_as_used()
 
-                
-                if reset_timestamp_before != user.password_reset_timestamp:
-                    return Response({'message': 'بازیابی رمز عبور با موفقیت انجام شد'}, status=status.HTTP_200_OK)
-                else:
-                    return Response({'error': 'لینک بازیابی رمز عبور شما منقضی شده است. دوباره تلاش کنید'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'message': 'بازیابی رمزعبور شما با موفقیت انجام شد'}, status=status.HTTP_200_OK)
 
-            except (User.DoesNotExist, ValueError, OverflowError, base64.binascii.Error):
-                return Response({'error': "کاربر عزیز، اطلاعات وارد شده صحیح نمی‌باشد"})
+            except (ValueError, OverflowError, PasswordResetLink.DoesNotExist):
+                return Response({'error': "لینک بازیابی رمزعبور نامعتبر است یا قبلاً استفاده شده است"}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 
