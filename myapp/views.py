@@ -68,9 +68,6 @@ class PasswordResetView(APIView):
 
 
 
-
-
-
 class PasswordResetConfirmView(APIView):
     
     

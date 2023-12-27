@@ -39,6 +39,11 @@ class CommentLikeHistory(models.Model):
         verbose_name_plural = "لایک کامنت ها"
 
 
+
+
+
+
+
 class CommentLike(models.Model):
 
     userId = models.ForeignKey(
@@ -52,6 +57,11 @@ class CommentLike(models.Model):
     class Meta:
         verbose_name = "لایک کامنت ها"
         verbose_name_plural = "لایک کامنت ها"
+
+
+
+
+
 
 
 class Comments(models.Model):
