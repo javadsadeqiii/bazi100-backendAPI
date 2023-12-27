@@ -12,7 +12,8 @@ en_formats.DATETIME_FORMAT = 'Y-m-d'
 
 
 
-
+class User(models.Model):
+    password_reset_timestamp = models.DateTimeField(null=True, blank=True)
 
 
 
