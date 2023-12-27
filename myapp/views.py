@@ -43,7 +43,7 @@ class PasswordResetView(APIView):
                 user = User.objects.get(email=email)
 
             
-                token = "salam bache"  # ساخت توکن یونیک برا کاربر
+                token = "salambache"  # ساخت توکن یونیک برا کاربر
                 
                 
 
