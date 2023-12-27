@@ -68,36 +68,33 @@ class PasswordResetView(APIView):
 
 
 
+
 class PasswordResetConfirmView(APIView):
     
-    
     def post(self, request):
-        
         serializer = PasswordResetConfirmSerializer(data=request.data)
         if serializer.is_valid():
-            token = serializer.validated_data['token']
             newPassword = serializer.validated_data['newPassword']
             confirmPassword = serializer.validated_data['confirmPassword']
 
             if newPassword != confirmPassword:
                 return Response("رمزعبور شما با تایید آن مطابقت ندارد")
 
-            user_id = cache.get(token)
-            if user_id:
+            
+            for token, email in cache._cache.items():
                 try:
-                    user = User.objects.get(pk=user_id)
+                    user = User.objects.get(email=email)
                     user.set_password(newPassword)
                     user.save()
-                    cache.delete(token)  # پاک کردن توکن از کش
+                    cache.delete(token)
                     return Response({'message': 'بازیابی رمزعبور شما با موفقیت انجام شد'}, status=status.HTTP_200_OK)
 
                 except User.DoesNotExist:
-                    return Response ({'error':"اطلاعات دریافتی از شما قابل بررسی نیست لطفا دوباره تلاش کنید"})
+                    pass
 
-            return Response({'error': 'توکن شما منقضی شده لطفا یکبار دیگر امتحان کنید'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'توکن نامعتبر است یا منقضی شده است'}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 
