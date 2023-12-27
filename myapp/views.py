@@ -70,15 +70,17 @@ class PasswordResetView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+
+
 class PasswordResetConfirmView(APIView):
     
     def post(self, request, unique_id):
         serializer = PasswordResetConfirmSerializer(data=request.data)
         if serializer.is_valid():
-            new_password = serializer.validated_data['new_password']
-            confirm_password = serializer.validated_data['confirm_password']
+            newPassword = serializer.validated_data['newPassword']
+            confirmPassword = serializer.validated_data['confirmPassword']
 
-            if new_password != confirm_password:
+            if newPassword != confirmPassword:
                 return Response("رمزعبور شما با تایید آن مطابقت ندارد", status=status.HTTP_400_BAD_REQUEST)
 
             try:
@@ -87,7 +89,7 @@ class PasswordResetConfirmView(APIView):
                 user = reset_link.user
 
                 
-                user.set_password(new_password)
+                user.set_password(newPassword)
                 user.save()
                 reset_link.mark_as_used()
 
