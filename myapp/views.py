@@ -24,10 +24,7 @@ from rest_framework.decorators import action
 from django.conf import settings
 from django.urls import reverse
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.utils.encoding import force_bytes
-from django.utils.http import urlsafe_base64_encode
-import base64
-import binascii
+from django.utils import timezone
 
 DATE_FORMAT = 'Y-m-d'
 DATETIME_FORMAT = 'Y-m-d H:i:s'
@@ -55,7 +52,7 @@ class ResetPasswordView(APIView):
             token = token_generator.make_token(user)
 
             
-            reset_link = f"http://localhost:3000/reset-password-confirm/{user.id}/{token}/"
+            reset_link = f"http://localhost:3000/reset-password-confirm/{user.id}-{token}/"
             
             subject = "درخواست بازیابی رمز عبور"
             message = f"لطفا جهت بازیابی رمزعبور خود روی لینک ارسالی کلیک کنید: {reset_link}"
@@ -84,11 +81,15 @@ class ResetPasswordView(APIView):
 
             
             if PasswordResetTokenGenerator().check_token(user, token):
-                user.set_password(newPassword)
-                user.save()
-                return Response({'message': "کاربر عزیز رمزعبور شما با موفقیت بازیابی شد"}, status=status.HTTP_200_OK)
+                if not user.password_reset_timestamp:
+                    user.set_password(newPassword)
+                    user.password_reset_timestamp = timezone.now()  
+                    user.save()
+                    return Response({'message': "کاربر عزیز رمزعبور شما با موفقیت بازیابی شد"}, status=status.HTTP_200_OK)
+                else:
+                    return Response({'error': "توکن قبلاً استفاده شده است"}, status=status.HTTP_400_BAD_REQUEST)
             else:
-                return Response({'error': "توکن اشتباه است یا منقضی شده است"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'error': "توکن نادرست است یا منقضی شده"}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({'error': "لطفا تمامی اطلاعات را به درستی وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
 
