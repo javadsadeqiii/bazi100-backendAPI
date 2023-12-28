@@ -73,26 +73,24 @@ class ResetPasswordView(APIView):
         confirmPassword = request.data.get('confirmPassword')
 
         if id and token and newPassword == confirmPassword:
-            
             try:
                 user = User.objects.get(pk=id) 
             except User.DoesNotExist:
                 return Response({'error': "کاربری با این شناسه یافت نشد"}, status=status.HTTP_400_BAD_REQUEST)
 
-            
-            if PasswordResetTokenGenerator().check_token(user, token):
-                if not user.password_reset_timestamp:
+           
+            if token.endswith('-unused'):
+                token_without_status = token[:-len('-unused')]
+                if PasswordResetTokenGenerator().check_token(user, token_without_status):
                     user.set_password(newPassword)
-                    user.password_reset_timestamp = timezone.now()  
                     user.save()
                     return Response({'message': "کاربر عزیز رمزعبور شما با موفقیت بازیابی شد"}, status=status.HTTP_200_OK)
                 else:
-                    return Response({'error': "توکن قبلاً استفاده شده است"}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({'error': "توکن نادرست است یا منقضی شده"}, status=status.HTTP_400_BAD_REQUEST)
             else:
-                return Response({'error': "توکن نادرست است یا منقضی شده"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'error': "توکن قبلاً استفاده شده است"}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({'error': "لطفا تمامی اطلاعات را به درستی وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 
