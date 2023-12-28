@@ -52,7 +52,7 @@ class ResetPasswordView(APIView):
             token = token_generator.make_token(user)
 
             
-            reset_link = f"http://localhost:3000/reset-password-confirm/{user.id}-{token}/"
+            reset_link = f"http://localhost:3000/resetpassword/{user.id}-{token}/"
             
             subject = "درخواست بازیابی رمز عبور"
             message = f"لطفا جهت بازیابی رمزعبور خود روی لینک ارسالی کلیک کنید: {reset_link}"
