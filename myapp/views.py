@@ -37,7 +37,6 @@ DATETIME_FORMAT = 'Y-m-d H:i:s'
 
 
 
-
 class ResetPasswordView(APIView):
     
     def post(self, request):
@@ -49,14 +48,15 @@ class ResetPasswordView(APIView):
             except User.DoesNotExist:
                 return Response({'error':"ایمیل وارد شده یافت نشد "}, status=status.HTTP_404_NOT_FOUND)
 
-            # Generate a token for the user
+            
+            
+            
             token_generator = PasswordResetTokenGenerator()
             token = token_generator.make_token(user)
 
-            # Construct the password reset link (without uidb64)
-            reset_link = f"http://127.0.0.1:8000/reset-password-confirm/{token}/"
-
-            # Send the reset link via email
+            
+            reset_link = f"http://127.0.0.1:8000/reset-password-confirm/{user.id}/{token}/"
+            
             subject = "درخواست بازیابی رمز عبور"
             message = f"لطفا جهت بازیابی رمزعبور خود روی لینک ارسالی کلیک کنید: {reset_link}"
             from_email = settings.EMAIL_HOST_USER
@@ -68,32 +68,29 @@ class ResetPasswordView(APIView):
         else:
             return Response({'error':"لطفا ایمیل خود را وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
         
+        
     def put(self, request):
-        email = request.data.get('email')
+        id = request.data.get('id')
         token = request.data.get('token')
         newPassword = request.data.get('newPassword')
         confirmPassword = request.data.get('confirmPassword')
 
-        if email and token and newPassword == confirmPassword:
+        if id and token and newPassword == confirmPassword:
+            
             try:
-                user = User.objects.get(email=email)
+                user = User.objects.get(pk=id) 
             except User.DoesNotExist:
-                return Response({'error':"ایمیل وارد شده متعلق به هیچ کاربری نیست"}, status=status.HTTP_404_NOT_FOUND)
+                return Response({'error': "کاربری با این شناسه یافت نشد"}, status=status.HTTP_400_BAD_REQUEST)
 
-            # Decode and validate the token
-            try:
-                if not PasswordResetTokenGenerator().check_token(user, token):
-                    raise ValueError("Invalid token")
-            except ValueError:
+            
+            if PasswordResetTokenGenerator().check_token(user, token):
+                user.set_password(newPassword)
+                user.save()
+                return Response({'message': "کاربر عزیز رمزعبور شما با موفقیت بازیابی شد"}, status=status.HTTP_200_OK)
+            else:
                 return Response({'error': "توکن اشتباه است یا منقضی شده است"}, status=status.HTTP_400_BAD_REQUEST)
-
-            # Set the new password
-            user.set_password(newPassword)
-            user.save()
-            return Response({'message':"کاربر عزیز رمزعبور شما با موفقیت بازیابی شد"}, status=status.HTTP_200_OK)
         else:
-            return Response({'error':"لطفا تمامی اطلاعات را به درستی وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
-
+            return Response({'error': "لطفا تمامی اطلاعات را به درستی وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 
