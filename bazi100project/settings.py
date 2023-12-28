@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     'ckeditor',
     'rest_framework',
     'rest_framework_simplejwt',
+   
+    
 
 
 

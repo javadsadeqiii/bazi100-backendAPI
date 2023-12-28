@@ -23,87 +23,87 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from django.conf import settings
 from django.urls import reverse
-from django.utils.http import urlsafe_base64_encode
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.encoding import force_bytes
-from django.utils.http import urlsafe_base64_decode
-from django.http import Http404
+from django.utils.http import urlsafe_base64_encode
 import base64
-User = get_user_model()
-
-
-
+import binascii
 
 DATE_FORMAT = 'Y-m-d'
 DATETIME_FORMAT = 'Y-m-d H:i:s'
 
 
 
-class PasswordResetView(APIView):
+class ResetPasswordView(APIView):
+    
     
     def post(self, request):
-        serializer = PasswordResetSerializer(data=request.data)
-        if serializer.is_valid():
-            email = serializer.validated_data['email']
+        email = request.data.get('email')
 
+        if email:
             try:
                 user = User.objects.get(email=email)
-
-                
-                reset_link = PasswordResetLink.objects.create(user=user)
-
-                
-                reset_link_id = urlsafe_base64_encode(force_bytes(reset_link.pk))
-                reset_link_url = f"http://localhost:3000/resetpassword/{reset_link_id}"
-                send_mail(
-                    'بازیابی رمز عبور',
-                    f'برای بازیابی رمز عبور وارد لینک شوید: {reset_link_url}',
-                    settings.DEFAULT_FROM_EMAIL,
-                    [email],
-                    fail_silently=False,
-                )
-
-                return Response({'message': 'لینک بازیابی رمزعبور به ایمیلتان ارسال شد'}, status=status.HTTP_200_OK)
-
             except User.DoesNotExist:
-                return Response({'error': 'کاربر با این ایمیل یافت نشد'}, status=status.HTTP_404_NOT_FOUND)
+                return Response({'error':"ایمیل وارد شده یافت نشد "}, status=status.HTTP_404_NOT_FOUND)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            # Generate a token for the user
+            token_generator = PasswordResetTokenGenerator()
+            uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+            token = token_generator.make_token(user)
 
+            # Construct the password reset link
+            reset_link = f"http://127.0.0.1:8000/reset-password-confirm/{uidb64}/{token}/"
 
+            # Send the reset link via email
+            subject = "درخواست بازیابی رمز عبور"
+            message = f"لطفا جهت بازیابی رمزعبور خود روی لینک ارسالی کلیک کنید: {reset_link}"
+            from_email = settings.EMAIL_HOST_USER
+            to_email = [email]
 
+            send_mail(subject, message, from_email, to_email, fail_silently=False)
 
-class PasswordResetConfirmView(APIView):
-    
-    def post(self, request, unique_id):
-        serializer = PasswordResetConfirmSerializer(data=request.data)
-        if serializer.is_valid():
-            newPassword = serializer.validated_data['newPassword']
-            confirmPassword = serializer.validated_data['confirmPassword']
+            return Response({'message':"ایمیل جهت بازیابی رمزعبور ارسال شد"}, status=status.HTTP_200_OK)
+        else:
+            return Response({'error':"لطفا ایمیل خود را وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
+        
+       
+       
+       
+       
+        # متد دوم برای گرفتن رمزجدید و توکن
+    def put(self, request):
+        email = request.data.get('email')
+        token = request.data.get('token')
+        newPassword = request.data.get('newPassword')
+        confirmPassword = request.data.get('confirmPassword')
 
-            if newPassword != confirmPassword:
-                return Response("رمزعبور شما با تایید آن مطابقت ندارد", status=status.HTTP_400_BAD_REQUEST)
-
+        if email and token and newPassword == confirmPassword:
             try:
-                reset_link_id = urlsafe_base64_decode(unique_id)
-                reset_link = get_object_or_404(PasswordResetLink, pk=reset_link_id, used=False)
-                user = reset_link.user
+                user = User.objects.get(email=email)
+            except User.DoesNotExist:
+                return Response({'error':"ایمیل وارد شده متعلق به هیچ کاربری نیست"}, status=status.HTTP_404_NOT_FOUND)
 
-                
-                user.set_password(newPassword)
-                user.save()
-                reset_link.mark_as_used()
+            # Decode the uidb64
+            try:
+                uidb64 = token.split('/')[1]
+                uid = base64.urlsafe_b64decode(uidb64).decode('utf-8')
+            except (IndexError, TypeError, UnicodeDecodeError, binascii.Error):
+                return Response({'error': "توکن اشتباه است یا منقضی شده است"}, status=status.HTTP_400_BAD_REQUEST)
 
-                return Response({'message': 'بازیابی رمزعبور شما با موفقیت انجام شد'}, status=status.HTTP_200_OK)
-
-            except (ValueError, OverflowError, PasswordResetLink.DoesNotExist):
-                return Response({'error': "لینک بازیابی رمزعبور نامعتبر است یا قبلاً استفاده شده است"}, status=status.HTTP_400_BAD_REQUEST)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-
-
+            if str(user.pk) == uid:
+                # Validate the token
+                token_generator = PasswordResetTokenGenerator()
+                if token_generator.check_token(user, token):
+                    # Set the new password
+                    user.set_password(newPassword)
+                    user.save()
+                    return Response({'message':"کاربر عزیز رمزعبور شما با موفقیت بازیابی شد"}, status=status.HTTP_200_OK)
+                else:
+                    return Response({'error':"توکن جهت بازیابی رمزعبور منقضی شده لطفا دوباره تلاش کنید"}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({'error':"کاربر عزیز اطلاعات وارد شده نادرست میباشد یا توکن مورد استفاده منقضی شده"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({'error':"لطفا تمامی اطلاعات را به درستی وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class SubscriberViewSet(viewsets.ModelViewSet):

@@ -84,10 +84,10 @@ urlpatterns = [
     
     path('api/unsubscribeletter/', SubscriberViewSet.as_view({'post': 'unsubscribe'}), name='unsubscribe'),
     
-    path('api/passwordreset/', PasswordResetView.as_view(), name='password_reset'),
+    path('api/resetpassword/', ResetPasswordView.as_view(), name='reset_password'), #اندپوینت پست اول
     
-    path('api/passwordresetconfirm/<str:unique_id>/', PasswordResetConfirmView.as_view(), name='password_reset_confirm')
-  
+    path('api/resetpasswordconfirm/', ResetPasswordView.as_view(), name='reset_password_confirm'),  #اندپوینت پست دوم
+    
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 

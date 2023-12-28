@@ -10,13 +10,6 @@ from django.contrib.auth.forms import PasswordResetForm
 
 
 
-class PasswordResetLinkSerializer(serializers.Serializer):
-    
-    class Meta:
-        
-        model = PasswordResetLink
-        fields = ('__all__')
-
 
 
 
