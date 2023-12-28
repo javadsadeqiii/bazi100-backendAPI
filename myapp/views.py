@@ -24,7 +24,8 @@ from rest_framework.decorators import action
 from django.conf import settings
 from django.urls import reverse
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.utils import timezone
+from django.core.cache import cache
+
 
 DATE_FORMAT = 'Y-m-d'
 DATETIME_FORMAT = 'Y-m-d H:i:s'
@@ -34,8 +35,25 @@ DATETIME_FORMAT = 'Y-m-d H:i:s'
 
 
 
+
 class ResetPasswordView(APIView):
-    
+
+    def invalidate_token(self, user, token):
+      
+        if not hasattr(self, 'used_tokens'):
+            self.used_tokens = {}
+
+        if user.id in self.used_tokens:
+            self.used_tokens[user.id].append(token)
+        else:
+            self.used_tokens[user.id] = [token]
+
+    def token_already_used(self, user, token):
+        
+        if hasattr(self, 'used_tokens') and user.id in self.used_tokens:
+            return token in self.used_tokens[user.id]
+        return False
+
     def post(self, request):
         email = request.data.get('email')
 
@@ -43,17 +61,13 @@ class ResetPasswordView(APIView):
             try:
                 user = User.objects.get(email=email)
             except User.DoesNotExist:
-                return Response({'error':"ایمیل وارد شده یافت نشد "}, status=status.HTTP_404_NOT_FOUND)
+                return Response({'error': "ایمیل وارد شده یافت نشد"}, status=status.HTTP_404_NOT_FOUND)
 
-            
-            
-            
             token_generator = PasswordResetTokenGenerator()
             token = token_generator.make_token(user)
 
-            
             reset_link = f"http://localhost:3000/resetpassword/{user.id}-{token}/"
-            
+
             subject = "درخواست بازیابی رمز عبور"
             message = f"لطفا جهت بازیابی رمزعبور خود روی لینک ارسالی کلیک کنید: {reset_link}"
             from_email = settings.EMAIL_HOST_USER
@@ -61,11 +75,10 @@ class ResetPasswordView(APIView):
 
             send_mail(subject, message, from_email, to_email, fail_silently=False)
 
-            return Response({'message':"ایمیل جهت بازیابی رمزعبور ارسال شد"}, status=status.HTTP_200_OK)
+            return Response({'message': "ایمیل جهت بازیابی رمزعبور ارسال شد"}, status=status.HTTP_200_OK)
         else:
-            return Response({'error':"لطفا ایمیل خود را وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
-        
-        
+            return Response({'error': "لطفا ایمیل خود را وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
+
     def put(self, request):
         id = request.data.get('id')
         token = request.data.get('token')
@@ -74,24 +87,29 @@ class ResetPasswordView(APIView):
 
         if id and token and newPassword == confirmPassword:
             try:
-                user = User.objects.get(pk=id) 
+                user = User.objects.get(pk=id)
             except User.DoesNotExist:
                 return Response({'error': "کاربری با این شناسه یافت نشد"}, status=status.HTTP_400_BAD_REQUEST)
 
-           
-            if token.endswith('-unused'):
-                token_without_status = token[:-len('-unused')]
-                if PasswordResetTokenGenerator().check_token(user, token_without_status):
-                    user.set_password(newPassword)
-                    user.save()
-                    return Response({'message': "کاربر عزیز رمزعبور شما با موفقیت بازیابی شد"}, status=status.HTTP_200_OK)
-                else:
-                    return Response({'error': "توکن نادرست است یا منقضی شده"}, status=status.HTTP_400_BAD_REQUEST)
-            else:
-                return Response({'error': "توکن قبلاً استفاده شده است"}, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            return Response({'error': "لطفا تمامی اطلاعات را به درستی وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
+            token_generator = PasswordResetTokenGenerator()
+            
+            if token_generator.check_token(user, token):
+                cache_key = f"used_token_{token}_{user.id}"
+                
+                if cache.get(cache_key):
+                    return Response({'error': "توکن قبلاً استفاده شده است"}, status=status.HTTP_400_BAD_REQUEST)
 
+                user.set_password(newPassword)
+                user.save()
+
+               
+                cache.set(cache_key, True, timeout=5184000)   
+
+                return Response({'message': "کاربر عزیز رمزعبور شما با موفقیت بازیابی شد"}, status=status.HTTP_200_OK)
+            else:
+                return Response({'error': "توکن نادرست است یا منقضی شده"}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({'error': "لطفا تمامی اطلاعات را به درستی وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 
@@ -156,6 +174,7 @@ class SubscriberViewSet(viewsets.ModelViewSet):
             send_mail(subject, message, from_email, recipient_list)
 
         return Response({'message': 'خبرنامه با موفقیت ارسال شد'}, status=status.HTTP_200_OK)
+
 
 
 

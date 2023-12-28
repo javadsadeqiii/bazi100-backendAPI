@@ -155,6 +155,15 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',  
+    }
+}
+
+
 # EMAIL_USER = 'valoranttt200@gmail.com'
 # EMAIL_PASS = 'cnetrwuyqgkdazqr'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
