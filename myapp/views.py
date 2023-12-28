@@ -34,8 +34,11 @@ DATETIME_FORMAT = 'Y-m-d H:i:s'
 
 
 
+
+
+
+
 class ResetPasswordView(APIView):
-    
     
     def post(self, request):
         email = request.data.get('email')
@@ -48,11 +51,10 @@ class ResetPasswordView(APIView):
 
             # Generate a token for the user
             token_generator = PasswordResetTokenGenerator()
-            uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
             token = token_generator.make_token(user)
 
-            # Construct the password reset link
-            reset_link = f"http://127.0.0.1:8000/reset-password-confirm/{uidb64}/{token}/"
+            # Construct the password reset link (without uidb64)
+            reset_link = f"http://127.0.0.1:8000/reset-password-confirm/{token}/"
 
             # Send the reset link via email
             subject = "درخواست بازیابی رمز عبور"
@@ -66,11 +68,6 @@ class ResetPasswordView(APIView):
         else:
             return Response({'error':"لطفا ایمیل خود را وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
         
-       
-       
-       
-       
-        # متد دوم برای گرفتن رمزجدید و توکن
     def put(self, request):
         email = request.data.get('email')
         token = request.data.get('token')
@@ -83,27 +80,24 @@ class ResetPasswordView(APIView):
             except User.DoesNotExist:
                 return Response({'error':"ایمیل وارد شده متعلق به هیچ کاربری نیست"}, status=status.HTTP_404_NOT_FOUND)
 
-            # Decode the uidb64
+            # Decode and validate the token
             try:
-                uidb64 = token.split('/')[1]
-                uid = base64.urlsafe_b64decode(uidb64).decode('utf-8')
-            except (IndexError, TypeError, UnicodeDecodeError, binascii.Error):
+                if not PasswordResetTokenGenerator().check_token(user, token):
+                    raise ValueError("Invalid token")
+            except ValueError:
                 return Response({'error': "توکن اشتباه است یا منقضی شده است"}, status=status.HTTP_400_BAD_REQUEST)
 
-            if str(user.pk) == uid:
-                # Validate the token
-                token_generator = PasswordResetTokenGenerator()
-                if token_generator.check_token(user, token):
-                    # Set the new password
-                    user.set_password(newPassword)
-                    user.save()
-                    return Response({'message':"کاربر عزیز رمزعبور شما با موفقیت بازیابی شد"}, status=status.HTTP_200_OK)
-                else:
-                    return Response({'error':"توکن جهت بازیابی رمزعبور منقضی شده لطفا دوباره تلاش کنید"}, status=status.HTTP_400_BAD_REQUEST)
-            else:
-                return Response({'error':"کاربر عزیز اطلاعات وارد شده نادرست میباشد یا توکن مورد استفاده منقضی شده"}, status=status.HTTP_400_BAD_REQUEST)
+            # Set the new password
+            user.set_password(newPassword)
+            user.save()
+            return Response({'message':"کاربر عزیز رمزعبور شما با موفقیت بازیابی شد"}, status=status.HTTP_200_OK)
         else:
             return Response({'error':"لطفا تمامی اطلاعات را به درستی وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
 
 
 class SubscriberViewSet(viewsets.ModelViewSet):
