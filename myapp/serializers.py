@@ -10,16 +10,11 @@ from django.contrib.auth.forms import PasswordResetForm
 
 
 
-
-
-
-
 class PasswordResetConfirmSerializer(serializers.Serializer):
     
     token = serializers.CharField()
     newPassword = serializers.CharField()
     confirmPassword = serializers.CharField()
-
 
 
 
@@ -33,12 +28,14 @@ class PasswordResetSerializer(serializers.Serializer):
 
 
 
+
+
 class SubscriberSerializer(serializers.ModelSerializer):
     
 
     class Meta:
         model = Subscriber
-        fields = '__all__'
+        fields = ('__all__')
 
     def validate_email(self, value):
 
@@ -60,6 +57,8 @@ class SubscriberSerializer(serializers.ModelSerializer):
 
 
 
+
+
 class ReplyLikeHistorySerializer(ModelSerializer):
 
     class Meta:
@@ -68,11 +67,20 @@ class ReplyLikeHistorySerializer(ModelSerializer):
         fields = ('__all__')
 
 
+
+
+
+
+
 class CommentLikeHistorySerializer(ModelSerializer):
 
     class Meta:
         model = CommentLikeHistory
         fields = ('__all__')
+
+
+
+
 
 
 class platformSeriallizer(ModelSerializer):
@@ -160,10 +168,16 @@ class contactUsSerializer(ModelSerializer):
 
 
 class AllPostsSerializer(ModelSerializer):
+    
+  
 
     class Meta:
         model = AllPosts
         fields = ('__all__')
+        
+        
+    def get_commentCount(self, obj):
+        return obj.comments.count() 
 
 
 class wallpapersSerializer(ModelSerializer):

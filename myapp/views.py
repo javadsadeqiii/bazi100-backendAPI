@@ -25,13 +25,13 @@ from django.conf import settings
 from django.urls import reverse
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.core.cache import cache
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+
 
 
 DATE_FORMAT = 'Y-m-d'
 DATETIME_FORMAT = 'Y-m-d H:i:s'
-
-
-
 
 
 
@@ -80,6 +80,7 @@ class ResetPasswordView(APIView):
             return Response({'error': "لطفا ایمیل خود را وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request):
+        
         id = request.data.get('id')
         token = request.data.get('token')
         newPassword = request.data.get('newPassword')
@@ -97,19 +98,20 @@ class ResetPasswordView(APIView):
                 cache_key = f"used_token_{token}_{user.id}"
                 
                 if cache.get(cache_key):
-                    return Response({'error': "توکن قبلاً استفاده شده است"}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({'error':"توکن قبلاً استفاده شده است"}, status=status.HTTP_400_BAD_REQUEST)
 
                 user.set_password(newPassword)
                 user.save()
-
-               
+                
                 cache.set(cache_key, True, timeout=5184000)   
 
                 return Response({'message': "کاربر عزیز رمزعبور شما با موفقیت بازیابی شد"}, status=status.HTTP_200_OK)
             else:
-                return Response({'error': "توکن نادرست است یا منقضی شده"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'error': "توکن بازنشانی رمزعبور شما منقضی شده است لطفا دوباره تلاش کنید"}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({'error': "لطفا تمامی اطلاعات را به درستی وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 
 
@@ -119,28 +121,32 @@ class SubscriberViewSet(viewsets.ModelViewSet):
     queryset = Subscriber.objects.all()
     serializer_class = SubscriberSerializer
 
-    def create(self, request):
-        serializer = SubscriberSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            success_message = "شما با موفقیت در خبرنامه عضو شدید"
-            return Response({'message': success_message, 'data': serializer.data}, status=status.HTTP_201_CREATED)
-        error_message = "عضویت در خبرنامه ناموفق بود لطفا ایمیل خود را چک کرده و دوباره وارد کنید"
-        return Response({'error': error_message, 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+    def subscribe(self, request):
+        
+        email = request.data.get('email')  
+        
+        try:
+            subscriber = Subscriber.objects.get(email=email)
+            subscriber.save()
+            return Response({'message': 'شما با موفقیت در خبرنامه عضو شدید'}, status=status.HTTP_200_OK)
+       
+        except Exception as e:
+            return Response({'error': 'عضویت شما در خبرنامه ناموفق بود لطفا دوباره تلاش کنید', 'details': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            
+        
 
+    
     def unsubscribe(self, request):
-        serializer = SubscriberSerializer(data=request.data)
-        if serializer.is_valid():
-            email = serializer.validated_data['email']
-            try:
-                subscriber = Subscriber.objects.get(email=email)
-                subscriber.delete()
-                success_message = "عضویت شما در خبرنامه با موفقیت لغو شد"
-                return Response({'message': success_message}, status=status.HTTP_200_OK)
-            except Subscriber.DoesNotExist:
-                return Response({'message': 'کاربری با این ایمیل پیدا نشد'}, status=status.HTTP_404_NOT_FOUND)
-        return Response({'message': 'لغو عضویت ناموفق بود', 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-
+        email = request.data.get('email')  
+        
+        try:
+            subscriber = Subscriber.objects.get(email=email)
+            subscriber.delete()
+            return Response({'message': 'عضویت شما در خبرنامه با موفقیت لغو شد'}, status=status.HTTP_200_OK)
+        except Subscriber.DoesNotExist:
+            return Response({'error': 'کاربری با این ایمیل پیدا نشد'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': 'عملیات لغو عضویت خبرنامه ناموفق بود', 'details': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
     @action(detail=False, methods=['post'])
@@ -180,7 +186,12 @@ class SubscriberViewSet(viewsets.ModelViewSet):
 
 
 
+
+
+
+
 class SignUpView(APIView):
+    
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
@@ -188,6 +199,14 @@ class SignUpView(APIView):
         email = request.data.get('email')
         if not username or not password:
             return Response({'error': 'لطفا تمامی فیلد هارا پرکنید'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        
+        if ' ' in username:
+            return Response({'error': 'نام کاربری نمی‌تواند شامل فاصله باشد'}, status=status.HTTP_400_BAD_REQUEST)
+
+        
+        if not re.match("^[a-zA-Z0-9_]*$", username):
+            return Response({'error': 'نام کاربری فقط می‌تواند شامل حروف انگلیسی، اعداد و آندرلاین (_) باشد'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             # اعتبارسنجی فرمت ایمیل
@@ -713,7 +732,8 @@ class allPostsViewSet(ModelViewSet):
 
     queryset = AllPosts.objects.all()
     serializer_class = AllPostsSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
+
 
 
 class wallpapersViewSet(ModelViewSet):

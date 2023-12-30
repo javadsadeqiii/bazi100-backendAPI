@@ -6,9 +6,8 @@ from django.core.validators import FileExtensionValidator
 from django_jsonform.models.fields import ArrayField
 from ckeditor_uploader.fields import RichTextUploadingField
 from django.db import models
-from django.contrib.auth.models import AbstractUser
-from django.contrib.auth.models import Group, Permission
-import secrets
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
 
 
 en_formats.DATETIME_FORMAT = 'Y-m-d'
@@ -18,6 +17,7 @@ en_formats.DATETIME_FORMAT = 'Y-m-d'
 
 
 class Subscriber(models.Model):
+    
     email = models.EmailField(unique=True)
     
 
@@ -29,7 +29,9 @@ class Subscriber(models.Model):
         verbose_name_plural = "خبرنامه"
 
 
+
 class CommentLikeHistory(models.Model):
+    
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     comment = models.ForeignKey('Comments', on_delete=models.CASCADE)
     liked_at = models.DateTimeField(auto_now_add=True)
@@ -63,8 +65,19 @@ class CommentLike(models.Model):
 
 
 
-
 class Comments(models.Model):
+    
+    
+    def save(self, *args, **kwargs):
+        super(Comments, self).save(*args, **kwargs)
+        self.post.update_comment_count()
+        
+        
+    def delete(self, *args, **kwargs):
+        self.post.update_comment_count()
+        super(Comments, self).delete(*args, **kwargs)
+
+
 
     commentText = models.TextField(verbose_name="متن کامنت")
 
@@ -88,7 +101,34 @@ class Comments(models.Model):
         verbose_name_plural = "کامنت ها"
 
 
+
+
+@receiver(post_save, sender=Comments)
+def update_comment_count_on_create(sender, instance, created, **kwargs):
+    if created:
+        instance.post.update_comment_count()
+
+
+@receiver(post_delete, sender=Comments)
+def update_comment_count_on_delete(sender, instance, **kwargs):
+    instance.post.update_comment_count()
+
+
+
+
+
 class Reply(models.Model):
+    
+    
+    
+    def save(self, *args, **kwargs):
+        super(Reply, self).save(*args, **kwargs)
+        self.post.update_reply_count()
+        
+        
+    def delete(self, *args, **kwargs):
+        self.post.update_reply_count()
+        super(Reply, self).delete(*args, **kwargs)
 
     replyText = models.TextField(verbose_name="متن پاسخ")
 
@@ -116,6 +156,18 @@ class Reply(models.Model):
     class Meta:
         verbose_name = "ریپلای"
         verbose_name_plural = "ریپلای ها"
+
+
+@receiver(post_save, sender=Reply)
+def update_reply_count_on_create(sender, instance, created, **kwargs):
+    if created:
+        instance.post.update_reply_count()
+
+
+@receiver(post_delete, sender=Reply)
+def update_reply_count_on_delete(sender, instance, **kwargs):
+    instance.post.update_reply_count()
+
 
 
 class ReplyLikeHistory(models.Model):
@@ -158,6 +210,9 @@ class platform(models.Model):
         verbose_name_plural = "پلتفرم بازی ها"
 
 
+
+
+
 class AllPosts(models.Model):
 
     EVENT_STAGE_CHOICES = (
@@ -183,6 +238,24 @@ class AllPosts(models.Model):
 
 
     )
+    
+   #commentCount = models.IntegerField(default=0, verbose_name="تعداد کامنت", blank=True)
+    
+    
+    def update_comment_count(self):
+        count = Comments.objects.filter(post=self).count()  
+        self.commentCount = count
+        self.save()
+        
+        
+  #  replyCount = models.IntegerField(default=0,verbose_name="تعداد ریپلای",blank=True)
+    
+    
+    def update_reply_count(self):
+        count = Reply.objects.filter(post=self).count()  
+        self.replyCount = count
+        self.save()
+        
 
     title = models.CharField(max_length=255, verbose_name="عنوان")
 
@@ -213,6 +286,10 @@ class AllPosts(models.Model):
 
     memberId = models.ForeignKey(
         'bazi100Team', on_delete=models.CASCADE, verbose_name="آیدی نویسنده")
+    
+    commentCount = models.IntegerField(default=0, verbose_name="تعداد کامنت", blank=True)
+    
+    replyCount = models.IntegerField(default=0,verbose_name="تعداد ریپلای",blank=True)
 
     isEvent = models.BooleanField(default=False, null=True)
 
@@ -233,6 +310,8 @@ class AllPosts(models.Model):
     def __str__(self):
 
         return self.title
+
+
 
 
 class wallpapers(models.Model):
