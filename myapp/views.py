@@ -134,8 +134,6 @@ class SubscriberViewSet(viewsets.ModelViewSet):
             return Response({'error': 'عضویت شما در خبرنامه ناموفق بود لطفا دوباره تلاش کنید', 'details': str(e)}, status=status.HTTP_400_BAD_REQUEST)
             
         
-
-    
     def unsubscribe(self, request):
         email = request.data.get('email')  
         
@@ -180,8 +178,6 @@ class SubscriberViewSet(viewsets.ModelViewSet):
             send_mail(subject, message, from_email, recipient_list)
 
         return Response({'message': 'خبرنامه با موفقیت ارسال شد'}, status=status.HTTP_200_OK)
-
-
 
 
 
@@ -734,7 +730,7 @@ class allPostsViewSet(ModelViewSet):
 
     queryset = AllPosts.objects.all()
     serializer_class = AllPostsSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
 
 
