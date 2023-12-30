@@ -79,7 +79,7 @@ urlpatterns = [
     
     path('public-posts/<slug:slug>/', AllPostsDetailView.as_view(), name='public-posts-detail'),
     
-    path('send-newsletter/', SubscriberViewSet.as_view({'get': 'send_newsletter'}), name='send-newsletter'),
+    path('api/send-newsletter/', SubscriberViewSet.as_view({'get': 'send_newsletter'}), name='send-newsletter'),
     
     path('api/subscribeletter/',SubscriberViewSet.as_view({'post': 'subscribe'}), name='subscribe'),
     
