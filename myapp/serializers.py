@@ -5,6 +5,7 @@ from rest_framework import serializers
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.contrib.auth.forms import PasswordResetForm
+from rest_framework.response import Response
 
 
 
@@ -47,7 +48,7 @@ class SubscriberSerializer(serializers.ModelSerializer):
         existing_user = User.objects.filter(email=value).exists()
 
         if existing_subscriber or existing_user:
-            raise serializers.ValidationError("ایمیل وارد شده وجود دارد")
+            return Response({'error':"ایمیل وارد شده وجود دارد"})
 
         return value
 

@@ -149,6 +149,8 @@ class SubscriberViewSet(viewsets.ModelViewSet):
             return Response({'error': 'عملیات لغو عضویت خبرنامه ناموفق بود', 'details': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
+
+
     @action(detail=False, methods=['post'])
     def subscribe(self, request):
         serializer = self.get_serializer(data=request.data)
@@ -169,8 +171,6 @@ class SubscriberViewSet(viewsets.ModelViewSet):
         subscribers = Subscriber.objects.values_list('email', flat=True)
         recipient_list.extend(subscribers)
        
-        all_users = User.objects.values_list('email', flat=True)
-        recipient_list.extend(all_users)
 
     
         for post in latest_posts:
@@ -726,6 +726,8 @@ class AllPostsDetailView(generics.RetrieveAPIView):
     queryset = AllPosts.objects.all()
     serializer_class = AllPostsSerializer
     lookup_field = 'slug'
+
+
 
 
 class allPostsViewSet(ModelViewSet):
