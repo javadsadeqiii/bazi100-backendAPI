@@ -16,6 +16,8 @@ en_formats.DATETIME_FORMAT = 'Y-m-d'
 
 
 
+
+
 class Subscriber(models.Model):
     
     email = models.EmailField(unique=True)
@@ -30,6 +32,10 @@ class Subscriber(models.Model):
 
 
 
+
+
+
+
 class CommentLikeHistory(models.Model):
     
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -39,8 +45,6 @@ class CommentLikeHistory(models.Model):
     class Meta:
         verbose_name = "لایک کامنت ها"
         verbose_name_plural = "لایک کامنت ها"
-
-
 
 
 
@@ -218,7 +222,7 @@ class AllPosts(models.Model):
     EVENT_STAGE_CHOICES = (
 
 
-        ('E3', 'E3'),
+        ('e3', 'e3'),
 
         ('game-awards', 'game-awards'),
 
@@ -232,24 +236,18 @@ class AllPosts(models.Model):
     VIDEO_TYPE_CHOICES = (
 
 
-        ('gameplays trailers', 'gameplays trailers'),
+        ('gameplays-trailers', 'gameplays-trailers'),
 
         ('blink', 'blink'),
 
 
     )
     
-   #commentCount = models.IntegerField(default=0, verbose_name="تعداد کامنت", blank=True)
-    
-    
     def update_comment_count(self):
         count = Comments.objects.filter(post=self).count()  
         self.commentCount = count
         self.save()
         
-        
-  #  replyCount = models.IntegerField(default=0,verbose_name="تعداد ریپلای",blank=True)
-    
     
     def update_reply_count(self):
         count = Reply.objects.filter(post=self).count()  
@@ -300,6 +298,8 @@ class AllPosts(models.Model):
     isNews = models.BooleanField(default=False, null=True)
 
     isStory = models.BooleanField(default=False, null=True)
+    
+    
 
     class Meta:
 
@@ -430,7 +430,15 @@ class albums(models.Model):
         return self.title
 
 
+
+
+
+
+
 class bazi100Team(models.Model):
+    
+    
+    
 
     POSITION_CHOICE = (
 

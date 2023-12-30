@@ -11,6 +11,10 @@ from rest_framework.response import Response
 
 
 
+
+
+
+
 class PasswordResetConfirmSerializer(serializers.Serializer):
     
     token = serializers.CharField()
@@ -41,9 +45,11 @@ class SubscriberSerializer(serializers.ModelSerializer):
     def validate_email(self, value):
 
         try:
+            
             validate_email(value)
         except DjangoValidationError:
-            raise serializers.ValidationError("فرمت ایمیل نادرست است")
+            
+            return Response({'error':"فرمت ایمیل نادرست است"})
         existing_subscriber = Subscriber.objects.filter(email=value).exists()
         existing_user = User.objects.filter(email=value).exists()
 
@@ -54,6 +60,9 @@ class SubscriberSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         return Subscriber.objects.create(**validated_data)
+
+
+
 
 
 
@@ -91,12 +100,22 @@ class platformSeriallizer(ModelSerializer):
         fields = ('__all__')
 
 
+
+
+
+
+
 class contactUsSerializer(ModelSerializer):
 
     class Meta:
 
         model = contactUs
         fields = ('__all__')
+
+
+
+
+
 
 
 class pollsSerializer(ModelSerializer):

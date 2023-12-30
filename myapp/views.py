@@ -116,6 +116,7 @@ class ResetPasswordView(APIView):
 
 
 
+
 class SubscriberViewSet(viewsets.ModelViewSet):
 
     queryset = Subscriber.objects.all()
@@ -133,6 +134,8 @@ class SubscriberViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return Response({'error': 'عضویت شما در خبرنامه ناموفق بود لطفا دوباره تلاش کنید', 'details': str(e)}, status=status.HTTP_400_BAD_REQUEST)
             
+
+
         
     def unsubscribe(self, request):
         email = request.data.get('email')  
@@ -159,25 +162,51 @@ class SubscriberViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def send_newsletter(self, request):
 
-       
-        latest_posts = AllPosts.objects.all().order_by('-date')[:3]
+     latest_posts = AllPosts.objects.all().order_by('-date')[:3]
 
-        subject = 'تازه ترین مطالب سایت بازینکس'
-        from_email = settings.EMAIL_HOST_USER
-        recipient_list = []
+     subject = 'تازه ترین مطالب سایت بازینکس'
+     from_email = settings.EMAIL_HOST_USER
+     recipient_list = []
        
-        subscribers = Subscriber.objects.values_list('email', flat=True)
-        recipient_list.extend(subscribers)
+     subscribers = Subscriber.objects.values_list('email', flat=True)
+     recipient_list.extend(subscribers)
        
 
     
-        for post in latest_posts:
-            post_url = reverse('public-posts-detail', kwargs={'slug': post.slug})
-            message = f"Title: {post.title}\nSummary: {post.postSummary}\nLink: {request.build_absolute_uri(post_url)}\n"
+     for post in latest_posts:
+        link_kwargs = {'slug': post.slug}
 
-            send_mail(subject, message, from_email, recipient_list)
+        if post.isEvent and post.eventStage:
+            link_kwargs['event'] = post.eventStage
+           
+            post_url = f"http://localhost:3000/{post.eventStage}/{post.slug}/"
 
-        return Response({'message': 'خبرنامه با موفقیت ارسال شد'}, status=status.HTTP_200_OK)
+        elif post.isArticle:
+            link_kwargs['type'] = 'articles'
+           
+            post_url = f"http://localhost:3000/articles/{post.slug}/"
+
+        elif post.isVideo and post.videoType:
+            link_kwargs['video_type'] = post.videoType
+            
+            post_url = f"http://localhost:3000/{post.videoType}/{post.slug}/"
+
+        elif post.isNews:
+            link_kwargs['type'] = 'news'
+           
+            post_url = f"http://localhost:3000/news/{post.slug}/"
+
+        elif post.isStory:
+            link_kwargs['type'] = 'stories'
+           
+            post_url = f"http://localhost:3000/stories/{post.slug}/"
+
+      
+        message = f"Title: {post.title}\nSummary: {post.postSummary}\nLink: {post_url}\n"
+
+        send_mail(subject, message, from_email, recipient_list)
+
+     return Response({'message': 'خبرنامه با موفقیت ارسال شد'}, status=status.HTTP_200_OK)
 
 
 

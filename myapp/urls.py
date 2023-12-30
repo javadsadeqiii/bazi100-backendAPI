@@ -77,7 +77,7 @@ urlpatterns = [
     
     path('api/commentLike/<int:comment_id>/likes/',CommentLikesAPIView.as_view(), name='comment_likes_api'),
     
-    path('public-posts/<slug:slug>/', AllPostsDetailView.as_view(), name='public-posts-detail'),
+    path('bazikato-newsletter', AllPostsDetailView.as_view(), name='bazikato-newsletter'),
     
     path('api/send-newsletter/', SubscriberViewSet.as_view({'get': 'send_newsletter'}), name='send-newsletter'),
     
