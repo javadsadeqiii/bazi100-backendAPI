@@ -155,14 +155,14 @@ class albumsAdmin(admin.ModelAdmin):
 admin.site.register(albums, albumsAdmin)
 
 
-class bazi100TeamAdmin(admin.ModelAdmin):
+class bazikachoTeamAdmin(admin.ModelAdmin):
 
     list_display = ('id', 'position', 'email', 'expertise')
 
     ordering = ('id',)
 
 
-admin.site.register(bazi100Team, bazi100TeamAdmin)
+admin.site.register(bazikachoTeam, bazikachoTeamAdmin)
 
 
 class advertisementsAdmin(admin.ModelAdmin):

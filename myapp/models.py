@@ -283,7 +283,7 @@ class AllPosts(models.Model):
         help_text="خلاصه شامل دو یا سه جمله باشد", verbose_name="خلاصه")
 
     memberId = models.ForeignKey(
-        'bazi100Team', on_delete=models.CASCADE, verbose_name="آیدی نویسنده")
+        'bazikachoTeam', on_delete=models.CASCADE, verbose_name="آیدی نویسنده")
     
     commentCount = models.IntegerField(default=0, verbose_name="تعداد کامنت", blank=True)
     
@@ -435,7 +435,7 @@ class albums(models.Model):
 
 
 
-class bazi100Team(models.Model):
+class bazikachoTeam(models.Model):
     
     
     

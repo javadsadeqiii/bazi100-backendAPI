@@ -16,7 +16,7 @@ from .views import *
 router = routers.DefaultRouter()
 router.register(r'Polls', views.pollsViewSet)
 router.register(r'choice', views.choiceViewSet)
-router.register(r'bazi100Team', views.bazi100TeamViewSet)
+router.register(r'BaziKachoTeam', views.BaziKachoTeamViewSet)
 router.register(r'allPosts', views.allPostsViewSet)
 router.register(r'wallpapers', views.wallpapersViewSet)
 router.register(r'albums', views.albumsViewSet)
@@ -73,7 +73,7 @@ urlpatterns = [
 
     path('api/LikeComment/', LikeCommentAPIView.as_view(), name='like-comment'),
     
-    path('api/Bazi100Team/<username>/',Bazi100TeamByUsernameView.as_view(), name='team-member-by-username'),
+    path('api/BaziKachoTeam/<username>/',BaziKachoTeamByUsernameView.as_view(), name='team-member-by-username'),
     
     path('api/commentLike/<int:comment_id>/likes/',CommentLikesAPIView.as_view(), name='comment_likes_api'),
     

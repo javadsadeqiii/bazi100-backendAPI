@@ -224,11 +224,11 @@ class tracksSerializer(ModelSerializer):
         fields = ('__all__')
 
 
-class bazi100TeamSerializer(ModelSerializer):
+class bazikachoTeamSerializer(ModelSerializer):
 
     class Meta:
 
-        model = bazi100Team
+        model = bazikachoTeam
         fields = ('__all__')
 
 

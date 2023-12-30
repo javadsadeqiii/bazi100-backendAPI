@@ -22,7 +22,6 @@ from rest_framework import generics
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from django.conf import settings
-from django.urls import reverse
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.core.cache import cache
 from rest_framework.authentication import TokenAuthentication
@@ -115,8 +114,6 @@ class ResetPasswordView(APIView):
 
 
 
-
-
 class SubscriberViewSet(viewsets.ModelViewSet):
 
     queryset = Subscriber.objects.all()
@@ -124,15 +121,23 @@ class SubscriberViewSet(viewsets.ModelViewSet):
 
     def subscribe(self, request):
         
-        email = request.data.get('email')  
+        email = request.data.get('email') 
+        
+       
+        
         
         try:
-            subscriber = Subscriber.objects.get(email=email)
-            subscriber.save()
+            user = User.objects.get(email=email)
+            user.save()
             return Response({'message': 'شما با موفقیت در خبرنامه عضو شدید'}, status=status.HTTP_200_OK)
-       
-        except Exception as e:
-            return Response({'error': 'عضویت شما در خبرنامه ناموفق بود لطفا دوباره تلاش کنید', 'details': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except User.DoesNotExist:
+            
+            try:
+                subscriber = Subscriber.objects.get(email=email)
+                subscriber.save()
+                return Response({'message': 'شما با موفقیت در خبرنامه عضو شدید'}, status=status.HTTP_200_OK)
+            except Exception as e:
+                return Response({'error': 'عضویت شما در خبرنامه ناموفق بود لطفا دوباره تلاش کنید', 'details': str(e)}, status=status.HTTP_400_BAD_REQUEST)
             
 
 
@@ -375,17 +380,17 @@ class ContactUsAPIView(APIView):
             return JsonResponse({'error': 'خطایی در ذخیره‌سازی اطلاعات رخ داده است.'}, status=500)
 
 
-class Bazi100TeamByUsernameView(APIView):
+class BaziKachoTeamByUsernameView(APIView):
     def get(self, request, username):
-        team_member = get_object_or_404(bazi100Team, username=username)
-        serializer = bazi100TeamSerializer(team_member)
+        team_member = get_object_or_404(bazikachoTeam, username=username)
+        serializer = bazikachoTeamSerializer(team_member)
         return Response(serializer.data)
 
 
-class bazi100TeamViewSet(ModelViewSet):
+class BaziKachoTeamViewSet(ModelViewSet):
 
-    queryset = bazi100Team.objects.all()
-    serializer_class = bazi100TeamSerializer
+    queryset = bazikachoTeam.objects.all()
+    serializer_class = bazikachoTeamSerializer
     permission_classes = [AllowAny]
 
 
