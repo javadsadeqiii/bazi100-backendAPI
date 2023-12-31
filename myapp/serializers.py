@@ -6,6 +6,7 @@ from django.core.validators import validate_email
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.contrib.auth.forms import PasswordResetForm
 from rest_framework.response import Response
+from django.core.exceptions import ValidationError
 
 
 
@@ -36,31 +37,9 @@ class PasswordResetSerializer(serializers.Serializer):
 
 
 class SubscriberSerializer(serializers.ModelSerializer):
-    
-
     class Meta:
         model = Subscriber
-        fields = ('__all__')
-
-    def validate_email(self, value):
-
-        try:
-            
-            validate_email(value)
-        except DjangoValidationError:
-            
-            return Response({'error':"فرمت ایمیل نادرست است"})
-        existing_subscriber = Subscriber.objects.filter(email=value).exists()
-        existing_user = User.objects.filter(email=value).exists()
-
-        if existing_subscriber or existing_user:
-            return Response({'error':"ایمیل وارد شده وجود دارد"})
-
-        return value
-
-    def create(self, validated_data):
-        return Subscriber.objects.create(**validated_data)
-
+        fields = ('email',)
 
 
 

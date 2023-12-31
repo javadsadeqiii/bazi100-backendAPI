@@ -114,31 +114,33 @@ class ResetPasswordView(APIView):
 
 
 
-class SubscriberViewSet(viewsets.ModelViewSet):
 
+
+
+
+class SubscriberViewSet(viewsets.ModelViewSet):
     queryset = Subscriber.objects.all()
     serializer_class = SubscriberSerializer
-
+    
     def subscribe(self, request):
-        
-        email = request.data.get('email') 
-        
-       
-        
+        email = request.data.get('email')
         
         try:
-            user = User.objects.get(email=email)
-            user.save()
-            return Response({'message': 'شما با موفقیت در خبرنامه عضو شدید'}, status=status.HTTP_200_OK)
-        except User.DoesNotExist:
             
-            try:
-                subscriber = Subscriber.objects.get(email=email)
-                subscriber.save()
-                return Response({'message': 'شما با موفقیت در خبرنامه عضو شدید'}, status=status.HTTP_200_OK)
-            except Exception as e:
-                return Response({'error': 'عضویت شما در خبرنامه ناموفق بود لطفا دوباره تلاش کنید', 'details': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-            
+            validate_email(email)
+        except ValidationError as e:
+            return Response({'error': 'فرمت ایمیل وارد شده صحیح نیست', 'details': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+        subscriber = Subscriber.objects.filter(email=email).first()
+        if subscriber:
+            return Response({'message': 'شما قبلا عضو خبرنامه شده اید'}, status=status.HTTP_200_OK)
+        
+        new_subscriber = Subscriber(email=email)
+        new_subscriber.save()
+        
+        return Response({'message': 'شما با موفقیت در خبرنامه عضو شدید'}, status=status.HTTP_201_CREATED)
+        
+
 
 
         

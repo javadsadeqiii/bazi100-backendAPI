@@ -16,8 +16,6 @@ en_formats.DATETIME_FORMAT = 'Y-m-d'
 
 
 
-
-
 class Subscriber(models.Model):
     
     email = models.EmailField(unique=True)
@@ -428,10 +426,6 @@ class albums(models.Model):
 
     def __str__(self):
         return self.title
-
-
-
-
 
 
 
