@@ -34,23 +34,6 @@ DATETIME_FORMAT = 'Y-m-d H:i:s'
 
 
 
-@api_view(['GET', 'POST', 'PUT'])
-
-def restricted_endpoint(request):
-    
-    token = request.headers.get('Authorization')
-
-    
-    fixed_token = "xEvHRRA-27abEXrHsG2Tfg"
-
-    
-    if token == f"Bearer {fixed_token}":
-        
-        if request.method in ['GET', 'POST', 'PUT']:
-            return Response({'message': 'شما اجازه دسترسی دارید'})
-    else:
-        return Response({'error': 'شما اجازه دسترسی ندارید'}, status=403)
-
 
 
 

@@ -91,7 +91,7 @@ urlpatterns = [
     
     path('api/resetpasswordconfirm/', ResetPasswordView.as_view(), name='reset_password_confirm'),
     
-    path('api/restricted/', restricted_endpoint, name='restricted_endpoint')
+  
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 

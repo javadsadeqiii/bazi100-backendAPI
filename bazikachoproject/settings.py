@@ -48,13 +48,17 @@ INSTALLED_APPS = [
     'django_jsonform',
     'ckeditor',
     'rest_framework',
-    
+]
    
     
 
-
-
+MIDDLEWARE = [
+    # ...
+   'myapp.middlewares.TokenMiddleware',
+    # ...
 ]
+
+
 
 
 REST_FRAMEWORK = {
