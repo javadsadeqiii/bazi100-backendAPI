@@ -25,7 +25,7 @@ from django.conf import settings
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.core.cache import cache
 from django.contrib.auth.models import User
-
+from .authentication import TokenAuthentication 
 
 
 
@@ -42,7 +42,8 @@ DATETIME_FORMAT = 'Y-m-d H:i:s'
 
 class ResetPasswordView(APIView):
     
-
+    authentication_classes = [TokenAuthentication] 
+    
     def invalidate_token(self, user, token):
       
         if not hasattr(self, 'used_tokens'):
@@ -125,6 +126,8 @@ class ResetPasswordView(APIView):
 
 
 class SubscriberViewSet(viewsets.ModelViewSet):
+    
+    authentication_classes = [TokenAuthentication] 
     queryset = Subscriber.objects.all()
     serializer_class = SubscriberSerializer
         
