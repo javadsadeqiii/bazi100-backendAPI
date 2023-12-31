@@ -143,7 +143,7 @@ class SubscriberViewSet(viewsets.ModelViewSet):
         
         subscriber = Subscriber.objects.filter(email=email).first()
         if subscriber:
-            return Response({'message': 'شما قبلا عضو خبرنامه شده اید'}, status=status.HTTP_200_OK)
+            return Response({'error': 'شما قبلا عضو خبرنامه شده اید'}, status=status.HTTP_200_OK)
         
         new_subscriber = Subscriber(email=email)
         new_subscriber.save()
