@@ -10,9 +10,8 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 
 
+
 en_formats.DATETIME_FORMAT = 'Y-m-d'
-
-
 
 
 
@@ -27,6 +26,7 @@ class Subscriber(models.Model):
     class Meta:
         verbose_name = "خبرنامه"
         verbose_name_plural = "خبرنامه"
+
 
 
 

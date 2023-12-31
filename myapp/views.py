@@ -24,13 +24,39 @@ from rest_framework.decorators import action
 from django.conf import settings
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.core.cache import cache
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import BasePermission
+from flask import Flask, request, jsonify
+from django.contrib.auth.models import User
+
 
 
 
 DATE_FORMAT = 'Y-m-d'
 DATETIME_FORMAT = 'Y-m-d H:i:s'
+
+
+
+@api_view(['GET', 'POST', 'PUT'])
+#@permission_classes([IsAuthenticated])
+
+
+def restricted_endpoint(request):
+    
+    token = request.headers.get('Authorization')
+
+    
+    fixed_token = "xEvHRRA-27abEXrHsG2Tfg"
+
+    
+    if token == f"Bearer {fixed_token}":
+        
+        if request.method in ['GET', 'POST', 'PUT']:
+            return Response({'message': 'شما اجازه دسترسی دارید'})
+    else:
+        return Response({'error': 'شما اجازه دسترسی ندارید'}, status=403)
+
+
+
 
 
 
@@ -142,7 +168,6 @@ class SubscriberViewSet(viewsets.ModelViewSet):
         
 
 
-
         
     def unsubscribe(self, request):
         email = request.data.get('email')  
@@ -171,7 +196,7 @@ class SubscriberViewSet(viewsets.ModelViewSet):
 
      latest_posts = AllPosts.objects.all().order_by('-date')[:3]
 
-     subject = 'تازه ترین مطالب سایت بازینکس'
+     subject = 'تازه ترین مطالب سایت بازیکاچو'
      from_email = settings.EMAIL_HOST_USER
      recipient_list = []
        

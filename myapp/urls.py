@@ -13,6 +13,7 @@ from .views import ContactUsAPIView
 from .views import *
 
 
+
 router = routers.DefaultRouter()
 router.register(r'Polls', views.pollsViewSet)
 router.register(r'choice', views.choiceViewSet)
@@ -23,6 +24,7 @@ router.register(r'albums', views.albumsViewSet)
 router.register(r'advertisements', views.advertisementsViewSet)
 router.register(r'tracks', views.tracksViewSet)
 router.register(r'subscribers', SubscriberViewSet, basename='subscribers')
+
 
 
 urlpatterns = [
@@ -87,8 +89,9 @@ urlpatterns = [
     
     path('api/resetpassword/', ResetPasswordView.as_view(), name='reset_password'), #اندپوینت پست اول
     
-    path('api/resetpasswordconfirm/', ResetPasswordView.as_view(), name='reset_password_confirm'),  #اندپوینت پست دوم
+    path('api/resetpasswordconfirm/', ResetPasswordView.as_view(), name='reset_password_confirm'),
     
+    path('api/restricted/', restricted_endpoint, name='restricted_endpoint')
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 
