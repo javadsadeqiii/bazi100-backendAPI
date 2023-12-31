@@ -24,8 +24,6 @@ from rest_framework.decorators import action
 from django.conf import settings
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.core.cache import cache
-from rest_framework.permissions import BasePermission
-from flask import Flask, request, jsonify
 from django.contrib.auth.models import User
 
 
@@ -37,8 +35,6 @@ DATETIME_FORMAT = 'Y-m-d H:i:s'
 
 
 @api_view(['GET', 'POST', 'PUT'])
-#@permission_classes([IsAuthenticated])
-
 
 def restricted_endpoint(request):
     
@@ -62,6 +58,7 @@ def restricted_endpoint(request):
 
 
 class ResetPasswordView(APIView):
+    
 
     def invalidate_token(self, user, token):
       
@@ -147,6 +144,7 @@ class ResetPasswordView(APIView):
 class SubscriberViewSet(viewsets.ModelViewSet):
     queryset = Subscriber.objects.all()
     serializer_class = SubscriberSerializer
+        
     
     def subscribe(self, request):
         email = request.data.get('email')
