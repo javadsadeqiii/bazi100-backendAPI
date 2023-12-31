@@ -25,6 +25,9 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
 
 
 
+
+
+
 class PasswordResetSerializer(serializers.Serializer):
     email = serializers.EmailField()
 
@@ -77,7 +80,6 @@ class platformSeriallizer(ModelSerializer):
     class Meta:
         model = platform
         fields = ('__all__')
-
 
 
 

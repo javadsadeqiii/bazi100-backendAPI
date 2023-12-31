@@ -124,22 +124,18 @@ class ResetPasswordView(APIView):
 
 
 
-
-
-
-
 class SubscriberViewSet(viewsets.ModelViewSet):
     
     authentication_classes = [TokenAuthentication] 
     queryset = Subscriber.objects.all()
     serializer_class = SubscriberSerializer
         
-    
+          
+    @action(detail=False, methods=['post'])
     def subscribe(self, request):
         email = request.data.get('email')
         
         try:
-            
             validate_email(email)
         except ValidationError:
             return Response({'error': 'ایمیل وارد شده معتبر نیست'}, status=status.HTTP_400_BAD_REQUEST)
@@ -153,9 +149,7 @@ class SubscriberViewSet(viewsets.ModelViewSet):
         
         return Response({'message': 'شما با موفقیت در خبرنامه عضو شدید'}, status=status.HTTP_201_CREATED)
         
-
-
-        
+    @action(detail=False, methods=['post'])
     def unsubscribe(self, request):
         email = request.data.get('email')  
         
