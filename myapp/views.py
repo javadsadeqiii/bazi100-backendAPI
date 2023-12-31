@@ -135,11 +135,8 @@ class SubscriberViewSet(viewsets.ModelViewSet):
     def subscribe(self, request):
         email = request.data.get('email')
         
-        try:
-            
-            validate_email(email)
-        except ValidationError as e:
-            return Response({'error': 'فرمت ایمیل وارد شده صحیح نیست', 'details': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        if validate_email(email):
+            return Response({'error': 'فرمت ایمیل وارد شده صحیح نیست'}, status=status.HTTP_400_BAD_REQUEST)
         
         subscriber = Subscriber.objects.filter(email=email).first()
         if subscriber:
