@@ -430,7 +430,7 @@ class BaziKachoTeamView(APIView):
 
     queryset = bazikachoTeam.objects.all()
     serializer_class = bazikachoTeamSerializer
-    permission_classes = [AllowAny]
+    
     
     
     def get(self, request):
@@ -783,12 +783,24 @@ class PollsView(APIView):
     queryset = Polls.objects.all()
     serializer_class = pollsSerializer
     authentication_classes = [TokenAuthentication] 
+    
+    def get(self, request):
+        polls = Polls.objects.all()
+        serializer = pollsSerializer(polls, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ChoiceView(APIView):
     queryset = Choice.objects.all()
     serializer_class = ChoiceSerializer
     authentication_classes = [TokenAuthentication] 
+    
+    def get(self, request):
+        choices = Choice.objects.all()
+        serializer = ChoiceSerializer(choices, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    
 
 
 class VoteView(APIView):
@@ -840,6 +852,12 @@ class AllPostsView(APIView):
     authentication_classes = [TokenAuthentication] 
     queryset = AllPosts.objects.all()
     serializer_class = AllPostsSerializer
+    
+    
+    def get(self, request):
+        all_posts = AllPosts.objects.all()
+        serializer = AllPostsSerializer(all_posts, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
    
 
 
@@ -849,6 +867,12 @@ class WallpapersView(APIView):
     queryset = wallpapers.objects.all()
     serializer_class = wallpapersSerializer
     authentication_classes = [TokenAuthentication] 
+    
+    
+    def get(self, request):
+        wallpapers_list = wallpapers.objects.all()
+        serializer = wallpapersSerializer(wallpapers_list, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class AlbumsDetailView(generics.RetrieveAPIView):
@@ -863,6 +887,11 @@ class AlbumsView(APIView):
     queryset = albums.objects.all()
     serializer_class = albumsSerializer
     authentication_classes = [TokenAuthentication] 
+    
+    def get(self, request):
+        albums_list = albums.objects.all()
+        serializer = albumsSerializer(albums_list, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class TracksView(APIView):
@@ -870,6 +899,11 @@ class TracksView(APIView):
     queryset = tracks.objects.all()
     serializer_class = tracksSerializer
     authentication_classes = [TokenAuthentication] 
+    
+    def get(self, request):
+        tracks_list = tracks.objects.all()
+        serializer = tracksSerializer(tracks_list, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class AdvertisementsView(APIView):
@@ -877,3 +911,9 @@ class AdvertisementsView(APIView):
     queryset = advertisements.objects.all()
     serializer_class = advertisementsSerializer
     authentication_classes = [TokenAuthentication] 
+    
+    
+    def get(self, request):
+        advertisements_list = advertisements.objects.all()
+        serializer = advertisementsSerializer(advertisements_list, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
