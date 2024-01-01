@@ -934,6 +934,6 @@ class AdvertisementsView(APIView):
     
     
     def get(self, request):
-        advertisements_list = advertisements.objects.all()
-        serializer = advertisementsSerializer(advertisements_list, many=True)
+        advertisements_list = Advertisements.objects.all()
+        serializer = AdvertisementsSerializer(advertisements_list, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
