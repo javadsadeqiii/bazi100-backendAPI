@@ -915,13 +915,12 @@ class TracksView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+
+
 class TracksDetailView(APIView):
-    
-   # authentication_classes = [TokenAuthentication] 
     def get(self, request, track_id):
         track = get_object_or_404(tracks, pk=track_id)
-        track_detail = tracks.objects.filter(track=track)
-        serializer = tracksSerializer(track_detail, many=True)
+        serializer = tracksSerializer(track)
         return Response(serializer.data)
 
     
