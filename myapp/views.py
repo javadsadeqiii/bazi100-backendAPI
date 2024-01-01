@@ -781,6 +781,8 @@ class ReplyLikesDetailAPIView(APIView):
 
 
 
+
+
 class PollsView(APIView):
     queryset = Polls.objects.all()
     serializer_class = pollsSerializer
@@ -899,6 +901,8 @@ class AlbumsView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+
+
 class TracksView(APIView):
 
     queryset = tracks.objects.all()
@@ -910,6 +914,17 @@ class TracksView(APIView):
         serializer = tracksSerializer(tracks_list, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
+class TracksDetailView(APIView):
+    
+    authentication_classes = [TokenAuthentication] 
+    def get(self, request, track_id):
+        track = get_object_or_404(tracks, pk=track_id)
+        track_detail = tracks.objects.filter(track=track)
+        serializer = tracksSerializer(track_detail, many=True)
+        return Response(serializer.data)
+
+    
 
 class AdvertisementsView(APIView):
 

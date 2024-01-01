@@ -39,6 +39,8 @@ urlpatterns = [
     
     path('api/tracks/', TracksView.as_view(), name='tracks'),
     
+    path('api/tracks/<int:track_id>/', TracksDetailView.as_view(), name='track-detail'),
+    
     path('api/advertisements/', AdvertisementsView.as_view(), name='advertisements'),
     
     path('api/send-newsletter/', SendNewsLetterViewSet.as_view({'get': 'send_newsletter'}), name='send_newsletter'),
@@ -81,9 +83,9 @@ urlpatterns = [
 
     path('api/posts/<int:post_id>/comments/',PostCommentsView.as_view(), name='post-comments'),
 
-    path('api/AllPosts/<slug:slug>/',AllPostsDetailView.as_view(), name='allposts-detail'),
+    path('api/allPosts/<slug:slug>/',AllPostsDetailView.as_view(), name='allposts-detail'),
 
-    path('api/Albums/<slug:slug>/',AlbumsDetailView.as_view(), name='albums-detail'),
+    path('api/albums/<slug:slug>/',AlbumsDetailView.as_view(), name='albums-detail'),
 
     path('api/LikeComment/', LikeCommentAPIView.as_view(), name='like-comment'),
     
