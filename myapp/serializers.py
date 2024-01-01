@@ -212,9 +212,9 @@ class bazikachoTeamSerializer(ModelSerializer):
         fields = ('__all__')
 
 
-class advertisementsSerializer(ModelSerializer):
+class AdvertisementsSerializer(ModelSerializer):
 
     class Meta:
 
-        model = advertisements
+        model = Advertisements
         fields = ('__all__')

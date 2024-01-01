@@ -41,7 +41,7 @@ urlpatterns = [
     
     path('api/tracks/<int:track_id>/', TracksDetailView.as_view(), name='track-detail'),
     
-    path('api/advertisements/', AdvertisementsView.as_view(), name='advertisements'),
+    path('api/Advertisements/', AdvertisementsView.as_view(), name='advertisements'),
     
     path('api/send-newsletter/', SendNewsLetterViewSet.as_view({'get': 'send_newsletter'}), name='send_newsletter'),
     

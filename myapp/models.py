@@ -499,7 +499,7 @@ class bazikachoTeam(models.Model):
 
 
 
-class advertisements(models.Model):
+class Advertisements(models.Model):
 
 
     TYPE_CHOICES = (

@@ -917,7 +917,7 @@ class TracksView(APIView):
 
 class TracksDetailView(APIView):
     
-    authentication_classes = [TokenAuthentication] 
+   # authentication_classes = [TokenAuthentication] 
     def get(self, request, track_id):
         track = get_object_or_404(tracks, pk=track_id)
         track_detail = tracks.objects.filter(track=track)
@@ -928,8 +928,8 @@ class TracksDetailView(APIView):
 
 class AdvertisementsView(APIView):
 
-    queryset = advertisements.objects.all()
-    serializer_class = advertisementsSerializer
+    queryset = Advertisements.objects.all()
+    serializer_class = AdvertisementsSerializer
     authentication_classes = [TokenAuthentication] 
     
     

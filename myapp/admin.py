@@ -165,7 +165,7 @@ class bazikachoTeamAdmin(admin.ModelAdmin):
 admin.site.register(bazikachoTeam, bazikachoTeamAdmin)
 
 
-class advertisementsAdmin(admin.ModelAdmin):
+class AdvertisementsAdmin(admin.ModelAdmin):
 
     list_display = ('adType', 'brandName', 'brandLink',
                     'startsDate', 'endsDate')
@@ -175,4 +175,4 @@ class advertisementsAdmin(admin.ModelAdmin):
     ordering = ('endsDate',)
 
 
-admin.site.register(advertisements, advertisementsAdmin)
+admin.site.register(Advertisements, AdvertisementsAdmin)
