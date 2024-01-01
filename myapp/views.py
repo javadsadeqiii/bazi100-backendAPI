@@ -127,7 +127,7 @@ class ResetPasswordView(APIView):
 
 class SubscriberView(APIView):
     
-   # authentication_classes = [TokenAuthentication] 
+    authentication_classes = [TokenAuthentication] 
     queryset = Subscriber.objects.all()
     serializer_class = SubscriberSerializer
     
@@ -160,7 +160,7 @@ class SubscriberView(APIView):
         
 class UnsubscriberView(APIView):
    
-   # authentication_classes = [TokenAuthentication] 
+    authentication_classes = [TokenAuthentication] 
     queryset = Subscriber.objects.all()
     serializer_class = SubscriberSerializer
 
@@ -189,6 +189,8 @@ class UnsubscriberView(APIView):
 
 
 class  SendNewsLetterViewSet(viewsets.ViewSet):
+    
+    authentication_classes = [TokenAuthentication] 
 
     @action(detail=False, methods=['get'])
     def send_newsletter(self, request):
@@ -248,6 +250,8 @@ class  SendNewsLetterViewSet(viewsets.ViewSet):
 
 class SignUpView(APIView):
     
+    authentication_classes = [TokenAuthentication] 
+    
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
@@ -297,6 +301,9 @@ class SignUpView(APIView):
 
 
 class LoginView(APIView):
+    
+    authentication_classes = [TokenAuthentication] 
+    
     def post(self, request):
         email = request.data.get('email')
         password = request.data.get('password')
@@ -324,9 +331,9 @@ class LoginView(APIView):
 
 
 class ChangeUsernameView(APIView):
-
-    permission_classes = [AllowAny]
-
+    
+    authentication_classes = [TokenAuthentication] 
+    
     def put(self, request):
         email = request.data.get('email')
         newUsername = request.data.get('newUsername')
@@ -347,7 +354,7 @@ class ChangeUsernameView(APIView):
 
 class ChangePasswordView(APIView):
 
-    permission_classes = [AllowAny]
+    authentication_classes = [TokenAuthentication] 
 
     def put(self, request):
         oldPassword = request.data.get('oldPassword')
@@ -378,7 +385,8 @@ class ChangePasswordView(APIView):
 
 
 class ContactUsAPIView(APIView):
-    permission_classes = [AllowAny]
+    
+    authentication_classes = [TokenAuthentication] 
 
     def post(self, request):
         fullName = request.data.get('fullName')
@@ -407,6 +415,8 @@ class ContactUsAPIView(APIView):
 
 
 class BaziKachoTeamByUsernameView(APIView):
+    
+    authentication_classes = [TokenAuthentication] 
     def get(self, request, username):
         team_member = get_object_or_404(bazikachoTeam, username=username)
         serializer = bazikachoTeamSerializer(team_member)
@@ -414,6 +424,8 @@ class BaziKachoTeamByUsernameView(APIView):
 
 
 class BaziKachoTeamViewSet(ModelViewSet):
+    
+    authentication_classes = [TokenAuthentication] 
 
     queryset = bazikachoTeam.objects.all()
     serializer_class = bazikachoTeamSerializer
@@ -421,6 +433,8 @@ class BaziKachoTeamViewSet(ModelViewSet):
 
 
 class PostCommentsView(APIView):
+    
+    authentication_classes = [TokenAuthentication] 
     def get(self, request, post_id):
         post = get_object_or_404(AllPosts, pk=post_id)
         post_comments = Comments.objects.filter(post=post)
@@ -429,6 +443,8 @@ class PostCommentsView(APIView):
 
 
 class commentAPIView(APIView):
+    
+    authentication_classes = [TokenAuthentication] 
 
     queryset = Comments.objects.all()
     serializer_class = CommentsSerializer
@@ -473,6 +489,8 @@ class commentAPIView(APIView):
 
 
 class LikeCommentAPIView(APIView):
+    
+    authentication_classes = [TokenAuthentication] 
 
     queryset = CommentLike.objects.all()
     serializer_class = CommentLikeSerializer
@@ -517,7 +535,13 @@ class LikeCommentAPIView(APIView):
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+
+
+
 class CommentLikesAPIView(APIView):
+    
+    authentication_classes = [TokenAuthentication] 
+    
     def get(self, request, comment_id):
         # ابتدا همه‌ی لایک‌های مربوط به آیدی کامنت را دریافت می‌کنیم
         comment_likes = CommentLikeHistory.objects.filter(
@@ -538,9 +562,12 @@ class CommentLikesAPIView(APIView):
         return JsonResponse({'comment_likes': likes_info})
 
 
+
+
+
 class CommentDetailAPIView(APIView):
     serializer_class = CommentsSerializer
-    permission_classes = [AllowAny]
+    authentication_classes = [TokenAuthentication] 
 
     def get(self, request, pk):
         try:
@@ -551,8 +578,11 @@ class CommentDetailAPIView(APIView):
             return Response({'error': 'کامنت یافت نشد'}, status=status.HTTP_404_NOT_FOUND)
 
 
+
+
+
 class UserDetailsAPIView(APIView):
-    permission_classes = [AllowAny]
+    authentication_classes = [TokenAuthentication] 
 
     def get(self, request, user_id):
         try:
@@ -570,7 +600,11 @@ class UserDetailsAPIView(APIView):
             return Response({'error': 'کاربر مورد نظر یافت نشد'}, status=status.HTTP_404_NOT_FOUND)
 
 
+
+
 class PostReplyView(APIView):
+    
+    authentication_classes = [TokenAuthentication] 
     def get(self, request, post_id):
         post = get_object_or_404(AllPosts, pk=post_id)
         post_replies = Reply.objects.filter(post=post)
@@ -578,9 +612,11 @@ class PostReplyView(APIView):
         return Response(serializer.data)
 
 
+
+
 class CommentRepliesAPIView(APIView):
     serializer_class = ReplySerializer
-    permission_classes = [AllowAny]
+    authentication_classes = [TokenAuthentication] 
 
     def get(self, request, comment_id):
         # Filter main replies (where parentReplyId is None)
@@ -590,10 +626,12 @@ class CommentRepliesAPIView(APIView):
         return Response(serializer.data)
 
 
+
+
 class RetrieveChildRepliesAPIView(APIView):
     queryset = Reply.objects.all()
     serializer_class = ReplySerializer
-    permission_classes = [AllowAny]
+    authentication_classes = [TokenAuthentication] 
 
     def get(self, request, reply_id):
         try:
@@ -609,7 +647,7 @@ class ReplyAPIView(APIView):
 
     queryset = Reply.objects.all()
     serializer_class = ReplySerializer
-    permission_classes = [AllowAny]
+    authentication_classes = [TokenAuthentication] 
 
     forbidden_words = ["جمهوری اسلامی", "ولایت فقیه", "خمینی", "خامنه ای", "کیر", "کص", "کون", "حرومزاده", "کیری", "کسشر", "فاک", "گاییدم", "مادرتو", "اسکل", "کصخل",
                        "fuck", "dick", "pussy", "wtf", "خفه شو", "مادر جنده", "کسخل", "کونی", "سکس", "sex", "porn", "پورن", "جنده", "گی", "ترنس",
@@ -671,7 +709,7 @@ class ReplyLikeAPIView(APIView):
 
     queryset = ReplyLike.objects.all()
     serializer_class = ReplyLikeSerializer
-    permission_classes = [AllowAny]
+    authentication_classes = [TokenAuthentication] 
 
     def get(self, request):
         likes = ReplyLike.objects.all()
@@ -713,6 +751,7 @@ class ReplyLikeAPIView(APIView):
 
 
 class ReplyLikesDetailAPIView(APIView):
+    authentication_classes = [TokenAuthentication] 
     def get(self, request, reply_id):
         # ابتدا همه‌ی لایک‌های مربوط به آیدی کامنت را دریافت می‌کنیم
         reply_likes = ReplyLikeHistory.objects.filter(
@@ -736,19 +775,19 @@ class ReplyLikesDetailAPIView(APIView):
 class pollsViewSet(ModelViewSet):
     queryset = Polls.objects.all()
     serializer_class = pollsSerializer
-    permission_classes = [AllowAny]
+    authentication_classes = [TokenAuthentication] 
 
 
 class choiceViewSet(ModelViewSet):
     queryset = Choice.objects.all()
     serializer_class = ChoiceSerializer
-    permission_classes = [AllowAny]
+    authentication_classes = [TokenAuthentication] 
 
 
 class voteViewSet(ModelViewSet):
     queryset = Vote.objects.all()
     serializer_class = VoteSerializer
-    permission_classes = [AllowAny]
+    authentication_classes = [TokenAuthentication] 
 
 
 @api_view(['POST'])
@@ -778,7 +817,10 @@ def voteChoice(request):
     return Response({'message': 'انتخاب شما با موفقیت ثبت شد'}, status=status.HTTP_200_OK)
 
 
+
+
 class AllPostsDetailView(generics.RetrieveAPIView):
+    authentication_classes = [TokenAuthentication] 
     queryset = AllPosts.objects.all()
     serializer_class = AllPostsSerializer
     lookup_field = 'slug'
@@ -787,7 +829,8 @@ class AllPostsDetailView(generics.RetrieveAPIView):
 
 
 class allPostsViewSet(ModelViewSet):
-
+    
+    authentication_classes = [TokenAuthentication] 
     queryset = AllPosts.objects.all()
     serializer_class = AllPostsSerializer
     permission_classes = [AllowAny]
@@ -798,10 +841,11 @@ class wallpapersViewSet(ModelViewSet):
 
     queryset = wallpapers.objects.all()
     serializer_class = wallpapersSerializer
-    permission_classes = [AllowAny]
+    authentication_classes = [TokenAuthentication] 
 
 
 class AlbumsDetailView(generics.RetrieveAPIView):
+    authentication_classes = [TokenAuthentication] 
     queryset = albums.objects.all()
     serializer_class = albumsSerializer
     lookup_field = 'slug'
@@ -811,18 +855,18 @@ class albumsViewSet(ModelViewSet):
 
     queryset = albums.objects.all()
     serializer_class = albumsSerializer
-    permission_classes = [AllowAny]
+    authentication_classes = [TokenAuthentication] 
 
 
 class tracksViewSet(ModelViewSet):
 
     queryset = tracks.objects.all()
     serializer_class = tracksSerializer
-    permission_classes = [AllowAny]
+    authentication_classes = [TokenAuthentication] 
 
 
 class advertisementsViewSet(ModelViewSet):
 
     queryset = advertisements.objects.all()
     serializer_class = advertisementsSerializer
-    permission_classes = [AllowAny]
+    authentication_classes = [TokenAuthentication] 

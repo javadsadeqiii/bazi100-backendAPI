@@ -381,7 +381,11 @@ class tracks(models.Model):
         return self.title
 
 
+
+
+
 class albums(models.Model):
+    
 
     title = models.CharField(max_length=240, verbose_name="عنوان")
 
@@ -426,9 +430,8 @@ class albums(models.Model):
 
 
 
+
 class bazikachoTeam(models.Model):
-    
-    
     
 
     POSITION_CHOICE = (
@@ -476,15 +479,20 @@ class bazikachoTeam(models.Model):
 
     class Meta:
 
-        verbose_name = "تیم بازی 100"
+        verbose_name = "تیم بازیکاچو"
 
-        verbose_name_plural = "تیم بازی 100"
+        verbose_name_plural = "تیم بازیکاچو"
 
     def __str__(self):
         return self.memberName
 
 
+
+
+
+
 class advertisements(models.Model):
+
 
     TYPE_CHOICES = (
 
@@ -526,6 +534,9 @@ class advertisements(models.Model):
 
     def __str__(self):
         return self.brandName
+
+
+
 
 
 class Polls(models.Model):
