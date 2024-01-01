@@ -206,6 +206,8 @@ EMAIL_USE_TLS = True  # Set to True for most email providers
 # DATETIME_FORMAT = 'Y-m-d H:i:s'
 
 
+LANGUAGE_CODE = 'fa' 
+
 DATE_FORMAT = '%Y-%m-%d'
 DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 

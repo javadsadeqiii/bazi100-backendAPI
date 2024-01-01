@@ -124,53 +124,71 @@ class ResetPasswordView(APIView):
 
 
 
-class SubscriberViewSet(viewsets.ModelViewSet):
+
+class SubscriberView(APIView):
     
-    authentication_classes = [TokenAuthentication] 
+   # authentication_classes = [TokenAuthentication] 
     queryset = Subscriber.objects.all()
     serializer_class = SubscriberSerializer
+    
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
-          
-    @action(detail=False, methods=['post'])
-    def subscribe(self, request):
+        
+        
+    def post(self, request):
+     email = request.data.get('email')
+
+     try:
+         validate_email(email)
+         subscriber = Subscriber.objects.get(email=email)
+         return Response({'error': 'ایمیل شما قبلا در خبرنامه ثبت شده'}, status=status.HTTP_400_BAD_REQUEST)
+     except ValidationError:
+        return Response({'error': 'ایمیل وارد شده معتبر نیست'}, status=status.HTTP_400_BAD_REQUEST)
+     except Subscriber.DoesNotExist:
+        subscriber = Subscriber(email=email)
+        subscriber.save()
+        return Response({'message': 'عضویت شما در خبرنامه با موفقیت ثبت شد'}, status=status.HTTP_201_CREATED)
+     except Exception as e:
+        return Response({'error': 'عملیات ثبت عضویت خبرنامه ناموفق بود', 'details': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+     
+        
+class UnsubscriberView(APIView):
+   
+   # authentication_classes = [TokenAuthentication] 
+    queryset = Subscriber.objects.all()
+    serializer_class = SubscriberSerializer
+
+    def post(self, request):
         email = request.data.get('email')
-        
+
         try:
             validate_email(email)
-        except ValidationError:
-            return Response({'error': 'ایمیل وارد شده معتبر نیست'}, status=status.HTTP_400_BAD_REQUEST)
-        
-        subscriber = Subscriber.objects.filter(email=email).first()
-        if subscriber:
-            return Response({'error': 'شما قبلا عضو خبرنامه شده اید'}, status=status.HTTP_200_OK)
-        
-        new_subscriber = Subscriber(email=email)
-        new_subscriber.save()
-        
-        return Response({'message': 'شما با موفقیت در خبرنامه عضو شدید'}, status=status.HTTP_201_CREATED)
-        
-    @action(detail=False, methods=['post'])
-    def unsubscribe(self, request):
-        email = request.data.get('email')  
-        
-        try:
             subscriber = Subscriber.objects.get(email=email)
             subscriber.delete()
-            return Response({'message': 'عضویت شما در خبرنامه با موفقیت لغو شد'}, status=status.HTTP_200_OK)
+            return Response({'message': 'عضویت شما درخبرنامه با موفقیت لغو شد'}, status=status.HTTP_200_OK)
         except Subscriber.DoesNotExist:
-            return Response({'error': 'کاربری با این ایمیل پیدا نشد'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'کاربری با این ایمیل درخبرنامه یافت نشد'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            return Response({'error': 'عملیات لغو عضویت خبرنامه ناموفق بود', 'details': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'عملیات لغو عضویت درخبرنامه ناموفق بود'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 
 
-    @action(detail=False, methods=['post'])
-    def subscribe(self, request):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
+  #  @action(detail=False, methods=['post'])
+   # def subscribe(self, request):
+    #    serializer = self.get_serializer(data=request.data)
+    #    serializer.is_valid(raise_exception=True)
+     #   serializer.save()
+     #   return Response(serializer.data)
+
+
+class  SendNewsLetterViewSet(viewsets.ViewSet):
 
     @action(detail=False, methods=['get'])
     def send_newsletter(self, request):

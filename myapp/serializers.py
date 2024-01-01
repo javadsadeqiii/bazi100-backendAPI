@@ -42,7 +42,7 @@ class PasswordResetSerializer(serializers.Serializer):
 class SubscriberSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subscriber
-        fields = ('email',)
+        fields = ('__all__')
 
 
 

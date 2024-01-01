@@ -23,12 +23,13 @@ router.register(r'wallpapers', views.wallpapersViewSet)
 router.register(r'albums', views.albumsViewSet)
 router.register(r'advertisements', views.advertisementsViewSet)
 router.register(r'tracks', views.tracksViewSet)
-router.register(r'subscribers', SubscriberViewSet, basename='subscribers')
+#router.register(r'subscribers', SubscriberView, basename='subscribers')
 
 
 
 urlpatterns = [
-    path('api/send-emails/', SubscriberViewSet.as_view({'get': 'send_newsletter'}), name='send_emails'),
+    
+   path('api/send-newsletter/', SendNewsLetterViewSet.as_view({'get': 'send_newsletter'}), name='send_newsletter'),
     
     path('admin/', admin.site.urls),
     
@@ -47,7 +48,6 @@ urlpatterns = [
     path('api/user/<int:user_id>/', UserDetailsAPIView.as_view(), name='user-details'),
     
     path('ckeditor/', include('ckeditor_uploader.urls')),
-    
     
     path('api/vote/', views.voteChoice, name='voteChoice'),
     
@@ -81,11 +81,9 @@ urlpatterns = [
     
     path('bazikacho-newsletter', AllPostsDetailView.as_view(), name='bazikachto-newsletter'),
     
-    path('api/send-newsletter/', SubscriberViewSet.as_view({'get': 'send_newsletter'}), name='send-newsletter'),
+    path('api/subscribenewsletter/', SubscriberView.as_view(), name='subscribe'),
     
-    path('api/subscribeletter/',SubscriberViewSet.as_view({'post': 'subscribe'}), name='subscribe'),
-    
-    path('api/unsubscribeletter/', SubscriberViewSet.as_view({'post': 'unsubscribe'}), name='unsubscribe'),
+    path('api/unsubscribenewsletter/', UnsubscriberView.as_view(), name='unsubscribe'),
     
     path('api/resetpassword/', ResetPasswordView.as_view(), name='reset_password'), #اندپوینت پست اول
     

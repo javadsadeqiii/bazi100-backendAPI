@@ -15,21 +15,18 @@ en_formats.DATETIME_FORMAT = 'Y-m-d'
 
 
 
-class Subscriber(models.Model):
-    
-    email = models.EmailField(unique=True)
-    
 
+
+
+class Subscriber(models.Model):
+    email = models.CharField(max_length=50)
+    
     def __str__(self):
         return self.email
 
     class Meta:
         verbose_name = "خبرنامه"
         verbose_name_plural = "خبرنامه"
-
-
-
-
 
 
 
