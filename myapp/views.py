@@ -431,6 +431,12 @@ class BaziKachoTeamView(APIView):
     queryset = bazikachoTeam.objects.all()
     serializer_class = bazikachoTeamSerializer
     permission_classes = [AllowAny]
+    
+    
+    def get(self, request):
+        bazi_kacho_team = bazikachoTeam.objects.all()
+        serializer = bazikachoTeamSerializer(bazi_kacho_team, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class PostCommentsView(APIView):
