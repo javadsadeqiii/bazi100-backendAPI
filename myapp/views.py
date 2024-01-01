@@ -29,11 +29,9 @@ from .authentication import TokenAuthentication
 
 
 
+
 DATE_FORMAT = 'Y-m-d'
 DATETIME_FORMAT = 'Y-m-d H:i:s'
-
-
-
 
 
 
@@ -180,12 +178,6 @@ class UnsubscriberView(APIView):
 
 
 
-  #  @action(detail=False, methods=['post'])
-   # def subscribe(self, request):
-    #    serializer = self.get_serializer(data=request.data)
-    #    serializer.is_valid(raise_exception=True)
-     #   serializer.save()
-     #   return Response(serializer.data)
 
 
 class  SendNewsLetterViewSet(viewsets.ViewSet):
@@ -806,6 +798,14 @@ class ChoiceView(APIView):
         choices = Choice.objects.all()
         serializer = ChoiceSerializer(choices, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    
+    
+class ChoiceDetailView(APIView):
+    def get(self, request, choice_id):
+        choice = get_object_or_404(Choice, pk=choice_id)
+        serializer = ChoiceSerializer(choice)
+        return Response(serializer.data)
     
     
 

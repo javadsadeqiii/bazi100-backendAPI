@@ -65,6 +65,8 @@ urlpatterns = [
     
     path('api/choice/', ChoiceView.as_view(), name='choices'),
     
+    path('api/choice/<int:choice_id>/', ChoiceDetailView.as_view(), name='choice-detail'),
+    
     path('api/comment/', commentAPIView.as_view(), name='comment'),
     
     path('api/comment/<int:pk>/',CommentDetailAPIView.as_view(), name='comment-detail'),

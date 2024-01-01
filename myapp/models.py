@@ -582,6 +582,11 @@ class Choice(models.Model):
         verbose_name_plural = "گزینه ها"
 
 
+
+
+
+
+
 class Vote(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     poll = models.ForeignKey(Polls, on_delete=models.CASCADE)
