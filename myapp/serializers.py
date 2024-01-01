@@ -50,7 +50,6 @@ class SubscriberSerializer(serializers.ModelSerializer):
 
 
 
-
 class ReplyLikeHistorySerializer(ModelSerializer):
 
     class Meta:

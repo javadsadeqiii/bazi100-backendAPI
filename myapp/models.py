@@ -169,6 +169,7 @@ def update_reply_count_on_delete(sender, instance, **kwargs):
 
 
 
+
 class ReplyLikeHistory(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -180,6 +181,8 @@ class ReplyLikeHistory(models.Model):
     class Meta:
         verbose_name = "لایک ریپلای"
         verbose_name_plural = "لایک ریپلای ها"
+
+
 
 
 class ReplyLike(models.Model):
@@ -309,6 +312,8 @@ class AllPosts(models.Model):
 
 
 
+
+
 class wallpapers(models.Model):
 
     DEVICE_CHOICES = (
@@ -346,6 +351,9 @@ class wallpapers(models.Model):
 
     def __str__(self):
         return self.title
+
+
+
 
 
 class tracks(models.Model):

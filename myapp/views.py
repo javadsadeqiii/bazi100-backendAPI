@@ -417,13 +417,14 @@ class ContactUsAPIView(APIView):
 class BaziKachoTeamByUsernameView(APIView):
     
     authentication_classes = [TokenAuthentication] 
+    
     def get(self, request, username):
         team_member = get_object_or_404(bazikachoTeam, username=username)
         serializer = bazikachoTeamSerializer(team_member)
         return Response(serializer.data)
 
 
-class BaziKachoTeamViewSet(ModelViewSet):
+class BaziKachoTeamView(APIView):
     
     authentication_classes = [TokenAuthentication] 
 
@@ -772,19 +773,19 @@ class ReplyLikesDetailAPIView(APIView):
         return JsonResponse({'reply_likes': likes_info})
 
 
-class pollsViewSet(ModelViewSet):
+class PollsView(APIView):
     queryset = Polls.objects.all()
     serializer_class = pollsSerializer
     authentication_classes = [TokenAuthentication] 
 
 
-class choiceViewSet(ModelViewSet):
+class ChoiceView(APIView):
     queryset = Choice.objects.all()
     serializer_class = ChoiceSerializer
     authentication_classes = [TokenAuthentication] 
 
 
-class voteViewSet(ModelViewSet):
+class VoteView(APIView):
     queryset = Vote.objects.all()
     serializer_class = VoteSerializer
     authentication_classes = [TokenAuthentication] 
@@ -828,16 +829,16 @@ class AllPostsDetailView(generics.RetrieveAPIView):
 
 
 
-class allPostsViewSet(ModelViewSet):
+class AllPostsView(APIView):
     
     authentication_classes = [TokenAuthentication] 
     queryset = AllPosts.objects.all()
     serializer_class = AllPostsSerializer
-    permission_classes = [AllowAny]
+   
 
 
 
-class wallpapersViewSet(ModelViewSet):
+class WallpapersView(APIView):
 
     queryset = wallpapers.objects.all()
     serializer_class = wallpapersSerializer
@@ -851,21 +852,21 @@ class AlbumsDetailView(generics.RetrieveAPIView):
     lookup_field = 'slug'
 
 
-class albumsViewSet(ModelViewSet):
+class AlbumsView(APIView):
 
     queryset = albums.objects.all()
     serializer_class = albumsSerializer
     authentication_classes = [TokenAuthentication] 
 
 
-class tracksViewSet(ModelViewSet):
+class TracksView(APIView):
 
     queryset = tracks.objects.all()
     serializer_class = tracksSerializer
     authentication_classes = [TokenAuthentication] 
 
 
-class advertisementsViewSet(ModelViewSet):
+class AdvertisementsView(APIView):
 
     queryset = advertisements.objects.all()
     serializer_class = advertisementsSerializer

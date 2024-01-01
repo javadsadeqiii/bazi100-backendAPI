@@ -14,26 +14,34 @@ from .views import *
 
 
 
-router = routers.DefaultRouter()
-router.register(r'Polls', views.pollsViewSet)
-router.register(r'choice', views.choiceViewSet)
-router.register(r'BaziKachoTeam', views.BaziKachoTeamViewSet)
-router.register(r'allPosts', views.allPostsViewSet)
-router.register(r'wallpapers', views.wallpapersViewSet)
-router.register(r'albums', views.albumsViewSet)
-router.register(r'advertisements', views.advertisementsViewSet)
-router.register(r'tracks', views.tracksViewSet)
+#router = routers.DefaultRouter()
+#router.register(r'Polls', views.pollsViewSet)
+#router.register(r'choice', views.choiceViewSet)
+#router.register(r'BaziKachoTeam', views.BaziKachoTeamViewSet)
+#router.register(r'allPosts', views.allPostsViewSet)
+#router.register(r'wallpapers', views.wallpapersViewSet)
+#router.register(r'albums', views.albumsViewSet)
+#router.register(r'advertisements', views.advertisementsViewSet)
+#router.register(r'tracks', views.tracksViewSet)
 #router.register(r'subscribers', SubscriberView, basename='subscribers')
 
 
 
 urlpatterns = [
     
-   path('api/send-newsletter/', SendNewsLetterViewSet.as_view({'get': 'send_newsletter'}), name='send_newsletter'),
+    path('api/allPosts/', AllPostsView.as_view(), name='all_posts'),
+    
+    path('api/wallpapers/', WallpapersView.as_view(), name='wallpapers'),
+    
+    path('api/albums/', AlbumsView.as_view(), name='albums'),
+    
+    path('api/tracks/', TracksView.as_view(), name='tracks'),
+    
+    path('api/advertisements/', AdvertisementsView.as_view(), name='advertisements'),
+    
+    path('api/send-newsletter/', SendNewsLetterViewSet.as_view({'get': 'send_newsletter'}), name='send_newsletter'),
     
     path('admin/', admin.site.urls),
-    
-    path('api/', include(router.urls)),
     
     path('api/signup/', SignUpView.as_view(), name='signup'),
     
@@ -50,6 +58,8 @@ urlpatterns = [
     path('ckeditor/', include('ckeditor_uploader.urls')),
     
     path('api/vote/', views.voteChoice, name='voteChoice'),
+    
+    path('api/choice/', ChoiceView.as_view(), name='choices'),
     
     path('api/comment/', commentAPIView.as_view(), name='comment'),
     
@@ -74,6 +84,8 @@ urlpatterns = [
     path('api/Albums/<slug:slug>/',AlbumsDetailView.as_view(), name='albums-detail'),
 
     path('api/LikeComment/', LikeCommentAPIView.as_view(), name='like-comment'),
+    
+    path('api/BaziKachoTeam/', BaziKachoTeamView.as_view(), name='bazikacho_team'),
     
     path('api/BaziKachoTeam/<username>/',BaziKachoTeamByUsernameView.as_view(), name='team-member-by-username'),
     
