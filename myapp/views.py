@@ -779,6 +779,8 @@ class ReplyLikesDetailAPIView(APIView):
         return JsonResponse({'reply_likes': likes_info})
 
 
+
+
 class PollsView(APIView):
     queryset = Polls.objects.all()
     serializer_class = pollsSerializer
@@ -788,6 +790,9 @@ class PollsView(APIView):
         polls = Polls.objects.all()
         serializer = pollsSerializer(polls, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
 
 
 class ChoiceView(APIView):

@@ -33,6 +33,8 @@ urlpatterns = [
     
     path('api/wallpapers/', WallpapersView.as_view(), name='wallpapers'),
     
+    path('api/polls/', PollsView.as_view(), name='polls'),
+    
     path('api/albums/', AlbumsView.as_view(), name='albums'),
     
     path('api/tracks/', TracksView.as_view(), name='tracks'),
