@@ -71,12 +71,12 @@ class ReplyReportView(APIView):
     authentication_classes = [TokenAuthentication] 
     def post(self, request):
         replyText = request.data.get('replyText')
-        commentId = request.data.get('commentId')
+        replyId = request.data.get('replyId')
         userId = request.data.get('userId')
 
         existing_reports = ReplyReport.objects.filter(
             replyText=replyText,
-            commentId=commentId,
+            replyId=replyId,
             userId=userId
         )
         
