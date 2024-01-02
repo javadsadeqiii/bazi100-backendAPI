@@ -32,7 +32,7 @@ class CommentReport(models.Model):
 
 class ReplyReport(models.Model):
     replyText = models.TextField()
-    replyId = models.ForeignKey('Comments', on_delete=models.CASCADE, related_name='reply_reports_id')
+    replyId = models.ForeignKey('Reply', on_delete=models.CASCADE, related_name='reply_reports_id')
     userId = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_reply_reports')
     post = models.ForeignKey('AllPosts', on_delete=models.CASCADE, related_name='post_reply_reports')
     
