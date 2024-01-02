@@ -14,6 +14,35 @@ from django.dispatch import receiver
 en_formats.DATETIME_FORMAT = 'Y-m-d'
 
 
+class CommentReport(models.Model):
+    commentText = models.CharField(max_length=100 )
+    commentId = models.ForeignKey('Comments', on_delete=models.CASCADE, related_name='comment_reports_id')
+    userId = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_comment_reports')
+    post = models.ForeignKey('AllPosts', on_delete=models.CASCADE, related_name='post_comment_reports')
+    
+    class Meta:
+        verbose_name = "گزارش کامنت"
+        verbose_name_plural = "کامنت های گزارش شده"
+
+
+
+
+
+
+
+class ReplyReport(models.Model):
+    replyText = models.CharField(max_length=100 )
+    replyId = models.ForeignKey('Comments', on_delete=models.CASCADE, related_name='reply_reports_id')
+    userId = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_reply_reports')
+    post = models.ForeignKey('AllPosts', on_delete=models.CASCADE, related_name='post_reply_reports')
+    
+    class Meta:
+        verbose_name = "گزارش ریپلای"
+        verbose_name_plural = "گزارش ریپلای ها"
+
+
+
+
 
 
 
@@ -27,6 +56,7 @@ class Subscriber(models.Model):
     class Meta:
         verbose_name = "خبرنامه"
         verbose_name_plural = "خبرنامه"
+
 
 
 

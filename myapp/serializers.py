@@ -2,13 +2,32 @@ from rest_framework.serializers import ModelSerializer
 from .models import *
 from rest_framework import serializers
 from rest_framework import serializers
-from django.core.validators import validate_email
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.contrib.auth.forms import PasswordResetForm
 from rest_framework.response import Response
-from django.core.exceptions import ValidationError
 
 
+
+
+
+
+class CommentReportSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CommentReport
+        fields = ['commentText', 'commentId', 'userId', 'post']
+
+
+
+
+
+
+
+
+
+class ReplyReportSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ReplyReport
+        fields = ['replyText', 'replyId', 'userId', 'post']
 
 
 
@@ -39,10 +58,13 @@ class PasswordResetSerializer(serializers.Serializer):
 
 
 
+
+
 class SubscriberSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subscriber
         fields = ('__all__')
+
 
 
 
@@ -63,11 +85,14 @@ class ReplyLikeHistorySerializer(ModelSerializer):
 
 
 
+
 class CommentLikeHistorySerializer(ModelSerializer):
 
     class Meta:
         model = CommentLikeHistory
         fields = ('__all__')
+
+
 
 
 
@@ -85,12 +110,17 @@ class platformSeriallizer(ModelSerializer):
 
 
 
+
+
+
 class contactUsSerializer(ModelSerializer):
 
     class Meta:
 
         model = contactUs
         fields = ('__all__')
+
+
 
 
 
@@ -105,6 +135,10 @@ class pollsSerializer(ModelSerializer):
         fields = ('__all__')
 
 
+
+
+
+
 class CustomDateTimeField(serializers.DateTimeField):
     def to_representation(self, value):
         formatted_date = value.strftime("%Y,%m,%d,%H,%M")
@@ -114,10 +148,18 @@ class CustomDateTimeField(serializers.DateTimeField):
         return formatted_date_parts
 
 
+
+
+
+
 class VoteSerializer(ModelSerializer):
     class Meta:
         model = Vote
         fields = ('__all__')
+
+
+
+
 
 
 class ChoiceSerializer(ModelSerializer):
@@ -125,6 +167,9 @@ class ChoiceSerializer(ModelSerializer):
     class Meta:
         model = Choice
         fields = ('__all__')
+
+
+
 
 
 class CommentsSerializer(ModelSerializer):
@@ -136,11 +181,20 @@ class CommentsSerializer(ModelSerializer):
         fields = ('__all__')
 
 
+
+
+
+
 class CommentLikeSerializer(ModelSerializer):
 
     class Meta:
         model = CommentLike
         fields = ('__all__')
+
+
+
+
+
 
 
 class ReplySerializer(ModelSerializer):
@@ -152,11 +206,23 @@ class ReplySerializer(ModelSerializer):
         fields = ('__all__')
 
 
+
+
+
+
+
+
 class ReplyLikeSerializer(ModelSerializer):
 
     class Meta:
         model = ReplyLike
         fields = ('__all__')
+
+
+
+
+
+
 
 
 class contactUsSerializer(ModelSerializer):
@@ -165,6 +231,12 @@ class contactUsSerializer(ModelSerializer):
 
         model = contactUs
         fields = ('__all__')
+
+
+
+
+
+
 
 
 class AllPostsSerializer(ModelSerializer):
@@ -180,10 +252,19 @@ class AllPostsSerializer(ModelSerializer):
         return obj.comments.count() 
 
 
+
+
+
+
 class wallpapersSerializer(ModelSerializer):
     class Meta:
         model = wallpapers
         fields = ('__all__')
+
+
+
+
+
 
 
 class albumsSerializer(ModelSerializer):
@@ -195,6 +276,10 @@ class albumsSerializer(ModelSerializer):
         fields = ('__all__')
 
 
+
+
+
+
 class tracksSerializer(ModelSerializer):
 
     class Meta:
@@ -204,12 +289,21 @@ class tracksSerializer(ModelSerializer):
         fields = ('__all__')
 
 
+
+
+
+
+
 class bazikachoTeamSerializer(ModelSerializer):
 
     class Meta:
 
         model = bazikachoTeam
         fields = ('__all__')
+
+
+
+
 
 
 class AdvertisementsSerializer(ModelSerializer):

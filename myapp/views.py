@@ -26,13 +26,66 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.core.cache import cache
 from django.contrib.auth.models import User
 from .authentication import TokenAuthentication 
-
+from django.template.loader import render_to_string
 
 
 
 DATE_FORMAT = 'Y-m-d'
 DATETIME_FORMAT = 'Y-m-d H:i:s'
 
+
+
+
+
+class CommentReportView(APIView):
+    def post(self, request):
+        commentText = request.data.get('commentText')
+        commentId = request.data.get('commentId')
+        userId = request.data.get('userId')
+
+        existing_reports = CommentReport.objects.filter(
+            commentText=commentText,
+            commentId=commentId,
+            userId=userId
+        )
+        
+        if existing_reports.exists():
+            return Response({'error': "شما قبلا این کامنت را گزارش کرده اید"}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = CommentReportSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'success': "گزارش شما با موفقیت ارسال شد و مورد بررسی قرار خواهد گرفت"}, status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+
+
+
+
+class ReplyReportView(APIView):
+    def post(self, request):
+        replyText = request.data.get('replyText')
+        commentId = request.data.get('commentId')
+        userId = request.data.get('userId')
+
+        existing_reports = ReplyReport.objects.filter(
+            replyText=replyText,
+            commentId=commentId,
+            userId=userId
+        )
+        
+        if existing_reports.exists():
+            return Response({'error': "شما قبلا این گزارش را ارسال کرده اید"}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = ReplyReportSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'success': "گزارش شما با موفقیت ارسال شد و مورد بررسی قرارخواهد گرفت"}, status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
 
 
 
@@ -180,60 +233,47 @@ class UnsubscriberView(APIView):
 
 
 
-class  SendNewsLetterViewSet(viewsets.ViewSet):
-    
-    authentication_classes = [TokenAuthentication] 
+
+
+class SendNewsLetterViewSet(viewsets.ViewSet):
 
     @action(detail=False, methods=['get'])
     def send_newsletter(self, request):
+        latest_posts = AllPosts.objects.all().order_by('-date')[:3]
+        
+        
 
-     latest_posts = AllPosts.objects.all().order_by('-date')[:3]
+        subject = 'تازه ترین مطالب سایت بازیکاچو'
+        from_email = settings.EMAIL_HOST_USER
+        recipient_list = []
+        post_url = '' 
 
-     subject = 'تازه ترین مطالب سایت بازیکاچو'
-     from_email = settings.EMAIL_HOST_USER
-     recipient_list = []
-       
-     subscribers = Subscriber.objects.values_list('email', flat=True)
-     recipient_list.extend(subscribers)
-       
-
-    
-     for post in latest_posts:
-        link_kwargs = {'slug': post.slug}
-
-        if post.isEvent and post.eventStage:
-            link_kwargs['event'] = post.eventStage
-           
-            post_url = f"http://localhost:3000/{post.eventStage}/{post.slug}/"
-
-        elif post.isArticle:
-            link_kwargs['type'] = 'articles'
-           
-            post_url = f"http://localhost:3000/articles/{post.slug}/"
-
-        elif post.isVideo and post.videoType:
-            link_kwargs['video_type'] = post.videoType
+        subscribers = Subscriber.objects.values_list('email', flat=True)
+        recipient_list.extend(subscribers)
+        
+        for post in latest_posts:
             
-            post_url = f"http://localhost:3000/{post.videoType}/{post.slug}/"
+            if post.isEvent and post.eventStage:
+                post_url = f"http://127.0.0.1:8000/{post.eventStage}/{post.slug}/"
+            elif post.isArticle:
+                post_url = f"http://127.0.0.1:8000/articles/{post.slug}/"
+            elif post.isVideo and post.videoType:
+                post_url = f"http://127.0.0.1:8000/{post.videoType}/{post.slug}/"
+            elif post.isNews:
+                post_url = f"http://127.0.0.1:8000/news/{post.slug}/"
+            elif post.isStory:
+                post_url = f"http://127.0.0.1:8000/stories/{post.slug}/"
+                
+        
+            post.post_url = post_url
+            
+        html_message = render_to_string('newsletter.html', {'latest_posts': latest_posts})
 
-        elif post.isNews:
-            link_kwargs['type'] = 'news'
-           
-            post_url = f"http://localhost:3000/news/{post.slug}/"
+        for subscriber_email in recipient_list:
+            send_mail(subject, '', from_email, [subscriber_email], html_message=html_message)
 
-        elif post.isStory:
-            link_kwargs['type'] = 'stories'
-           
-            post_url = f"http://localhost:3000/stories/{post.slug}/"
-
-      
-        message = f"Title: {post.title}\nSummary: {post.postSummary}\nLink: {post_url}\n"
-
-        send_mail(subject, message, from_email, recipient_list)
-
-     return Response({'message': 'خبرنامه با موفقیت ارسال شد'}, status=status.HTTP_200_OK)
-
-
+        return Response({'message': 'خبرنامه با موفقیت ارسال شد'}, status=status.HTTP_200_OK)
+    
 
 
 

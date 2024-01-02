@@ -6,6 +6,33 @@ from .models import User
 
 
 
+class CommentReportAdmin(admin.ModelAdmin):
+    
+    list_display = ('commentText','commentId','userId')
+    ordering = ('id',)
+    
+admin.site.register(CommentReport, CommentReportAdmin)
+    
+
+
+
+
+
+
+
+
+class ReplyReportAdmin(admin.ModelAdmin):
+    
+    list_display = ('replyText','replyId','userId')
+    ordering = ('id',)
+    
+admin.site.register(ReplyReport, ReplyReportAdmin)
+    
+
+
+
+
+
 
 class SubscriberAdmin(admin.ModelAdmin):
 

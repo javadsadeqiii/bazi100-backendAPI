@@ -1,9 +1,7 @@
 
 from django.conf import settings
 from django.urls import path, include
-from rest_framework.routers import DefaultRouter
 from myapp import views
-from rest_framework import routers
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
@@ -11,19 +9,6 @@ from . import views
 from .views import SignUpView, LoginView
 from .views import ContactUsAPIView
 from .views import *
-
-
-
-#router = routers.DefaultRouter()
-#router.register(r'Polls', views.pollsViewSet)
-#router.register(r'choice', views.choiceViewSet)
-#router.register(r'BaziKachoTeam', views.BaziKachoTeamViewSet)
-#router.register(r'allPosts', views.allPostsViewSet)
-#router.register(r'wallpapers', views.wallpapersViewSet)
-#router.register(r'albums', views.albumsViewSet)
-#router.register(r'advertisements', views.advertisementsViewSet)
-#router.register(r'tracks', views.tracksViewSet)
-#router.register(r'subscribers', SubscriberView, basename='subscribers')
 
 
 
@@ -56,6 +41,10 @@ urlpatterns = [
     path('api/change-password/', ChangePasswordView.as_view(), name='change-password'),
     
     path('api/contactUs/', ContactUsAPIView.as_view(), name='contact_us'),
+    
+    path('api/commentreport/', CommentReportView.as_view(), name='comment-reports'),
+    
+    path('api/replyreport/', CommentReportView.as_view(), name='reply-reports'),
     
     path('api/user/<int:user_id>/', UserDetailsAPIView.as_view(), name='user-details'),
     
