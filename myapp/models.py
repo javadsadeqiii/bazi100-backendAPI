@@ -15,7 +15,7 @@ en_formats.DATETIME_FORMAT = 'Y-m-d'
 
 
 class CommentReport(models.Model):
-    commentText = models.CharField(max_length=1000)
+    commentText = models.TextField()
     commentId = models.ForeignKey('Comments', on_delete=models.CASCADE, related_name='comment_reports_id')
     userId = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_comment_reports')
     post = models.ForeignKey('AllPosts', on_delete=models.CASCADE, related_name='post_comment_reports')
@@ -31,7 +31,7 @@ class CommentReport(models.Model):
 
 
 class ReplyReport(models.Model):
-    replyText = models.CharField(max_length=1000 )
+    replyText = models.TextField()
     replyId = models.ForeignKey('Comments', on_delete=models.CASCADE, related_name='reply_reports_id')
     userId = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_reply_reports')
     post = models.ForeignKey('AllPosts', on_delete=models.CASCADE, related_name='post_reply_reports')
