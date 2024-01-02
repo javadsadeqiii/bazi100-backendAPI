@@ -44,7 +44,7 @@ urlpatterns = [
     
     path('api/commentreport/', CommentReportView.as_view(), name='comment-reports'),
     
-    path('api/replyreport/', CommentReportView.as_view(), name='reply-reports'),
+    path('api/replyreport/', ReplyReportView.as_view(), name='reply-reports'),
     
     path('api/user/<int:user_id>/', UserDetailsAPIView.as_view(), name='user-details'),
     
