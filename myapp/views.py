@@ -38,6 +38,8 @@ DATETIME_FORMAT = 'Y-m-d H:i:s'
 
 
 class CommentReportView(APIView):
+    
+    authentication_classes = [TokenAuthentication] 
     def post(self, request):
         commentText = request.data.get('commentText')
         commentId = request.data.get('commentId')
@@ -65,6 +67,8 @@ class CommentReportView(APIView):
 
 
 class ReplyReportView(APIView):
+    
+    authentication_classes = [TokenAuthentication] 
     def post(self, request):
         replyText = request.data.get('replyText')
         commentId = request.data.get('commentId')
