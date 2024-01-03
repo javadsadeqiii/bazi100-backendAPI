@@ -42,7 +42,7 @@ DATETIME_FORMAT = 'Y-m-d H:i:s'
 
 
 class CommentReportView(APIView):
-    authentication_classes = [TokenAuthentication] 
+    #authentication_classes = [TokenAuthentication] 
     
     def post(self, request):
         commentId = request.data.get('commentId')
@@ -53,7 +53,7 @@ class CommentReportView(APIView):
         )
         
         if existing_reports.filter(userId=userId).exists():
-            return Response({'error': "شما قبلا این را گزارش کرده اید"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': "شما قبلا این کامنت را گزارش کرده اید"}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = CommentReportSerializer(data=request.data)
         if serializer.is_valid():
@@ -70,18 +70,18 @@ class CommentReportView(APIView):
 
 
 class ReplyReportView(APIView):
-    authentication_classes = [TokenAuthentication] 
+   # authentication_classes = [TokenAuthentication] 
     
     def post(self, request):
-        replyId = request.data.get('replyId')
+        reply = request.data.get('reply')
         userId = request.data.get('userId')
 
         existing_reports = ReplyReport.objects.filter(
-            replyId=replyId,
+            reply=reply,
         )
         
         if existing_reports.filter(userId=userId).exists():
-            return Response({'error': "شما قبلا این گزارش را ارسال کرده اید"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': "شما قبلا این کامنت را گزارش کرده اید"}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = ReplyReportSerializer(data=request.data)
         if serializer.is_valid():
@@ -334,6 +334,9 @@ class SignUpView(APIView):
             'message': 'ثبت نام با موفقیت انجام شد'
         }
         return Response(response_data, status=status.HTTP_201_CREATED)
+
+
+
 
 
 class LoginView(APIView):

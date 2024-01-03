@@ -27,7 +27,7 @@ class CommentReportSerializer(serializers.ModelSerializer):
 class ReplyReportSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReplyReport
-        fields = ['replyText', 'replyId', 'userId', 'post']
+        fields = ['replyText', 'reply', 'userId', 'post']
 
 
 

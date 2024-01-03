@@ -23,7 +23,7 @@ admin.site.register(CommentReport, CommentReportAdmin)
 
 class ReplyReportAdmin(admin.ModelAdmin):
     
-    list_display = ('replyText','replyId','userId')
+    list_display = ('replyText','reply','userId')
     ordering = ('id',)
     
 admin.site.register(ReplyReport, ReplyReportAdmin)
