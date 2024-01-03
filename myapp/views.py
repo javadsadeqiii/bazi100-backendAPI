@@ -98,7 +98,7 @@ class ReplyReportView(APIView):
 class ResetPasswordView(APIView):
     
     
-    authentication_classes = [TokenAuthentication] 
+   # authentication_classes = [TokenAuthentication] 
     
     def invalidate_token(self, user, token):
       
@@ -128,8 +128,8 @@ class ResetPasswordView(APIView):
             token_generator = PasswordResetTokenGenerator()
             token = token_generator.make_token(user)
 
-            reset_link = f"http://127.0.0.1:8000/resetpassword/{user.id}-{token}/"
-            html_message = render_to_string('resetpassword.html', {'reset_link': reset_link})
+           # reset_link = f"http://127.0.0.1:8000/resetpassword/{user.id}-{token}/"
+            html_message = render_to_string('resetpassword.html', {'user_id': user.id, 'token': token})
             subject = "درخواست بازیابی رمز عبور"
             from_email = settings.EMAIL_HOST_USER
             to_email = [email]
@@ -258,15 +258,15 @@ class SendNewsLetterViewSet(viewsets.ViewSet):
         for post in latest_posts:
             
             if post.isEvent and post.eventStage:
-                post_url = f"http://127.0.0.1:8000/{post.eventStage}/{post.slug}/"
+                post_url = f"http://localhost:3000/{post.eventStage}/{post.slug}/"
             elif post.isArticle:
-                post_url = f"http://127.0.0.1:8000/articles/{post.slug}/"
+                post_url = f"http://localhost:3000/articles/{post.slug}/"
             elif post.isVideo and post.videoType:
-                post_url = f"http://127.0.0.1:8000/{post.videoType}/{post.slug}/"
+                post_url = f"http://localhost:3000/{post.videoType}/{post.slug}/"
             elif post.isNews:
-                post_url = f"http://127.0.0.1:8000/news/{post.slug}/"
+                post_url = f"http://localhost:3000/news/{post.slug}/"
             elif post.isStory:
-                post_url = f"http://127.0.0.1:8000/stories/{post.slug}/"
+                post_url = f"http://localhost:3000/stories/{post.slug}/"
                 
         
             post.post_url = post_url
