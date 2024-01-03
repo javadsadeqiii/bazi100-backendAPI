@@ -15,7 +15,7 @@ from django.core.validators import validate_email
 from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.hashers import make_password
 from django.views import View
-from myapp.models import contactUs
+from myapp.models import ContactUs
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework import generics
@@ -27,6 +27,8 @@ from django.core.cache import cache
 from django.contrib.auth.models import User
 from .authentication import TokenAuthentication 
 from django.template.loader import render_to_string
+from django.core.mail import EmailMultiAlternatives
+from django.utils.html import strip_tags
 
 
 
@@ -37,22 +39,21 @@ DATETIME_FORMAT = 'Y-m-d H:i:s'
 
 
 
+
+
 class CommentReportView(APIView):
-    
     authentication_classes = [TokenAuthentication] 
+    
     def post(self, request):
-        commentText = request.data.get('commentText')
         commentId = request.data.get('commentId')
         userId = request.data.get('userId')
 
         existing_reports = CommentReport.objects.filter(
-            commentText=commentText,
             commentId=commentId,
-            userId=userId
         )
         
-        if existing_reports.exists():
-            return Response({'error': "شما قبلا این کامنت را گزارش کرده اید"}, status=status.HTTP_400_BAD_REQUEST)
+        if existing_reports.filter(userId=userId).exists():
+            return Response({'error': "شما قبلا این را گزارش کرده اید"}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = CommentReportSerializer(data=request.data)
         if serializer.is_valid():
@@ -66,27 +67,26 @@ class CommentReportView(APIView):
 
 
 
+
+
 class ReplyReportView(APIView):
-    
     authentication_classes = [TokenAuthentication] 
+    
     def post(self, request):
-        replyText = request.data.get('replyText')
         replyId = request.data.get('replyId')
         userId = request.data.get('userId')
 
         existing_reports = ReplyReport.objects.filter(
-            replyText=replyText,
             replyId=replyId,
-            userId=userId
         )
         
-        if existing_reports.exists():
+        if existing_reports.filter(userId=userId).exists():
             return Response({'error': "شما قبلا این گزارش را ارسال کرده اید"}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = ReplyReportSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response({'success': "گزارش شما با موفقیت ارسال شد و مورد بررسی قرارخواهد گرفت"}, status=status.HTTP_201_CREATED)
+            return Response({'success': "گزارش شما با موفقیت ارسال شد و مورد بررسی قرار خواهد گرفت"}, status=status.HTTP_201_CREATED)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
@@ -96,6 +96,7 @@ class ReplyReportView(APIView):
 
 
 class ResetPasswordView(APIView):
+    
     
     authentication_classes = [TokenAuthentication] 
     
@@ -127,18 +128,20 @@ class ResetPasswordView(APIView):
             token_generator = PasswordResetTokenGenerator()
             token = token_generator.make_token(user)
 
-            reset_link = f"http://localhost:3000/resetpassword/{user.id}-{token}/"
-
+            reset_link = f"http://127.0.0.1:8000/resetpassword/{user.id}-{token}/"
+            html_message = render_to_string('resetpassword.html', {'reset_link': reset_link})
             subject = "درخواست بازیابی رمز عبور"
-            message = f"لطفا جهت بازیابی رمزعبور خود روی لینک ارسالی کلیک کنید: {reset_link}"
             from_email = settings.EMAIL_HOST_USER
             to_email = [email]
 
-            send_mail(subject, message, from_email, to_email, fail_silently=False)
+            send_mail(subject, '', from_email, to_email, html_message=html_message, fail_silently=False)
 
             return Response({'message': "ایمیل جهت بازیابی رمزعبور ارسال شد"}, status=status.HTTP_200_OK)
         else:
             return Response({'error': "لطفا ایمیل خود را وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
 
     def put(self, request):
         
@@ -171,9 +174,6 @@ class ResetPasswordView(APIView):
                 return Response({'error': "توکن بازنشانی رمزعبور شما منقضی شده است لطفا دوباره تلاش کنید"}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({'error': "لطفا تمامی اطلاعات را به درستی وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
-
-
-
 
 
 
@@ -420,9 +420,23 @@ class ChangePasswordView(APIView):
             return Response({'error':  " نام کاربری وارد شده یافت نشد"}, status=status.HTTP_404_NOT_FOUND)
 
 
-class ContactUsAPIView(APIView):
+
+
+
+
+class ContactUsView(APIView):
     
-    authentication_classes = [TokenAuthentication] 
+
+    serializer_class = ContactUsSerializer
+    queryset = ContactUs.objects.all()
+   
+   
+    
+    def get(self, request):
+        contact = ContactUs.objects.all()
+        serializer = ContactUsSerializer(contact, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
     def post(self, request):
         fullName = request.data.get('fullName')
@@ -432,22 +446,34 @@ class ContactUsAPIView(APIView):
         if not fullName or not emailContact or not message:
             return JsonResponse({'error': 'لطفاً تمام فیلدها را پر کنید'}, status=400)
 
-        created_contact = contactUs.objects.create(
+        created_contact = ContactUs.objects.create(
             fullName=fullName, emailContact=emailContact, message=message)
 
         if created_contact:
-            # ارسال ایمیل
-            send_mail(
-                "درخواست کاربر از طریق بخش تماس باما سایت بازی 100",
-                "کاربر عزیز بازی 100 درخواست شما با موفقیت ارسال شد و پس از بررسی پاسخ مورد نظر ارسال میشود",
-                "javadjs197@gmail.com",
-                [emailContact],
-                fail_silently=False,
-            )
+           
+            html_message = render_to_string('contactus.html', {'user_message': message})
+            
+           
+            plain_message = strip_tags(html_message)
 
-            return JsonResponse({'message': 'اطلاعات با موفقیت ذخیره شد و ایمیل ارسال شد.'}, status=201)
+            
+            html_message = html_message.replace('پیام کاربر', message)
+
+            
+            email = EmailMultiAlternatives(
+                subject="ارتباط با تیم بازی کاچو",
+                body=plain_message,
+                from_email=settings.EMAIL_HOST_USER,
+                to=[emailContact],
+            )
+            email.attach_alternative(html_message, "text/html")
+            email.send(fail_silently=False)
+
+            return Response({'message': 'اطلاعات با موفقیت ذخیره شد و ایمیل ارسال شد.'}, status=201)
         else:
-            return JsonResponse({'error': 'خطایی در ذخیره‌سازی اطلاعات رخ داده است.'}, status=500)
+            return Response({'error': 'خطایی در ذخیره‌سازی اطلاعات رخ داده است.'}, status=500)
+
+
 
 
 class BaziKachoTeamByUsernameView(APIView):

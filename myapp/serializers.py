@@ -113,11 +113,11 @@ class platformSeriallizer(ModelSerializer):
 
 
 
-class contactUsSerializer(ModelSerializer):
+class ContactUsSerializer(ModelSerializer):
 
     class Meta:
 
-        model = contactUs
+        model = ContactUs
         fields = ('__all__')
 
 
@@ -210,8 +210,6 @@ class ReplySerializer(ModelSerializer):
 
 
 
-
-
 class ReplyLikeSerializer(ModelSerializer):
 
     class Meta:
@@ -225,12 +223,12 @@ class ReplyLikeSerializer(ModelSerializer):
 
 
 
-class contactUsSerializer(ModelSerializer):
+#class contactUsSerializer(ModelSerializer):
 
-    class Meta:
+    #class Meta:
 
-        model = contactUs
-        fields = ('__all__')
+     #   model = contactUs
+      #  fields = ('__all__')
 
 
 

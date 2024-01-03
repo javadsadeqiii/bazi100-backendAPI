@@ -7,7 +7,7 @@ from django.contrib import admin
 from django.urls import path
 from . import views
 from .views import SignUpView, LoginView
-from .views import ContactUsAPIView
+from .views import ContactUsView
 from .views import *
 
 
@@ -40,7 +40,8 @@ urlpatterns = [
     
     path('api/change-password/', ChangePasswordView.as_view(), name='change-password'),
     
-    path('api/contactUs/', ContactUsAPIView.as_view(), name='contact_us'),
+    path('api/contactUs/', ContactUsView.as_view(), name='contact_us'),
+    
     
     path('api/commentreport/', CommentReportView.as_view(), name='comment-reports'),
     

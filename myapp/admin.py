@@ -110,13 +110,13 @@ class VoteAdmin(admin.ModelAdmin):
 admin.site.register(Vote, VoteAdmin)
 
 
-class contactUsAdmin(admin.ModelAdmin):
+class ContactUsAdmin(admin.ModelAdmin):
 
     list_display = ('id', 'message')
     ordering = ('id',)
 
 
-admin.site.register(contactUs, contactUsAdmin)
+admin.site.register(ContactUs, ContactUsAdmin)
 
 
 class CommentsAdmin(admin.ModelAdmin):
