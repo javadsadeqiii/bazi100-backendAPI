@@ -633,6 +633,8 @@ class Vote(models.Model):
         verbose_name_plural = "رای ها"
 
 
+
+
 class ContactUs(models.Model):
 
     fullName = models.CharField(max_length=150, verbose_name="نام کامل")
