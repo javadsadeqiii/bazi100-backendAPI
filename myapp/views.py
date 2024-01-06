@@ -1,5 +1,4 @@
 from django.http import JsonResponse
-from rest_framework.viewsets import ModelViewSet
 from . models import *
 from .serializers import *
 import re
@@ -29,7 +28,7 @@ from .authentication import TokenAuthentication
 from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
 from django.utils.html import strip_tags
-
+from .throttles import CommentThrottle
 
 
 DATE_FORMAT = 'Y-m-d'
@@ -42,7 +41,7 @@ DATETIME_FORMAT = 'Y-m-d H:i:s'
 
 
 class CommentReportView(APIView):
-    #authentication_classes = [TokenAuthentication] 
+    authentication_classes = [TokenAuthentication] 
     
     def post(self, request):
         commentId = request.data.get('commentId')
@@ -70,7 +69,7 @@ class CommentReportView(APIView):
 
 
 class ReplyReportView(APIView):
-   # authentication_classes = [TokenAuthentication] 
+    authentication_classes = [TokenAuthentication] 
     
     def post(self, request):
         reply = request.data.get('reply')
@@ -98,7 +97,7 @@ class ReplyReportView(APIView):
 class ResetPasswordView(APIView):
     
     
-   # authentication_classes = [TokenAuthentication] 
+    authentication_classes = [TokenAuthentication] 
     
     def invalidate_token(self, user, token):
       
@@ -128,7 +127,6 @@ class ResetPasswordView(APIView):
             token_generator = PasswordResetTokenGenerator()
             token = token_generator.make_token(user)
 
-           # reset_link = f"http://127.0.0.1:8000/resetpassword/{user.id}-{token}/"
             html_message = render_to_string('resetpassword.html', {'user_id': user.id, 'token': token})
             subject = "درخواست بازیابی رمز عبور"
             from_email = settings.EMAIL_HOST_USER
@@ -240,6 +238,8 @@ class UnsubscriberView(APIView):
 
 
 class SendNewsLetterViewSet(viewsets.ViewSet):
+    
+    authentication_classes = [TokenAuthentication] 
 
     @action(detail=False, methods=['get'])
     def send_newsletter(self, request):
@@ -429,7 +429,7 @@ class ChangePasswordView(APIView):
 
 class ContactUsView(APIView):
     
-
+    authentication_classes = [TokenAuthentication]
     serializer_class = ContactUsSerializer
     queryset = ContactUs.objects.all()
    
@@ -516,6 +516,7 @@ class PostCommentsView(APIView):
 
 class commentAPIView(APIView):
     
+    throttle_classes = [CommentThrottle]
     authentication_classes = [TokenAuthentication] 
 
     queryset = Comments.objects.all()
@@ -595,7 +596,7 @@ class LikeCommentAPIView(APIView):
             else:
                 # اگر قبلا لایک نشده بود، ایجاد لایک جدید و افزایش تعداد لایک‌ها
                 CommentLikeHistory.objects.create(user=user, comment=comment)
-                comment.likeCount += 1
+                comment.likeCount +=1
                 comment.save()
                 return Response({'message': 'کامنت با موفقیت لایک شد'}, status=status.HTTP_201_CREATED)
 
@@ -615,19 +616,19 @@ class CommentLikesAPIView(APIView):
     authentication_classes = [TokenAuthentication] 
     
     def get(self, request, comment_id):
-        # ابتدا همه‌ی لایک‌های مربوط به آیدی کامنت را دریافت می‌کنیم
+       
         comment_likes = CommentLikeHistory.objects.filter(
             comment_id=comment_id)
 
-        # ساخت یک لیست برای ذخیره اطلاعات لایک‌ها
+   
         likes_info = []
         for like in comment_likes:
-            # اضافه کردن اطلاعات هر لایک به لیست
+  
             like_info = {
                 'like_id': like.id,
                 'user_id': like.user_id,
                 'comment_id': like.comment_id,
-                # تبدیل به فرمت مورد نظر
+           
                 'liked_at': like.liked_at.strftime('%Y-%m-%d %H:%M:%S')
             }
             likes_info.append(like_info)
