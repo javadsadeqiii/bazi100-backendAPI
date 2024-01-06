@@ -5,7 +5,7 @@ from rest_framework.response import Response
 
 
 class CommentThrottle(UserRateThrottle):
-    rate = '1/2m'  # هر 2 دقیقه بتونه کامنت بزاره
+    rate = '1/2m' 
 
     def allow_request(self, request, view):
         if request.user.is_authenticated:
@@ -15,5 +15,5 @@ class CommentThrottle(UserRateThrottle):
         return super().allow_request(request, view)
 
     def wait(self):
-        return Response({'error':'لطفا پس از 2 دقیقه کامنت خود را ارسال کنید'}) 
+        return super().wait()
     
