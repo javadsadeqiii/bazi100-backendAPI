@@ -516,7 +516,7 @@ class PostCommentsView(APIView):
 
 class commentAPIView(APIView):
     
-    throttle_classes = [CommentThrottle]
+    #throttle_classes = [CommentThrottle]
     authentication_classes = [TokenAuthentication] 
 
     queryset = Comments.objects.all()
