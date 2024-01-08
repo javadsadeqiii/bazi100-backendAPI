@@ -372,6 +372,9 @@ class LoginView(APIView):
         return Response({'error': 'ایمیل یا رمز عبور اشتباه است'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
+
+
+
 class ChangeUsernameView(APIView):
     
     authentication_classes = [TokenAuthentication] 
@@ -430,6 +433,7 @@ class ChangePasswordView(APIView):
 
 
 
+
 class ContactUsView(APIView):
     
     authentication_classes = [TokenAuthentication]
@@ -482,6 +486,8 @@ class ContactUsView(APIView):
 
 
 
+
+
 class BaziKachoTeamByUsernameView(APIView):
     
     authentication_classes = [TokenAuthentication] 
@@ -490,6 +496,10 @@ class BaziKachoTeamByUsernameView(APIView):
         team_member = get_object_or_404(bazikachoTeam, username=username)
         serializer = bazikachoTeamSerializer(team_member)
         return Response(serializer.data)
+
+
+
+
 
 
 class BaziKachoTeamView(APIView):
@@ -507,6 +517,9 @@ class BaziKachoTeamView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+
+
+
 class PostCommentsView(APIView):
     
     authentication_classes = [TokenAuthentication] 
@@ -515,6 +528,8 @@ class PostCommentsView(APIView):
         post_comments = Comments.objects.filter(post=post)
         serializer = CommentsSerializer(post_comments, many=True)
         return Response(serializer.data)
+
+
 
 
 
@@ -559,7 +574,7 @@ class commentAPIView(APIView):
                 time_since_last_comment = datetime.datetime.now(datetime.timezone.utc) - last_comment.createdAt
                 
                 if time_since_last_comment.total_seconds() < 120:
-                    return JsonResponse({'error': 'لطفا بعد از 2 دقیقه کامنت خود را ارسال کنید'}, status=status.HTTP_400_BAD_REQUEST)
+                    return JsonResponse({'error': 'لطفا پس از گذشت 2 دقیقه کامنت خود را ارسال کنید'}, status=status.HTTP_400_BAD_REQUEST)
 
 
             post = AllPosts.objects.get(id=post)
@@ -772,6 +787,16 @@ class ReplyAPIView(APIView):
 
             if re.search(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', replyText):
                 return JsonResponse({'error': 'قرار دادن لینک در پاسخ مجاز نیست'}, status=status.HTTP_400_BAD_REQUEST)
+            
+             # Get the user's last reply, if any
+            last_reply = Reply.objects.filter(userId=userId).order_by('-createdAt').first()
+
+            if last_reply:
+                time_since_last_reply = datetime.datetime.now(datetime.timezone.utc) - last_reply.createdAt
+                # Check if the time difference is less than 2 minutes
+                if time_since_last_reply.total_seconds() < 120:
+                    return JsonResponse({'error': 'لطفا پس از گذشت 2 دقیقه کامنت خود را ارسال کنید'}, status=status.HTTP_400_BAD_REQUEST)
+
 
             post = AllPosts.objects.get(id=post)
            # comment = Comments.objects.get(id=commentId)
