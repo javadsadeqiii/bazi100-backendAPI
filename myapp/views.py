@@ -28,7 +28,9 @@ from .authentication import TokenAuthentication
 from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
 from django.utils.html import strip_tags
-from .throttles import CommentThrottle
+import datetime
+#from .throttles import CommentThrottle
+from django.http import HttpResponse
 
 
 DATE_FORMAT = 'Y-m-d'
@@ -237,6 +239,7 @@ class UnsubscriberView(APIView):
 
 
 
+
 class SendNewsLetterViewSet(viewsets.ViewSet):
     
     authentication_classes = [TokenAuthentication] 
@@ -276,7 +279,7 @@ class SendNewsLetterViewSet(viewsets.ViewSet):
         for subscriber_email in recipient_list:
             send_mail(subject, '', from_email, [subscriber_email], html_message=html_message)
 
-        return Response({'message': 'خبرنامه با موفقیت ارسال شد'}, status=status.HTTP_200_OK)
+        return HttpResponse(html_message, content_type='text/html')
     
 
 
@@ -514,9 +517,11 @@ class PostCommentsView(APIView):
         return Response(serializer.data)
 
 
+
+
 class commentAPIView(APIView):
     
-    #throttle_classes = [CommentThrottle]
+   
     authentication_classes = [TokenAuthentication] 
 
     queryset = Comments.objects.all()
@@ -546,6 +551,16 @@ class commentAPIView(APIView):
 
             if re.search(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', commentText):
                 return JsonResponse({'error': 'قرار دادن لینک در کامنت مجاز نیست'}, status=status.HTTP_400_BAD_REQUEST)
+            
+              
+            last_comment = Comments.objects.filter(userId=userId).order_by('-createdAt').first()
+
+            if last_comment:
+                time_since_last_comment = datetime.datetime.now(datetime.timezone.utc) - last_comment.createdAt
+                
+                if time_since_last_comment.total_seconds() < 120:
+                    return JsonResponse({'error': 'لطفا بعد از 2 دقیقه کامنت خود را ارسال کنید'}, status=status.HTTP_400_BAD_REQUEST)
+
 
             post = AllPosts.objects.get(id=post)
             user = User.objects.get(id=userId)
