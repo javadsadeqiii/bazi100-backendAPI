@@ -34,6 +34,7 @@ from datetime import datetime
 from django.core.cache import cache
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
+from datetime import datetime, timezone
 
 
 
@@ -604,9 +605,9 @@ class commentAPIView(APIView):
             last_comment = Comments.objects.filter(userId=userId).order_by('-createdAt').first()
 
             if last_comment:
-                time_since_last_comment = datetime.now(datetime.timezone.utc) - last_comment.createdAt
+             time_since_last_comment = datetime.now(timezone.utc) - last_comment.createdAt
                 
-                if time_since_last_comment.total_seconds() < 120:
+            if time_since_last_comment.total_seconds() < 120:
                     return JsonResponse({'error': 'برای ثبت کامنت جدید لطفا 2 دقیقه منتظر بمانید'}, status=status.HTTP_400_BAD_REQUEST)
 
 
