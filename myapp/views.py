@@ -604,7 +604,7 @@ class commentAPIView(APIView):
             last_comment = Comments.objects.filter(userId=userId).order_by('-createdAt').first()
 
             if last_comment:
-                time_since_last_comment = datetime.datetime.now(datetime.timezone.utc) - last_comment.createdAt
+                time_since_last_comment = datetime.now(datetime.timezone.utc) - last_comment.createdAt
                 
                 if time_since_last_comment.total_seconds() < 120:
                     return JsonResponse({'error': 'برای ثبت کامنت جدید لطفا 2 دقیقه منتظر بمانید'}, status=status.HTTP_400_BAD_REQUEST)
