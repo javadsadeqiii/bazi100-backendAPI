@@ -104,41 +104,27 @@ class ReplyReportView(APIView):
 
 
 class ResetPasswordView(APIView):
-    
-    
-    @method_decorator(cache_page(60*5))  
+   
     def post(self, request):
         email = request.data.get('email')
 
-        if email:
-            cache_key = f"reset_password_{email}"
-            if cache.get(cache_key):
-                return Response({'error': "برای ارسال درخواست جدید جهت بازیابی رمزعبور لطفا 5 دقیقه منتظر بمانید"}, status=status.HTTP_429_TOO_MANY_REQUESTS)
             
-            try:
+        try:
                 user = User.objects.get(email=email)
-            except User.DoesNotExist:
+        except User.DoesNotExist:
                 return Response({'error': "ایمیل وارد شده یافت نشد"}, status=status.HTTP_404_NOT_FOUND)
-            
-            
-       
-            
-            
            
-            token_generator = PasswordResetTokenGenerator()
-            token = token_generator.make_token(user)
+        token_generator = PasswordResetTokenGenerator()
+        token = token_generator.make_token(user)
 
-            html_message = render_to_string('resetpassword.html', {'user_id': user.id, 'token': token})
-            subject = "درخواست بازیابی رمز عبور"
-            from_email = settings.EMAIL_HOST_USER
-            to_email = [email]
+        html_message = render_to_string('resetpassword.html', {'user_id': user.id, 'token': token})
+        subject = "درخواست بازیابی رمز عبور"
+        from_email = settings.EMAIL_HOST_USER
+        to_email = [email]
 
-            send_mail(subject, '', from_email, to_email, html_message=html_message, fail_silently=False)
-            cache.set(cache_key, True, timeout=60*5)
-
-            return Response({'message': "ایمیل جهت بازیابی رمزعبور ارسال شد"}, status=status.HTTP_200_OK)
-        else:
-            return Response({'error': "لطفا ایمیل خود را وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
+        send_mail(subject, '', from_email, to_email, html_message=html_message, fail_silently=False)
+        return Response({'message': "ایمیل جهت بازیابی رمزعبور ارسال شد"}, status=status.HTTP_200_OK)
+      
     
     
     def invalidate_token(self, user, token):
@@ -477,18 +463,6 @@ class ContactUsView(APIView):
             return JsonResponse({'error': 'لطفاً تمام فیلدها را پر کنید'}, status=400)
         
         
-           
-        last_contact = ContactUs.objects.filter(emailContact=emailContact).order_by('-createdAt').first()
-
-        if last_contact:
-            time_since_last_contact = datetime.now(timezone.utc) - last_contact.createdAt
-            
-            if time_since_last_contact.total_seconds() < 300:
-                time_remaining = 300 - time_since_last_contact.total_seconds()
-                return JsonResponse({'error': "برای ارسال پیغام جدید لطفا 5 دقیقه منتظر بمانید"}, status=status.HTTP_400_BAD_REQUEST)
-        
-        
-
         created_contact = ContactUs.objects.create(
             fullName=fullName, emailContact=emailContact, message=message)
 
