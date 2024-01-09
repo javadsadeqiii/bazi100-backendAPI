@@ -6,6 +6,11 @@ from .models import User
 
 
 
+
+
+
+
+
 class CommentReportAdmin(admin.ModelAdmin):
     
     list_display = ('commentText','commentId','userId')
@@ -13,6 +18,8 @@ class CommentReportAdmin(admin.ModelAdmin):
     
 admin.site.register(CommentReport, CommentReportAdmin)
     
+
+
 
 
 

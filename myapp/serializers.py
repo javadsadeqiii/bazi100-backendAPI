@@ -11,6 +11,8 @@ from rest_framework.response import Response
 
 
 
+
+
 class CommentReportSerializer(serializers.ModelSerializer):
     class Meta:
         model = CommentReport
@@ -22,10 +24,14 @@ class CommentReportSerializer(serializers.ModelSerializer):
 
 
 
+
+
 class ReplyReportSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReplyReport
         fields = ['replyText', 'reply', 'userId', 'post']
+
+
 
 
 
@@ -45,12 +51,15 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
 
 
 
+
+
 class PasswordResetSerializer(serializers.Serializer):
     email = serializers.EmailField()
 
     def validate_email(self, value):
         PasswordResetForm({'email': value})  
         return value
+
 
 
 
@@ -110,13 +119,13 @@ class platformSeriallizer(ModelSerializer):
 
 
 
-
 class ContactUsSerializer(ModelSerializer):
 
     class Meta:
 
         model = ContactUs
         fields = ('__all__')
+
 
 
 
@@ -138,6 +147,8 @@ class pollsSerializer(ModelSerializer):
 
 
 
+
+
 class CustomDateTimeField(serializers.DateTimeField):
     def to_representation(self, value):
         formatted_date = value.strftime("%Y,%m,%d,%H,%M")
@@ -145,6 +156,8 @@ class CustomDateTimeField(serializers.DateTimeField):
         formatted_date_parts[1] = str(int(formatted_date_parts[1]))
         formatted_date_parts[2] = str(int(formatted_date_parts[2]))
         return formatted_date_parts
+
+
 
 
 
@@ -162,11 +175,13 @@ class VoteSerializer(ModelSerializer):
 
 
 
+
 class ChoiceSerializer(ModelSerializer):
 
     class Meta:
         model = Choice
         fields = ('__all__')
+
 
 
 
@@ -211,6 +226,8 @@ class ReplySerializer(ModelSerializer):
 
 
 
+
+
 class ReplyLikeSerializer(ModelSerializer):
 
     class Meta:
@@ -227,7 +244,6 @@ class ReplyLikeSerializer(ModelSerializer):
 
 class AllPostsSerializer(ModelSerializer):
     
-  
 
     class Meta:
         model = AllPosts
@@ -242,10 +258,12 @@ class AllPostsSerializer(ModelSerializer):
 
 
 
+
 class wallpapersSerializer(ModelSerializer):
     class Meta:
         model = wallpapers
         fields = ('__all__')
+
 
 
 
@@ -266,6 +284,7 @@ class albumsSerializer(ModelSerializer):
 
 
 
+
 class tracksSerializer(ModelSerializer):
 
     class Meta:
@@ -273,6 +292,7 @@ class tracksSerializer(ModelSerializer):
         model = tracks
 
         fields = ('__all__')
+
 
 
 

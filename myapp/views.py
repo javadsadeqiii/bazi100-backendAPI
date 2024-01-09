@@ -34,7 +34,11 @@ from datetime import datetime
 from django.core.cache import cache
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
-from datetime import datetime, timezone
+from datetime import timezone
+from django.utils import timezone
+import datetime
+
+
 
 
 
@@ -277,15 +281,15 @@ class SendNewsLetterViewSet(viewsets.ViewSet):
         for post in latest_posts:
             
             if post.isEvent and post.eventStage:
-                post_url = f"http://localhost:3000/{post.eventStage}/{post.slug}/"
+                post_url = f"http://bazikacho.ir/{post.eventStage}/{post.slug}/"
             elif post.isArticle:
-                post_url = f"http://localhost:3000/articles/{post.slug}/"
+                post_url = f"http://bazikacho/articles/{post.slug}/"
             elif post.isVideo and post.videoType:
-                post_url = f"http://localhost:3000/{post.videoType}/{post.slug}/"
+                post_url = f"http://bazikacho/{post.videoType}/{post.slug}/"
             elif post.isNews:
-                post_url = f"http://localhost:3000/news/{post.slug}/"
+                post_url = f"http://bazikacho/news/{post.slug}/"
             elif post.isStory:
-                post_url = f"http://localhost:3000/stories/{post.slug}/"
+                post_url = f"http://bazikacho/stories/{post.slug}/"
                 
         
             post.post_url = post_url
@@ -556,61 +560,7 @@ class PostCommentsView(APIView):
 
 
 
-class commentAPIView(APIView):
-    
-   
-    authentication_classes = [TokenAuthentication] 
 
-    queryset = Comments.objects.all()
-    serializer_class = CommentsSerializer
-    permission_classes = [AllowAny]
-
-    forbidden_words = ["جمهوری اسلامی", "ولایت فقیه", "خمینی", "خامنه ای", "کیر", "کص", "کون", "حرومزاده", "کیری", "کسشر", "فاک", "گاییدم", "مادرتو", "اسکل", "کصخل",
-                       "fuck", "dick", "pussy", "wtf", "خفه شو", "مادر جنده", "کسخل", "کونی", "سکس", "sex", "porn", "پورن", "جنده", "گی", "ترنس","کردمت"
-                       "kos", "kon", "koni", "kiri", "kir", "sexy", "فیلم سوپر", "xxx", "لواط", "همجنس بازی", "لز", "لزبین", "عوضی", "خفه شو","خارشوگاییدم"
-                       "کس نگو", "siktir"]
-
-    def get(self, request):
-        all_comments = Comments.objects.all()
-        serializer = CommentsSerializer(all_comments, many=True)
-        return Response(serializer.data)
-
-    def post(self, request):
-        commentText = request.data.get('commentText')
-        userId = request.data.get('userId')
-        post = request.data.get('post')
-
-        if commentText and userId and post:
-
-            for word in self.forbidden_words:
-                if word in commentText:
-                    return JsonResponse({'error': 'کامنت حاوی الفاظ نامناسب است'}, status=status.HTTP_400_BAD_REQUEST)
-
-            if re.search(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', commentText):
-                return JsonResponse({'error': 'قرار دادن لینک در کامنت مجاز نیست'}, status=status.HTTP_400_BAD_REQUEST)
-            
-              
-            last_comment = Comments.objects.filter(userId=userId).order_by('-createdAt').first()
-
-            if last_comment:
-             time_since_last_comment = datetime.now(timezone.utc) - last_comment.createdAt
-                
-            if time_since_last_comment.total_seconds() < 120:
-                    return JsonResponse({'error': 'برای ثبت کامنت جدید لطفا 2 دقیقه منتظر بمانید'}, status=status.HTTP_400_BAD_REQUEST)
-
-
-            post = AllPosts.objects.get(id=post)
-            user = User.objects.get(id=userId)
-            new_comment = Comments.objects.create(
-                commentText=commentText,
-                userId=user,
-                post=post,
-            )
-
-            new_comment.save()
-            return JsonResponse({'message': 'کامنت با موفقیت ثبت شد'}, status=status.HTTP_201_CREATED)
-        else:
-            return JsonResponse({'error': 'مشکلی در ثبت کامنت رخ داد'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LikeCommentAPIView(APIView):
@@ -773,7 +723,81 @@ class RetrieveChildRepliesAPIView(APIView):
 
 
 
-class ReplyAPIView(APIView):
+
+class BaseAPIView(APIView):
+    
+    def get_last_activity_time(self, user_id, comment_model):
+        last_activity = comment_model.objects.filter(userId=user_id).order_by('-createdAt').first()
+        if last_activity:
+            time_since_last_activity = timezone.now() - last_activity.createdAt
+            return time_since_last_activity
+        return None
+
+
+
+
+
+class commentAPIView(BaseAPIView):
+    
+   
+    authentication_classes = [TokenAuthentication] 
+
+    queryset = Comments.objects.all()
+    serializer_class = CommentsSerializer
+    permission_classes = [AllowAny]
+
+    forbidden_words = ["جمهوری اسلامی", "ولایت فقیه", "خمینی", "خامنه ای", "کیر", "کص", "کون", "حرومزاده", "کیری", "کسشر", "فاک", "گاییدم", "مادرتو", "اسکل", "کصخل",
+                       "fuck", "dick", "pussy", "wtf", "خفه شو", "مادر جنده", "کسخل", "کونی", "سکس", "sex", "porn", "پورن", "جنده", "گی", "ترنس","کردمت"
+                       "kos", "kon", "koni", "kiri", "kir", "sexy", "فیلم سوپر", "xxx", "لواط", "همجنس بازی", "لز", "لزبین", "عوضی", "خفه شو","خارشوگاییدم"
+                       "کس نگو", "siktir"]
+
+    def get(self, request):
+        all_comments = Comments.objects.all()
+        serializer = CommentsSerializer(all_comments, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        commentText = request.data.get('commentText')
+        userId = request.data.get('userId')
+        post = request.data.get('post')
+
+        if commentText and userId and post:
+
+            for word in self.forbidden_words:
+                if word in commentText:
+                    return JsonResponse({'error': 'کامنت حاوی الفاظ نامناسب است'}, status=status.HTTP_400_BAD_REQUEST)
+
+            if re.search(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', commentText):
+                return JsonResponse({'error': 'قرار دادن لینک در کامنت مجاز نیست'}, status=status.HTTP_400_BAD_REQUEST)
+            
+              
+            last_comment_time = self.get_last_activity_time(userId, Comments)
+            last_reply_time = self.get_last_activity_time(userId, Reply)
+
+            if last_comment_time and last_comment_time.total_seconds() < 60 or last_reply_time and last_reply_time.total_seconds() < 60 :
+                return JsonResponse({'error': 'جهت ارسال کامنت جدید لطفا 1 دقیقه منتظر بمانید'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+            post = AllPosts.objects.get(id=post)
+            user = User.objects.get(id=userId)
+            new_comment = Comments.objects.create(
+                commentText=commentText,
+                userId=user,
+                post=post,
+            )
+
+            new_comment.save()
+            return JsonResponse({'message': 'کامنت با موفقیت ثبت شد'}, status=status.HTTP_201_CREATED)
+        else:
+            return JsonResponse({'error': 'مشکلی در ثبت کامنت رخ داد'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
+
+class ReplyAPIView(BaseAPIView):
 
     queryset = Reply.objects.all()
     serializer_class = ReplySerializer
@@ -816,14 +840,11 @@ class ReplyAPIView(APIView):
                 return JsonResponse({'error': 'قرار دادن لینک در پاسخ مجاز نیست'}, status=status.HTTP_400_BAD_REQUEST)
             
             
-            last_reply = Reply.objects.filter(userId=userId).order_by('-createdAt').first()
+            last_reply_time = self.get_last_activity_time(userId, Reply)
+            last_comment_time = self.get_last_activity_time(userId, Comments)
 
-            if last_reply:
-                time_since_last_reply = datetime.now(timezone.utc) - last_reply.createdAt
-               
-                if time_since_last_reply.total_seconds() < 120:
-                    return JsonResponse({'error': 'برای ثبت کامنت جدید لطفا 2 دقیقه منتظر بمانید'}, status=status.HTTP_400_BAD_REQUEST)
-
+            if last_reply_time and last_reply_time.total_seconds() < 60 or last_comment_time and last_comment_time.total_seconds() < 60:
+                return JsonResponse({'error': 'جهت ارسال کامنت جدید لطفا 1 دقیقه منتظر بمانید'}, status=status.HTTP_400_BAD_REQUEST)
 
             post = AllPosts.objects.get(id=post)
             user = User.objects.get(id=userId)

@@ -96,6 +96,9 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ORIGIN_ALLOW_ALL = True
 
 
+
+
+
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -134,7 +137,10 @@ TEMPLATES = [
     },
 ]
 
+
 WSGI_APPLICATION = 'myapp.wsgi.application'
+
+
 
 
 
@@ -148,6 +154,10 @@ DATABASES = {
         'PORT': '5432'
     }
 }
+
+
+
+
 
 
 
