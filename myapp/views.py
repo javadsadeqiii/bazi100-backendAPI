@@ -831,7 +831,7 @@ class ReplyAPIView(APIView):
             last_reply = Reply.objects.filter(userId=userId).order_by('-createdAt').first()
 
             if last_reply:
-                time_since_last_reply = datetime.datetime.now(datetime.timezone.utc) - last_reply.createdAt
+                time_since_last_reply = datetime.now(timezone.utc) - last_reply.createdAt
                
                 if time_since_last_reply.total_seconds() < 120:
                     return JsonResponse({'error': 'برای ثبت کامنت جدید لطفا 2 دقیقه منتظر بمانید'}, status=status.HTTP_400_BAD_REQUEST)
