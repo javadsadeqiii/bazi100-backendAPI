@@ -92,7 +92,7 @@ urlpatterns = [
     
     path('api/unsubscribenewsletter/', UnsubscriberView.as_view(), name='unsubscribe'),
     
-    path('api/resetpassword/', ResetPasswordView.as_view(), name='reset_password'), #اندپوینت پست اول
+    path('api/resetpassword/', ResetPasswordView.as_view(), name='reset_password'), 
     
     path('api/resetpasswordconfirm/', ResetPasswordView.as_view(), name='reset_password_confirm'),
     

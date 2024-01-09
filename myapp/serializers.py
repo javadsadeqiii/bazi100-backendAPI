@@ -22,8 +22,6 @@ class CommentReportSerializer(serializers.ModelSerializer):
 
 
 
-
-
 class ReplyReportSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReplyReport
@@ -139,6 +137,7 @@ class pollsSerializer(ModelSerializer):
 
 
 
+
 class CustomDateTimeField(serializers.DateTimeField):
     def to_representation(self, value):
         formatted_date = value.strftime("%Y,%m,%d,%H,%M")
@@ -162,11 +161,13 @@ class VoteSerializer(ModelSerializer):
 
 
 
+
 class ChoiceSerializer(ModelSerializer):
 
     class Meta:
         model = Choice
         fields = ('__all__')
+
 
 
 
@@ -216,19 +217,6 @@ class ReplyLikeSerializer(ModelSerializer):
         model = ReplyLike
         fields = ('__all__')
 
-
-
-
-
-
-
-
-#class contactUsSerializer(ModelSerializer):
-
-    #class Meta:
-
-     #   model = contactUs
-      #  fields = ('__all__')
 
 
 

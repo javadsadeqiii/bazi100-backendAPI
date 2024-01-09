@@ -42,7 +42,7 @@ class ReplyReport(models.Model):
     
     class Meta:
         verbose_name = "گزارش ریپلای"
-        verbose_name_plural = "گزارش ریپلای ها"
+        verbose_name_plural = "ریپلای های گزارش شده"
 
 
 
@@ -151,8 +151,6 @@ def update_comment_count_on_delete(sender, instance, **kwargs):
 
 
 class Reply(models.Model):
-    
-    
     
     def save(self, *args, **kwargs):
         super(Reply, self).save(*args, **kwargs)
@@ -299,9 +297,13 @@ class AllPosts(models.Model):
     platformIds = models.ManyToManyField(platform, verbose_name="پلتفرم ها")
 
     date = models.DateField(verbose_name="تاریخ و ساعت")
+    
+    isEvent = models.BooleanField(default=False, null=True)
 
     eventStage = models.CharField(
         max_length=100, null=True, choices=EVENT_STAGE_CHOICES, blank=True, verbose_name="برگزارکننده رویداد")
+    
+    isVideo = models.BooleanField(default=False, null=True)
 
     videoType = models.CharField(
         max_length=40, null=True, choices=VIDEO_TYPE_CHOICES, blank=True, verbose_name="تایپ ویدیو")
@@ -321,11 +323,7 @@ class AllPosts(models.Model):
     
     replyCount = models.IntegerField(default=0,verbose_name="تعداد ریپلای",blank=True)
 
-    isEvent = models.BooleanField(default=False, null=True)
-
     isArticle = models.BooleanField(default=False, null=True)
-
-    isVideo = models.BooleanField(default=False, null=True)
 
     isNews = models.BooleanField(default=False, null=True)
 
@@ -622,6 +620,7 @@ class Choice(models.Model):
 
 
 class Vote(models.Model):
+    
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     poll = models.ForeignKey(Polls, on_delete=models.CASCADE)
     choice = models.ForeignKey(Choice, on_delete=models.CASCADE)
@@ -642,7 +641,10 @@ class ContactUs(models.Model):
     emailContact = models.EmailField(verbose_name="ایمیل")
 
     message = models.TextField(verbose_name="متن پیغام")
-
+    
+    createdAt = models.DateTimeField(auto_now_add=True, verbose_name="زمان و تاریخ ",null = True)
+    
+    
     class Meta:
 
         verbose_name = "تماس با ما"

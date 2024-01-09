@@ -9,8 +9,6 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-8s-3p(w9m1oo!6exe@4bod0q67$w)-#^tn#ms-icv7&#5n2i@='
@@ -22,7 +20,10 @@ DEBUG = True
 ALLOWED_HOSTS = ["*"]
 
 
-# Application definition
+
+
+
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -36,6 +37,7 @@ INSTALLED_APPS = [
     'django_jsonform',
     'ckeditor',
     'rest_framework',
+    
 ]
    
     
@@ -135,8 +137,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'myapp.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
     'default': {
@@ -150,8 +150,6 @@ DATABASES = {
 }
 
 
-# Password validation
-# https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -177,14 +175,12 @@ CACHES = {
 }
 
 
-# EMAIL_USER = 'valoranttt200@gmail.com'
-# EMAIL_PASS = 'cnetrwuyqgkdazqr'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587  # Use the appropriate port for your email host
+EMAIL_PORT = 587  
 EMAIL_HOST_USER = 'valoranttt200@gmail.com'
 EMAIL_HOST_PASSWORD = 'eglijfdujnmwtmii'
-EMAIL_USE_TLS = True  # Set to True for most email providers
+EMAIL_USE_TLS = True  
 
 
 # Internationalization
@@ -192,8 +188,6 @@ EMAIL_USE_TLS = True  # Set to True for most email providers
 # settings.py
 
 
-# DATE_FORMAT=  'Y-m-d'
-# DATETIME_FORMAT = 'Y-m-d H:i:s'
 
 
 LANGUAGE_CODE = 'fa' 
@@ -204,7 +198,7 @@ DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 
 LANGUAGE_CODE = 'en-us'
 
-# DATE_INPUT_FORMATS = ['YYYY-MM-DD']
+
 
 TIME_ZONE = 'Asia/Tehran'
 
@@ -229,4 +223,4 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Google account
+

@@ -20,7 +20,6 @@ admin.site.register(CommentReport, CommentReportAdmin)
 
 
 
-
 class ReplyReportAdmin(admin.ModelAdmin):
     
     list_display = ('replyText','reply','userId')
@@ -43,6 +42,10 @@ class SubscriberAdmin(admin.ModelAdmin):
 admin.site.register(Subscriber, SubscriberAdmin)
 
 
+
+
+
+
 class CommentLikeHistoryAdmin(admin.ModelAdmin):
 
     list_display = ['user', 'comment', 'liked_at']
@@ -51,6 +54,9 @@ class CommentLikeHistoryAdmin(admin.ModelAdmin):
 
 
 admin.site.register(CommentLikeHistory, CommentLikeHistoryAdmin)
+
+
+
 
 
       
@@ -66,6 +72,10 @@ admin.site.unregister(User)
 admin.site.register(User, CustomUserAdmin)
 
 
+
+
+
+
 class AllPostsAdmin(admin.ModelAdmin):
 
     list_display = ('id', 'title', 'date', 'tags')
@@ -75,12 +85,22 @@ class AllPostsAdmin(admin.ModelAdmin):
 admin.site.register(AllPosts, AllPostsAdmin)
 
 
+
+
+
+
+
 class platformAdmin(admin.ModelAdmin):
 
     list_display = ("name",)
 
 
 admin.site.register(platform, platformAdmin)
+
+
+
+
+
 
 
 class pollsAdmin(admin.ModelAdmin):
@@ -92,6 +112,10 @@ class pollsAdmin(admin.ModelAdmin):
 admin.site.register(Polls, pollsAdmin)
 
 
+
+
+
+
 class ChoiceAdmin(admin.ModelAdmin):
 
     list_display = ('id', 'title', 'numVotes')
@@ -99,6 +123,9 @@ class ChoiceAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Choice, ChoiceAdmin)
+
+
+
 
 
 class VoteAdmin(admin.ModelAdmin):
@@ -110,6 +137,10 @@ class VoteAdmin(admin.ModelAdmin):
 admin.site.register(Vote, VoteAdmin)
 
 
+
+
+
+
 class ContactUsAdmin(admin.ModelAdmin):
 
     list_display = ('id', 'message')
@@ -117,6 +148,9 @@ class ContactUsAdmin(admin.ModelAdmin):
 
 
 admin.site.register(ContactUs, ContactUsAdmin)
+
+
+
 
 
 class CommentsAdmin(admin.ModelAdmin):
@@ -129,6 +163,9 @@ class CommentsAdmin(admin.ModelAdmin):
 admin.site.register(Comments, CommentsAdmin)
 
 
+
+
+
 class ReplyAdmin(admin.ModelAdmin):
 
     list_display = ('id', 'userId', 'replyText')
@@ -138,12 +175,18 @@ class ReplyAdmin(admin.ModelAdmin):
 admin.site.register(Reply, ReplyAdmin)
 
 
+
+
+
 class ReplyLikeHistoryAdmin(admin.ModelAdmin):
 
     list_display = ('id', 'user', 'reply', 'liked_at')
 
 
 admin.site.register(ReplyLikeHistory, ReplyLikeHistoryAdmin)
+
+
+
 
 
 class wallpapersAdmin(admin.ModelAdmin):
@@ -158,6 +201,8 @@ class wallpapersAdmin(admin.ModelAdmin):
 admin.site.register(wallpapers, wallpapersAdmin)
 
 
+
+
 class tracksAdmin(admin.ModelAdmin):
 
     list_display = ('title', 'id', 'artists', 'album', 'date')
@@ -168,6 +213,10 @@ class tracksAdmin(admin.ModelAdmin):
 
 
 admin.site.register(tracks, tracksAdmin)
+
+
+
+
 
 
 class albumsAdmin(admin.ModelAdmin):
@@ -182,6 +231,9 @@ class albumsAdmin(admin.ModelAdmin):
 admin.site.register(albums, albumsAdmin)
 
 
+
+
+
 class bazikachoTeamAdmin(admin.ModelAdmin):
 
     list_display = ('id', 'position', 'email', 'expertise')
@@ -190,6 +242,10 @@ class bazikachoTeamAdmin(admin.ModelAdmin):
 
 
 admin.site.register(bazikachoTeam, bazikachoTeamAdmin)
+
+
+
+
 
 
 class AdvertisementsAdmin(admin.ModelAdmin):

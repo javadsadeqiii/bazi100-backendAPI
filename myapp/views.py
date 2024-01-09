@@ -29,8 +29,13 @@ from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
 from django.utils.html import strip_tags
 import datetime
-#from .throttles import CommentThrottle
 from django.http import HttpResponse
+from datetime import datetime
+from django.core.cache import cache
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+
+
 
 
 DATE_FORMAT = 'Y-m-d'
@@ -40,9 +45,8 @@ DATETIME_FORMAT = 'Y-m-d H:i:s'
 
 
 
-
-
 class CommentReportView(APIView):
+    
     authentication_classes = [TokenAuthentication] 
     
     def post(self, request):
@@ -63,6 +67,7 @@ class CommentReportView(APIView):
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+
 
 
 
@@ -96,10 +101,44 @@ class ReplyReportView(APIView):
 
 
 
+
 class ResetPasswordView(APIView):
     
     
-    authentication_classes = [TokenAuthentication] 
+    @method_decorator(cache_page(60*5))  
+    def post(self, request):
+        email = request.data.get('email')
+
+        if email:
+            cache_key = f"reset_password_{email}"
+            if cache.get(cache_key):
+                return Response({'error': "برای ارسال درخواست جدید جهت بازیابی رمزعبور لطفا 5 دقیقه منتظر بمانید"}, status=status.HTTP_429_TOO_MANY_REQUESTS)
+            
+            try:
+                user = User.objects.get(email=email)
+            except User.DoesNotExist:
+                return Response({'error': "ایمیل وارد شده یافت نشد"}, status=status.HTTP_404_NOT_FOUND)
+            
+            
+       
+            
+            
+           
+            token_generator = PasswordResetTokenGenerator()
+            token = token_generator.make_token(user)
+
+            html_message = render_to_string('resetpassword.html', {'user_id': user.id, 'token': token})
+            subject = "درخواست بازیابی رمز عبور"
+            from_email = settings.EMAIL_HOST_USER
+            to_email = [email]
+
+            send_mail(subject, '', from_email, to_email, html_message=html_message, fail_silently=False)
+            cache.set(cache_key, True, timeout=60*5)
+
+            return Response({'message': "ایمیل جهت بازیابی رمزعبور ارسال شد"}, status=status.HTTP_200_OK)
+        else:
+            return Response({'error': "لطفا ایمیل خود را وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
+    
     
     def invalidate_token(self, user, token):
       
@@ -117,30 +156,7 @@ class ResetPasswordView(APIView):
             return token in self.used_tokens[user.id]
         return False
 
-    def post(self, request):
-        email = request.data.get('email')
-
-        if email:
-            try:
-                user = User.objects.get(email=email)
-            except User.DoesNotExist:
-                return Response({'error': "ایمیل وارد شده یافت نشد"}, status=status.HTTP_404_NOT_FOUND)
-
-            token_generator = PasswordResetTokenGenerator()
-            token = token_generator.make_token(user)
-
-            html_message = render_to_string('resetpassword.html', {'user_id': user.id, 'token': token})
-            subject = "درخواست بازیابی رمز عبور"
-            from_email = settings.EMAIL_HOST_USER
-            to_email = [email]
-
-            send_mail(subject, '', from_email, to_email, html_message=html_message, fail_silently=False)
-
-            return Response({'message': "ایمیل جهت بازیابی رمزعبور ارسال شد"}, status=status.HTTP_200_OK)
-        else:
-            return Response({'error': "لطفا ایمیل خود را وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
-
-
+    
 
 
     def put(self, request):
@@ -210,6 +226,9 @@ class SubscriberView(APIView):
         return Response({'message': 'عضویت شما در خبرنامه با موفقیت ثبت شد'}, status=status.HTTP_201_CREATED)
      except Exception as e:
         return Response({'error': 'عملیات ثبت عضویت خبرنامه ناموفق بود', 'details': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+        
+        
         
      
         
@@ -308,7 +327,7 @@ class SignUpView(APIView):
             return Response({'error': 'نام کاربری فقط می‌تواند شامل حروف انگلیسی، اعداد و آندرلاین (_) باشد'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            # اعتبارسنجی فرمت ایمیل
+            
             validate_email(email)
         except ValidationError:
             return Response({'error': 'ایمیل وارد شده معتبر نیست'}, status=status.HTTP_400_BAD_REQUEST)
@@ -329,7 +348,7 @@ class SignUpView(APIView):
         user = User.objects.create(
             username=username, password=make_password(password), email=email)
 
-        # بازگرداندن اطلاعات کاربری به عنوان پاسخ
+       
         response_data = {
             'username': user.username,
             'password': user.password,
@@ -455,6 +474,19 @@ class ContactUsView(APIView):
 
         if not fullName or not emailContact or not message:
             return JsonResponse({'error': 'لطفاً تمام فیلدها را پر کنید'}, status=400)
+        
+        
+           
+        last_contact = ContactUs.objects.filter(emailContact=emailContact).order_by('-createdAt').first()
+
+        if last_contact:
+            time_since_last_contact = datetime.datetime.now(datetime.timezone.utc) - last_contact.createdAt
+            
+            if time_since_last_contact.total_seconds() < 300:
+                time_remaining = 300 - time_since_last_contact.total_seconds()
+                return JsonResponse({'error': "برای ارسال پیغام جدید لطفا 5 دقیقه منتظر بمانید"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        
 
         created_contact = ContactUs.objects.create(
             fullName=fullName, emailContact=emailContact, message=message)
@@ -471,6 +503,7 @@ class ContactUsView(APIView):
 
             
             email = EmailMultiAlternatives(
+                
                 subject="ارتباط با تیم بازی کاچو",
                 body=plain_message,
                 from_email=settings.EMAIL_HOST_USER,
@@ -544,8 +577,8 @@ class commentAPIView(APIView):
     permission_classes = [AllowAny]
 
     forbidden_words = ["جمهوری اسلامی", "ولایت فقیه", "خمینی", "خامنه ای", "کیر", "کص", "کون", "حرومزاده", "کیری", "کسشر", "فاک", "گاییدم", "مادرتو", "اسکل", "کصخل",
-                       "fuck", "dick", "pussy", "wtf", "خفه شو", "مادر جنده", "کسخل", "کونی", "سکس", "sex", "porn", "پورن", "جنده", "گی", "ترنس",
-                       "kos", "kon", "koni", "kiri", "kir", "sexy", "فیلم سوپر", "xxx", "لواط", "همجنس بازی", "لز", "لزبین", "عوضی", "خفه شو",
+                       "fuck", "dick", "pussy", "wtf", "خفه شو", "مادر جنده", "کسخل", "کونی", "سکس", "sex", "porn", "پورن", "جنده", "گی", "ترنس","کردمت"
+                       "kos", "kon", "koni", "kiri", "kir", "sexy", "فیلم سوپر", "xxx", "لواط", "همجنس بازی", "لز", "لزبین", "عوضی", "خفه شو","خارشوگاییدم"
                        "کس نگو", "siktir"]
 
     def get(self, request):
@@ -574,7 +607,7 @@ class commentAPIView(APIView):
                 time_since_last_comment = datetime.datetime.now(datetime.timezone.utc) - last_comment.createdAt
                 
                 if time_since_last_comment.total_seconds() < 120:
-                    return JsonResponse({'error': 'لطفا پس از گذشت 2 دقیقه کامنت خود را ارسال کنید'}, status=status.HTTP_400_BAD_REQUEST)
+                    return JsonResponse({'error': 'برای ثبت کامنت جدید لطفا 2 دقیقه منتظر بمانید'}, status=status.HTTP_400_BAD_REQUEST)
 
 
             post = AllPosts.objects.get(id=post)
@@ -612,19 +645,19 @@ class LikeCommentAPIView(APIView):
             comment = Comments.objects.get(id=commentId)
             user = User.objects.get(id=userId)
 
-            # چک کردن آیا کاربر قبلا این کامنت را لایک کرده یا نه
+           
             has_liked_before = CommentLikeHistory.objects.filter(
                 user=user, comment=comment).exists()
 
             if has_liked_before:
-                # اگر قبلا لایک شده بود، حذف لایک و کاهش تعداد لایک‌ها
+               
                 CommentLikeHistory.objects.filter(
                     user=user, comment=comment).delete()
                 comment.likeCount -= 1
                 comment.save()
                 return Response({'message': 'لایک کامنت حذف شد'}, status=status.HTTP_200_OK)
             else:
-                # اگر قبلا لایک نشده بود، ایجاد لایک جدید و افزایش تعداد لایک‌ها
+             
                 CommentLikeHistory.objects.create(user=user, comment=comment)
                 comment.likeCount +=1
                 comment.save()
@@ -722,7 +755,7 @@ class CommentRepliesAPIView(APIView):
     authentication_classes = [TokenAuthentication] 
 
     def get(self, request, comment_id):
-        # Filter main replies (where parentReplyId is None)
+        
         main_replies = Reply.objects.filter(
             commentId=comment_id, parentReplyId=None)
         serializer = ReplySerializer(main_replies, many=True)
@@ -738,12 +771,17 @@ class RetrieveChildRepliesAPIView(APIView):
 
     def get(self, request, reply_id):
         try:
-            # بدست آوردن همه ریپلای‌هایی که parentReplyId آن‌ها برابر با آیدی ارسال شده است
+           
             child_replies = Reply.objects.filter(parentReplyId=reply_id)
             serializer = ReplySerializer(child_replies, many=True)
             return Response(serializer.data)
         except Reply.DoesNotExist:
             return JsonResponse({'error': 'ریپلای مورد نظر یافت نشد'}, status=status.HTTP_404_NOT_FOUND)
+
+
+
+
+
 
 
 class ReplyAPIView(APIView):
@@ -775,7 +813,7 @@ class ReplyAPIView(APIView):
             if parentReplyId is not None and str(parentReplyId).isdigit():
                 try:
                     parentReply = Reply.objects.get(id=parentReplyId)
-                    parentReplyId = parentReply  # Set the actual parent Reply object
+                    parentReplyId = parentReply 
                 except Reply.DoesNotExist:
                     return JsonResponse({'error': 'ریپلای والد نادرست'}, status=status.HTTP_400_BAD_REQUEST)
             else:
@@ -788,25 +826,24 @@ class ReplyAPIView(APIView):
             if re.search(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', replyText):
                 return JsonResponse({'error': 'قرار دادن لینک در پاسخ مجاز نیست'}, status=status.HTTP_400_BAD_REQUEST)
             
-             # Get the user's last reply, if any
+            
             last_reply = Reply.objects.filter(userId=userId).order_by('-createdAt').first()
 
             if last_reply:
                 time_since_last_reply = datetime.datetime.now(datetime.timezone.utc) - last_reply.createdAt
-                # Check if the time difference is less than 2 minutes
+               
                 if time_since_last_reply.total_seconds() < 120:
-                    return JsonResponse({'error': 'لطفا پس از گذشت 2 دقیقه کامنت خود را ارسال کنید'}, status=status.HTTP_400_BAD_REQUEST)
+                    return JsonResponse({'error': 'برای ثبت کامنت جدید لطفا 2 دقیقه منتظر بمانید'}, status=status.HTTP_400_BAD_REQUEST)
 
 
             post = AllPosts.objects.get(id=post)
-           # comment = Comments.objects.get(id=commentId)
             user = User.objects.get(id=userId)
             new_reply = Reply.objects.create(
                 replyText=replyText,
                 userId=user,
                 post=post,
                 parentReplyId=parentReplyId
-                # commentId=comment
+    
             )
 
             comment = Comments.objects.get(id=commentId)
@@ -837,19 +874,19 @@ class ReplyLikeAPIView(APIView):
             reply = Reply.objects.get(id=replyId)
             user = User.objects.get(id=userId)
 
-            # چک کردن آیا کاربر قبلا این کامنت را لایک کرده یا نه
+           
             has_liked_before = ReplyLikeHistory.objects.filter(
                 user=user, reply=reply).exists()
 
             if has_liked_before:
-                # اگر قبلا لایک شده بود، حذف لایک و کاهش تعداد لایک‌ها
+              
                 ReplyLikeHistory.objects.filter(
                     user=user, reply=reply).delete()
                 reply.likeCount -= 1
                 reply.save()
                 return Response({'message': 'لایک کامنت حذف شد'}, status=status.HTTP_200_OK)
             else:
-                # اگر قبلا لایک نشده بود، ایجاد لایک جدید و افزایش تعداد لایک‌ها
+               
                 ReplyLikeHistory.objects.create(user=user, reply=reply)
                 reply.likeCount += 1
                 reply.save()
@@ -866,19 +903,18 @@ class ReplyLikeAPIView(APIView):
 class ReplyLikesDetailAPIView(APIView):
     authentication_classes = [TokenAuthentication] 
     def get(self, request, reply_id):
-        # ابتدا همه‌ی لایک‌های مربوط به آیدی کامنت را دریافت می‌کنیم
+       
         reply_likes = ReplyLikeHistory.objects.filter(
             reply_id=reply_id)
 
-        # ساخت یک لیست برای ذخیره اطلاعات لایک‌ها
+      
         likes_info = []
         for like in reply_likes:
-            # اضافه کردن اطلاعات هر لایک به لیست
+           
             like_info = {
                 'like_id': like.id,
                 'user_id': like.user_id,
                 'reply_id': like.reply_id,
-                # تبدیل به فرمت مورد نظر
                 'liked_at': like.liked_at.strftime('%Y-%m-%d %H:%M:%S')
             }
             likes_info.append(like_info)
@@ -915,11 +951,15 @@ class ChoiceView(APIView):
     
     
     
+    
+    
 class ChoiceDetailView(APIView):
     def get(self, request, choice_id):
         choice = get_object_or_404(Choice, pk=choice_id)
         serializer = ChoiceSerializer(choice)
         return Response(serializer.data)
+    
+    
     
     
 
@@ -950,7 +990,7 @@ def voteChoice(request):
 
     Vote.objects.create(user=user, poll=poll, choice=choice)
 
-    # Update numVotes in Choice model
+    
     choice.numVotes = Vote.objects.filter(choice=choice).count()
     choice.save()
 
@@ -996,11 +1036,19 @@ class WallpapersView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+
+
+
 class AlbumsDetailView(generics.RetrieveAPIView):
     authentication_classes = [TokenAuthentication] 
     queryset = albums.objects.all()
     serializer_class = albumsSerializer
     lookup_field = 'slug'
+
+
+
+
+
 
 
 class AlbumsView(APIView):
@@ -1013,6 +1061,8 @@ class AlbumsView(APIView):
         albums_list = albums.objects.all()
         serializer = albumsSerializer(albums_list, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 
 
 
@@ -1031,6 +1081,9 @@ class TracksView(APIView):
 
 
 
+
+
+
 class TracksDetailView(APIView):
     def get(self, request, track_id):
         track = get_object_or_404(tracks, pk=track_id)
@@ -1038,6 +1091,9 @@ class TracksDetailView(APIView):
         return Response(serializer.data)
 
     
+
+
+
 
 class AdvertisementsView(APIView):
 
