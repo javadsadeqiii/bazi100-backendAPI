@@ -481,7 +481,7 @@ class ContactUsView(APIView):
         last_contact = ContactUs.objects.filter(emailContact=emailContact).order_by('-createdAt').first()
 
         if last_contact:
-            time_since_last_contact = datetime.datetime.now(datetime.timezone.utc) - last_contact.createdAt
+            time_since_last_contact = datetime.now(timezone.utc) - last_contact.createdAt
             
             if time_since_last_contact.total_seconds() < 300:
                 time_remaining = 300 - time_since_last_contact.total_seconds()
