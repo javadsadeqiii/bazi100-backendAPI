@@ -21,7 +21,7 @@ ALLOWED_HOSTS = ["*"]
 
 
 
-
+AUTH_USER_MODEL = 'myapp.CustomUser'
 
 
 
@@ -82,12 +82,16 @@ CKEDITOR_CONFIGS = {
         },
 }
 
+
+
 CORS_ALLOWED_ORIGINS = [
     "https://example.com",
     "https://sub.example.com",
     "http://localhost:8080",
     "http://127.0.0.1:9000",
     "http://localhost:3000",
+    "http://bazikacho.ir",
+    
 
 
 ]

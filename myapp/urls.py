@@ -22,6 +22,8 @@ urlpatterns = [
     
     path('api/albums/', AlbumsView.as_view(), name='albums'),
     
+    path('api/uploadavatar/', AvatarUploadView.as_view(), name='avatar-upload'),
+    
     path('api/tracks/', TracksView.as_view(), name='tracks'),
     
     path('api/tracks/<int:track_id>/', TracksDetailView.as_view(), name='track-detail'),

@@ -50,6 +50,29 @@ DATETIME_FORMAT = 'Y-m-d H:i:s'
 
 
 
+class AvatarUploadView(generics.CreateAPIView):
+    
+    
+    authentication_classes = [TokenAuthentication] 
+    serializer_class = AvatarUploadSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        avatar = serializer.validated_data['avatar']
+        user = self.request.user
+        user.avatar = avatar
+        user.save()
+
+        return Response({'message': 'آواتار با موفقیت بارگذاری شد'})
+
+
+
+
+
+
+
+
 class CommentReportView(APIView):
     
     authentication_classes = [TokenAuthentication] 
@@ -120,8 +143,8 @@ class ResetPasswordView(APIView):
                 return Response({'error': "برای ارسال درخواست جدید جهت بازیابی رمزعبور لطفا 5 دقیقه منتظر بمانید"}, status=status.HTTP_429_TOO_MANY_REQUESTS)
             
             try:
-                user = User.objects.get(email=email)
-            except User.DoesNotExist:
+                user = CustomUser.objects.get(email=email)
+            except CustomUser.DoesNotExist:
                 return Response({'error': "ایمیل وارد شده یافت نشد"}, status=status.HTTP_404_NOT_FOUND)
             
            
@@ -169,8 +192,8 @@ class ResetPasswordView(APIView):
 
         if id and token and newPassword == confirmPassword:
             try:
-                user = User.objects.get(pk=id)
-            except User.DoesNotExist:
+                user = CustomUser.objects.get(pk=id)
+            except CustomUser.DoesNotExist:
                 return Response({'error': "کاربری با این شناسه یافت نشد"}, status=status.HTTP_400_BAD_REQUEST)
 
             token_generator = PasswordResetTokenGenerator()
@@ -309,7 +332,7 @@ class SendNewsLetterViewSet(viewsets.ViewSet):
 
 class SignUpView(APIView):
     
-    authentication_classes = [TokenAuthentication] 
+   # authentication_classes = [TokenAuthentication] 
     
     def post(self, request):
         username = request.data.get('username')
@@ -333,10 +356,10 @@ class SignUpView(APIView):
         except ValidationError:
             return Response({'error': 'ایمیل وارد شده معتبر نیست'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if User.objects.filter(username=username).exists():
+        if CustomUser.objects.filter(username=username).exists():
             return Response({'error': 'نام کاربری وجود دارد'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if User.objects.filter(email=email).exists():
+        if CustomUser.objects.filter(email=email).exists():
             return Response({'error': "ایمیل وارد شده قبلا ثبت شده است"}, status=status.HTTP_400_BAD_REQUEST)
 
         if len(password) < 8:
@@ -346,7 +369,7 @@ class SignUpView(APIView):
             return Response({'error': 'رمز عبور و تایید آن باید یکسان باشند'}, status=status.HTTP_400_BAD_REQUEST)
 
 
-        user = User.objects.create(
+        user = CustomUser.objects.create(
             username=username, password=make_password(password), email=email)
 
        
@@ -357,6 +380,8 @@ class SignUpView(APIView):
             'message': 'ثبت نام با موفقیت انجام شد'
         }
         return Response(response_data, status=status.HTTP_201_CREATED)
+
+
 
 
 
@@ -373,8 +398,8 @@ class LoginView(APIView):
         if not email or not password:
             return Response({'error': "لطفا هردو فیلد ایمیل و رمزعبور را وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
 
-        User = get_user_model()
-        user = User.objects.filter(email=email).first()
+        CustomUser = get_user_model()
+        user = CustomUser.objects.filter(email=email).first()
 
         if user:
             user_auth = authenticate(username=user.username, password=password)
@@ -395,6 +420,8 @@ class LoginView(APIView):
 
 
 
+
+
 class ChangeUsernameView(APIView):
     
     authentication_classes = [TokenAuthentication] 
@@ -407,14 +434,20 @@ class ChangeUsernameView(APIView):
             return Response({'error': 'لطفا هردو فیلد ایمیل و نام کاربری را وارد کنید'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
+            user = CustomUser.objects.get(email=email)
+        except CustomUser.DoesNotExist:
             return Response({'error': "کاربر با این ایمیل یافت نشد"}, status=status.HTTP_404_NOT_FOUND)
 
         user.username = newUsername
         user.save()
 
         return Response({'message': 'نام کاربری به‌روزرسانی شد'}, status=status.HTTP_200_OK)
+
+
+
+
+
+
 
 
 class ChangePasswordView(APIView):
@@ -438,14 +471,14 @@ class ChangePasswordView(APIView):
 
         try:
 
-            user = User.objects.get(email=email)
+            user = CustomUser.objects.get(email=email)
             if user.check_password(oldPassword):
                 user.set_password(newPassword)
                 user.save()
                 return Response({'message': "رمز عبور شما با موفقیت تغییر کرد"}, status=status.HTTP_200_OK)
             else:
                 return Response({'error': "رمز عبور فعلی نادرست است"}, status=status.HTTP_400_BAD_REQUEST)
-        except User.DoesNotExist:
+        except CustomUser.DoesNotExist:
             return Response({'error':  " نام کاربری وارد شده یافت نشد"}, status=status.HTTP_404_NOT_FOUND)
 
 
@@ -582,7 +615,7 @@ class LikeCommentAPIView(APIView):
 
         try:
             comment = Comments.objects.get(id=commentId)
-            user = User.objects.get(id=userId)
+            user = CustomUser.objects.get(id=userId)
 
            
             has_liked_before = CommentLikeHistory.objects.filter(
@@ -604,7 +637,7 @@ class LikeCommentAPIView(APIView):
 
         except Comments.DoesNotExist:
             return Response({'error': 'کامنت موردنظر پیدا نشد'}, status=status.HTTP_404_NOT_FOUND)
-        except User.DoesNotExist:
+        except CustomUser.DoesNotExist:
             return Response({'error': 'کاربر موردنظر پیدا نشد'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -661,7 +694,7 @@ class UserDetailsAPIView(APIView):
 
     def get(self, request, user_id):
         try:
-            user = User.objects.get(id=user_id)
+            user = CustomUser.objects.get(id=user_id)
 
             user_data = {
                 'id': user.id,
@@ -671,7 +704,7 @@ class UserDetailsAPIView(APIView):
 
             }
             return Response(user_data)
-        except User.DoesNotExist:
+        except CustomUser.DoesNotExist:
             return Response({'error': 'کاربر مورد نظر یافت نشد'}, status=status.HTTP_404_NOT_FOUND)
 
 
@@ -780,7 +813,7 @@ class commentAPIView(BaseAPIView):
 
 
             post = AllPosts.objects.get(id=post)
-            user = User.objects.get(id=userId)
+            user = CustomUser.objects.get(id=userId)
             new_comment = Comments.objects.create(
                 commentText=commentText,
                 userId=user,
@@ -847,7 +880,7 @@ class ReplyAPIView(BaseAPIView):
                 return JsonResponse({'error': 'جهت ارسال کامنت جدید لطفا 1 دقیقه منتظر بمانید'}, status=status.HTTP_400_BAD_REQUEST)
 
             post = AllPosts.objects.get(id=post)
-            user = User.objects.get(id=userId)
+            user = CustomUser.objects.get(id=userId)
             new_reply = Reply.objects.create(
                 replyText=replyText,
                 userId=user,
@@ -882,7 +915,7 @@ class ReplyLikeAPIView(APIView):
 
         try:
             reply = Reply.objects.get(id=replyId)
-            user = User.objects.get(id=userId)
+            user = CustomUser.objects.get(id=userId)
 
            
             has_liked_before = ReplyLikeHistory.objects.filter(
@@ -904,7 +937,7 @@ class ReplyLikeAPIView(APIView):
 
         except reply.DoesNotExist:
             return Response({'error': 'کامنت موردنظر پیدا نشد'}, status=status.HTTP_404_NOT_FOUND)
-        except User.DoesNotExist:
+        except CustomUser.DoesNotExist:
             return Response({'error': 'کاربر موردنظر پیدا نشد'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -987,10 +1020,10 @@ def voteChoice(request):
     choice = request.data.get('choice')
 
     try:
-        user = User.objects.get(pk=user)
+        user = CustomUser.objects.get(pk=user)
         poll = Polls.objects.get(pk=poll)
         choice = Choice.objects.get(pk=choice)
-    except (User.DoesNotExist, Polls.DoesNotExist, Choice.DoesNotExist) as e:
+    except (CustomUser.DoesNotExist, Polls.DoesNotExist, Choice.DoesNotExist) as e:
         raise ValidationError({'error': "یکی از مقادیر نادرست وارد شده"})
 
     user_voted = Vote.objects.filter(

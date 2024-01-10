@@ -3,6 +3,57 @@ from .models import *
 from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import User
+from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth import get_user_model
+
+
+
+
+
+CustomUserModel = get_user_model()
+
+
+class CustomUserAdmin(BaseUserAdmin):
+    list_display = ['id', 'username', 'email', 'avatar']  
+    ordering = ('id',)
+
+    fieldsets = (
+        (None, {'fields': ('username', 'password')}),
+        ('Personal info', {'fields': ('first_name', 'last_name', 'email', 'avatar')}),  
+        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        ('Important dates', {'fields': ('last_login', 'date_joined')}),
+    )
+
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('username', 'password1', 'password2', 'email', 'avatar')
+        }),
+        ('Personal info', {'fields': ('first_name', 'last_name' )}),
+        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        ('Important dates', {'fields': ('last_login', 'date_joined')})
+    )
+
+
+if CustomUserModel != CustomUser:
+    admin.site.unregister(CustomUserModel)
+
+admin.site.register(CustomUser, CustomUserAdmin)
+
+
+
+
+
+#class CustomUserAdmin(BaseUserAdmin):
+    
+  
+   # list_display = ['id', 'username', 'email']
+  ##  ordering = ('id',)
+
+
+#admin.site.unregister(User)
+
+#admin.site.register(User, CustomUserAdmin)
 
 
 
@@ -40,6 +91,7 @@ admin.site.register(ReplyReport, ReplyReportAdmin)
 
 
 
+
 class SubscriberAdmin(admin.ModelAdmin):
 
     list_display = ('email',)
@@ -67,17 +119,6 @@ admin.site.register(CommentLikeHistory, CommentLikeHistoryAdmin)
 
 
       
-class CustomUserAdmin(BaseUserAdmin):
-    
-  
-    list_display = ['id', 'username', 'email']
-    ordering = ('id',)
-
-
-admin.site.unregister(User)
-
-admin.site.register(User, CustomUserAdmin)
-
 
 
 

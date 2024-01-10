@@ -8,6 +8,8 @@ from ckeditor_uploader.fields import RichTextUploadingField
 from django.db import models
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
+from django.contrib.auth.models import AbstractUser
+import random
 
 
 
@@ -17,11 +19,50 @@ en_formats.DATETIME_FORMAT = 'Y-m-d'
 
 
 
+
+class CustomUser(AbstractUser):
+    
+    
+     AVATAR_CHOICES = [
+        ('images/avatar1', 'Avatar 1'),
+        ('images/avatar2', 'Avatar 2'),
+        ('images/avatar3', 'Avatar 3'),
+        ('images/avatar4', 'Avatar 4'),
+        ('images/avatar5', 'Avatar 5'),
+        ('images/avatar6', 'Avatar 6'),
+        ('images/avatar7', 'Avatar 7'),
+        ('images/avatar8', 'Avatar 8'),
+        ('images/avatar9', 'Avatar 9'),
+        ('images/avatar10','Avatar 10'),
+        ('images/avatar11','Avatar 11'),
+    ]
+  
+     avatar = models.FileField(upload_to='images/', verbose_name="Avatar", blank=True, choices=AVATAR_CHOICES)
+     
+     def save(self, *args, **kwargs):
+        if not self.avatar:  
+            self.avatar = random.choice(self.AVATAR_CHOICES)[0]
+        super().save(*args, **kwargs)
+    
+    
+    
+CustomUser._meta.get_field('groups').remote_field.related_name = 'custom_user_groups'
+CustomUser._meta.get_field('user_permissions').remote_field.related_name = 'custom_user_permissions'
+
+
+
+
+
+
+
+
+
+
 class CommentReport(models.Model):
     
     commentText = models.TextField()
     commentId = models.ForeignKey('Comments', on_delete=models.CASCADE, related_name='comment_reports_id')
-    userId = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_comment_reports')
+    userId = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='user_comment_reports')
     post = models.ForeignKey('AllPosts', on_delete=models.CASCADE, related_name='post_comment_reports')
     
     class Meta:
@@ -37,7 +78,7 @@ class CommentReport(models.Model):
 class ReplyReport(models.Model):
     replyText = models.TextField()
     reply = models.ForeignKey('Reply', on_delete=models.CASCADE, related_name='report_of_reply')
-    userId = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_reply_reports')
+    userId = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='user_reply_reports')
     post = models.ForeignKey('AllPosts', on_delete=models.CASCADE, related_name='post_reply_reports')
     
     class Meta:
@@ -69,7 +110,7 @@ class Subscriber(models.Model):
 
 class CommentLikeHistory(models.Model):
     
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     comment = models.ForeignKey('Comments', on_delete=models.CASCADE)
     liked_at = models.DateTimeField(auto_now_add=True)
 
@@ -85,7 +126,7 @@ class CommentLikeHistory(models.Model):
 class CommentLike(models.Model):
 
     userId = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='userliker', verbose_name="آیدی کاربر")
+        CustomUser, on_delete=models.CASCADE, related_name='userliker', verbose_name="آیدی کاربر")
 
     commentId = models.ForeignKey(
         'Comments', on_delete=models.CASCADE, default=None, related_name='likecount', verbose_name="آیدی کامنت")
@@ -121,7 +162,7 @@ class Comments(models.Model):
         auto_now_add=True, verbose_name="زمان و تاریخ انتشار کامنت")
 
     userId = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='user', verbose_name="آیدی کاربر")
+        CustomUser, on_delete=models.CASCADE, related_name='user', verbose_name="آیدی کاربر")
 
     post = models.ForeignKey(
         'AllPosts', on_delete=models.CASCADE, default=None, related_name='post', verbose_name="آیدی پست")
@@ -169,7 +210,7 @@ class Reply(models.Model):
     createdAt = models.DateTimeField(
         auto_now_add=True, verbose_name="زمان و تاریخ انتشار پاسخ")
 
-    userId = models.ForeignKey(User, on_delete=models.CASCADE,
+    userId = models.ForeignKey(CustomUser, on_delete=models.CASCADE,
                                related_name='user_replies', verbose_name="آیدی کاربر")
 
     commentId = models.ManyToManyField(
@@ -210,7 +251,7 @@ def update_reply_count_on_delete(sender, instance, **kwargs):
 
 class ReplyLikeHistory(models.Model):
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
 
     reply = models.ForeignKey(Reply, on_delete=models.CASCADE)
 
@@ -228,7 +269,7 @@ class ReplyLikeHistory(models.Model):
 class ReplyLike(models.Model):
 
     userId = models.ForeignKey(
-        User, on_delete=models.CASCADE, verbose_name="آیدی کاربر")
+        CustomUser, on_delete=models.CASCADE, verbose_name="آیدی کاربر")
     replyId = models.ForeignKey(
         Reply, on_delete=models.CASCADE, verbose_name="آیدی کامنت")
 
@@ -349,9 +390,9 @@ class AllPosts(models.Model):
 
     class Meta:
 
-        verbose_name = "جدول پست ها"
+        verbose_name = " پست ها"
 
-        verbose_name_plural = "جدول همه پست ها"
+        verbose_name_plural = " همه پست ها"
 
     def __str__(self):
 
@@ -446,6 +487,7 @@ class tracks(models.Model):
 
 
 
+
 class albums(models.Model):
     
 
@@ -489,6 +531,7 @@ class albums(models.Model):
 
     def __str__(self):
         return self.title
+
 
 
 
@@ -555,6 +598,8 @@ class bazikachoTeam(models.Model):
 
 
 
+
+
 class Advertisements(models.Model):
 
 
@@ -603,6 +648,9 @@ class Advertisements(models.Model):
 
 
 
+
+
+
 class Polls(models.Model):
 
     expiryTimestamp = models.DateField(
@@ -621,6 +669,12 @@ class Polls(models.Model):
         verbose_name = "نظرسنجی"
 
         verbose_name_plural = "نظرسنجی ها"
+
+
+
+
+
+
 
 
 class Choice(models.Model):
@@ -643,9 +697,10 @@ class Choice(models.Model):
 
 
 
+
 class Vote(models.Model):
     
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     poll = models.ForeignKey(Polls, on_delete=models.CASCADE)
     choice = models.ForeignKey(Choice, on_delete=models.CASCADE)
 
@@ -654,6 +709,10 @@ class Vote(models.Model):
         verbose_name = "رای ها"
 
         verbose_name_plural = "رای ها"
+
+
+
+
 
 
 
