@@ -35,7 +35,7 @@ from django.core.cache import cache
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from datetime import timezone
-from django.utils import timezone
+#from django.utils import timezone
 import datetime
 from PIL import Image
 
@@ -409,7 +409,7 @@ class SignUpView(APIView):
 
 class LoginView(APIView):
     
-    authentication_classes = [TokenAuthentication] 
+   # authentication_classes = [TokenAuthentication] 
     
     def post(self, request):
         email = request.data.get('email')
@@ -425,17 +425,19 @@ class LoginView(APIView):
             user_auth = authenticate(username=user.username, password=password)
 
             if user_auth:
+                avatar_url = user.avatar.url if user.avatar else None
+
                 return Response({
-                    'message': 'با موفقیت وارد شدید',
+                    'message': 'ورود کاربر با موفقیت انجام شد',
                     'user': {
                         'id': user.id,
                         'username': user.username,
                         'email': user.email,
-                        'avatar':user.avatar,
+                        'avatar_url': avatar_url,
                     }
                 }, status=status.HTTP_200_OK)
 
-        return Response({'error': 'ایمیل یا رمز عبور اشتباه است'}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response({'error': 'ایمیل یا رمزعبور اشتباه است'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 
