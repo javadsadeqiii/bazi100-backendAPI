@@ -40,10 +40,12 @@ class CustomUser(AbstractUser):
      avatar = models.FileField(upload_to='images/', verbose_name="Avatar", blank=True, choices=AVATAR_CHOICES)
      
      def save(self, *args, **kwargs):
+        if not self.id:  
+            super().save(*args, **kwargs)  
+
         if not self.avatar:  
             self.avatar = random.choice(self.AVATAR_CHOICES)[0]
         super().save(*args, **kwargs)
-    
     
     
 CustomUser._meta.get_field('groups').remote_field.related_name = 'custom_user_groups'
@@ -52,6 +54,10 @@ CustomUser._meta.get_field('user_permissions').remote_field.related_name = 'cust
 
 
 
+   #  def save(self, *args, **kwargs):
+    #    if not self.avatar:  
+     #       self.avatar = random.choice(self.AVATAR_CHOICES)[0]
+     #   super().save(*args, **kwargs)
 
 
 
@@ -385,6 +391,8 @@ class AllPosts(models.Model):
     isNews = models.BooleanField(default=False, null=True)
 
     isStory = models.BooleanField(default=False, null=True)
+    
+    isReportage = models.BooleanField(default=False,null =True)
     
     
 
