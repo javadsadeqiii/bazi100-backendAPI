@@ -24,17 +24,17 @@ class CustomUser(AbstractUser):
     
     
      AVATAR_CHOICES = [
-        ('images/avatar1', 'Avatar 1'),
-        ('images/avatar2', 'Avatar 2'),
-        ('images/avatar3', 'Avatar 3'),
-        ('images/avatar4', 'Avatar 4'),
-        ('images/avatar5', 'Avatar 5'),
-        ('images/avatar6', 'Avatar 6'),
-        ('images/avatar7', 'Avatar 7'),
-        ('images/avatar8', 'Avatar 8'),
-        ('images/avatar9', 'Avatar 9'),
-        ('images/avatar10','Avatar 10'),
-        ('images/avatar11','Avatar 11'),
+        ('images/avatar1.webp', 'Avatar 1'),
+        ('images/avatar2.webp', 'Avatar 2'),
+        ('images/avatar3.webp', 'Avatar 3'),
+        ('images/avatar4.webp', 'Avatar 4'),
+        ('images/avatar5.webp', 'Avatar 5'),
+        ('images/avatar6.webp', 'Avatar 6'),
+        ('images/avatar7.webp', 'Avatar 7'),
+        ('images/avatar8.webp', 'Avatar 8'),
+        ('images/avatar9.webp', 'Avatar 9'),
+        ('images/avatar10.webp','Avatar 10'),
+        ('images/avatar11.webp','Avatar 11'),
     ]
   
      avatar = models.FileField(upload_to='images/', verbose_name="Avatar", blank=True, choices=AVATAR_CHOICES)
