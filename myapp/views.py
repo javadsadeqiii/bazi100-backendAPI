@@ -37,6 +37,7 @@ from django.views.decorators.cache import cache_page
 from datetime import timezone
 from django.utils import timezone
 import datetime
+from PIL import Image
 
 
 
@@ -53,18 +54,37 @@ DATETIME_FORMAT = 'Y-m-d H:i:s'
 class AvatarUploadView(generics.CreateAPIView):
     
     
-    authentication_classes = [TokenAuthentication] 
-    serializer_class = AvatarUploadSerializer
-
     def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        avatar = serializer.validated_data['avatar']
-        user = self.request.user
+        userId = request.data.get('userId')
+        avatar = request.data.get('avatar')
+
+
+        try:
+            user = User.objects.get(pk=userId)
+        except User.DoesNotExist:
+            return Response({'error': 'کاربر یافت نشد'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if not avatar:
+            return Response({'error': 'هیچ فایلی ارائه نشده'}, status=status.HTTP_400_BAD_REQUEST)
+      
+        valid_extensions = ['jpg', 'jpeg', 'png', 'webp']
+        ext = avatar.name.split('.')[-1].lower()
+        if ext not in valid_extensions:
+            return Response({'error': "باشد JPG , PNG , JPEG , WebP فایل بارگذاری شده باید شامل یکی از فرمت های "}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            img = Image.open(avatar)
+            width, height = img.size
+            max_dimension = 200
+            if width > max_dimension or height > max_dimension:
+                return Response({'message': f"پیکسل باشد {max_dimension}x{max_dimension} ابعاد آواتار نباید بیشتر از"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
         user.avatar = avatar
         user.save()
 
-        return Response({'message': 'آواتار با موفقیت بارگذاری شد'})
+        return Response({'message': 'آواتار با موفقیت بارگذاری شد'}, status=status.HTTP_201_CREATED)
 
 
 

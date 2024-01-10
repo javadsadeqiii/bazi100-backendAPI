@@ -5,7 +5,7 @@ from rest_framework import serializers
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.contrib.auth.forms import PasswordResetForm
 from rest_framework.response import Response
-from PIL import Image
+
 
 
 
@@ -16,22 +16,7 @@ class AvatarUploadSerializer(serializers.Serializer):
     
     avatar = serializers.ImageField()
     
-    def validate_avatar(self, value):
-        valid_extensions = ['jpg', 'jpeg', 'png', 'webp']
-        ext = value.name.split('.')[-1].lower()
-        if ext not in valid_extensions:
-            return Response({'error':"باشد JPG , PNG , JPEG , WebP فایل بارگذاری شده باید شامل یکی از فرمت های "})
-
-        
-        img = Image.open(value)
-        width, height = img.size
-        max_dimension = 200
-        if width > max_dimension or height > max_dimension:
-            return Response({'message':f"پیکسل باشد {max_dimension}x{max_dimension} ابعاد آواتار نباید بیشتر از"})
-
-        return value
-
-
+  
 
 
 
