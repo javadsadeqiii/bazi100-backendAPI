@@ -10,10 +10,11 @@ from rest_framework.response import Response
 
 
 
+class AvatarSelectionSerializer(serializers.Serializer):
+    selected_avatar = serializers.CharField()
 
-
-class AvatarUploadSerializer(serializers.Serializer):
-    avatar = serializers.ImageField()
+#class AvatarUploadSerializer(serializers.Serializer):
+  #  avatar = serializers.ImageField()
     
 
 

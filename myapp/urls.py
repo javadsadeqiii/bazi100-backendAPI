@@ -22,7 +22,7 @@ urlpatterns = [
     
     path('api/albums/', AlbumsView.as_view(), name='albums'),
     
-    path('api/uploadavatar/', AvatarUploadView.as_view(), name='avatar-upload'),
+    path('api/selectavatar/', AvatarSelectionView.as_view(), name='select_avatar'),
     
    # path('reset-downloads/', ResetDownloadsView.as_view(), name='reset_downloads'),
     

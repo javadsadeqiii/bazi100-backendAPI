@@ -43,9 +43,6 @@ from django.utils import timezone
 
 
 
-
-
-
 DATE_FORMAT = 'Y-m-d'
 DATETIME_FORMAT = 'Y-m-d H:i:s'
 
@@ -67,47 +64,27 @@ DATETIME_FORMAT = 'Y-m-d H:i:s'
 
 
 
-class AvatarUploadView(generics.CreateAPIView):
+class AvatarSelectionView(APIView):
     
-    serializer_class = AvatarUploadSerializer
-
     def post(self, request, *args, **kwargs):
-        user_id = request.data.get('userId')
-        avatar_data = request.data.get('avatar')
+        userId = request.data.get('userId')
+        selectedAvatar = request.data.get('selectedAvatar')
 
         try:
-            user = CustomUser.objects.get(pk=user_id)
+            user = CustomUser.objects.get(pk=userId)
         except CustomUser.DoesNotExist:
             return Response({'error': 'کاربر یافت نشد'}, status=status.HTTP_400_BAD_REQUEST)
+
         
-        if not avatar_data:
-            return Response({'error': 'هیچ فایلی یا داده‌ای ارائه نشده'}, status=status.HTTP_400_BAD_REQUEST)
+        valid_avatars = [avatar[0] for avatar in user.AVATAR_CHOICES]
+        if selectedAvatar not in valid_avatars:
+            return Response({'error': 'آواتار انتخابی معتبر نیست'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if isinstance(avatar_data, str):
-
-            user.avatar = avatar_data
-        else:
-            
-            valid_extensions = ['jpg', 'jpeg', 'png', 'webp']
-            ext = avatar_data.name.split('.')[-1].lower()
-            if ext not in valid_extensions:
-                return Response({'error': "باشد JPG , PNG , JPEG , WebP فایل بارگذاری شده باید شامل یکی از فرمت های "}, status=status.HTTP_400_BAD_REQUEST)
-
-            try:
-                img = Image.open(avatar_data)
-                width, height = img.size
-                max_dimension = 200
-                if width > max_dimension or height > max_dimension:
-                    return Response({'message': f"پیکسل باشد {max_dimension}x{max_dimension} ابعاد آواتار نباید بیشتر از"}, status=status.HTTP_400_BAD_REQUEST)
-            except Exception as e:
-                return Response({'error': "خطایی در روند تغییر آواتار رخ داد"}, status=status.HTTP_400_BAD_REQUEST)
-
-            user.avatar = avatar_data
-
+    
+        user.avatar = selectedAvatar
         user.save()
 
-        return Response({'message': 'آواتار با موفقیت بارگذاری شد'}, status=status.HTTP_201_CREATED)
-
+        return Response({'message': 'آواتار با موفقیت انتخاب شد'}, status=status.HTTP_200_OK)
 
 
 

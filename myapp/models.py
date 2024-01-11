@@ -59,10 +59,10 @@ class CustomUser(AbstractUser):
   #      user.downloads = 5  
  #       user.save()
     
-    
-
+        
 CustomUser._meta.get_field('groups').remote_field.related_name = 'custom_user_groups'
 CustomUser._meta.get_field('user_permissions').remote_field.related_name = 'custom_user_permissions'
+
 
 
 
