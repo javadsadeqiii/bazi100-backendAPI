@@ -719,14 +719,13 @@ class UserDetailsAPIView(APIView):
     def get(self, request, user_id):
         try:
             user = CustomUser.objects.get(id=user_id)
-            avatar_url = user.get_avatar_url()
+            avatar_url = user.avatar.url if user.avatar else None
 
             user_data = {
                 'id': user.id,
                 'username': user.username,
                 'email': user.email,
-                'password': user.password,
-                'avatar_url': avatar_url
+                'avatar_url': avatar_url,
 
             }
             return Response(user_data)
