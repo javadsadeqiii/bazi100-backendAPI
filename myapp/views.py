@@ -40,6 +40,8 @@ from datetime import timezone, datetime
 from PIL import Image
 from django.utils import timezone
 from .serializers import CustomUserSerializer
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.decorators import parser_classes
 #from django.db.models import F
 
 
@@ -64,12 +66,13 @@ DATETIME_FORMAT = 'Y-m-d H:i:s'
 
 
 
-
+@parser_classes([MultiPartParser, FormParser])
 class AvatarSelectionView(APIView):
     
     def post(self, request, *args, **kwargs):
         userId = request.data.get('userId')
-        selectedAvatar = request.data.get('selectedAvatar')
+        avatar = request.data.get('avatar')
+        customAvatar = request.data.get('customAvatar')
 
         try:
             user = CustomUser.objects.get(pk=userId)
@@ -78,16 +81,43 @@ class AvatarSelectionView(APIView):
 
         
         valid_avatars = [avatar[0] for avatar in user.AVATAR_CHOICES]
-        if selectedAvatar not in valid_avatars:
+        if avatar not in valid_avatars:
             return Response({'error': 'آواتار انتخابی معتبر نیست'}, status=status.HTTP_400_BAD_REQUEST)
 
     
-        user.avatar = selectedAvatar
+        if customAvatar:
+           
+            if (
+                customAvatar.size > 200 * 1024  
+                or customAvatar.width > 200
+                or customAvatar.height > 200
+                or customAvatar.content_type not in ['image/jpeg', 'image/png', 'image/webp']
+            ):
+                return Response({'error':  ' باشد png , jpeg , webp آواتار جهت بارگذاری باید شامل یکی از فرمت های'}, status=status.HTTP_400_BAD_REQUEST)
+
+            
+        user.avatar = customAvatar
         user.save()
 
-         
-        serializer = CustomUserSerializer(user)
-        return Response({'message': 'آواتار با موفقیت انتخاب شد', 'avatar_data': serializer.data}, status=status.HTTP_200_OK)
+
+        user.avatar = avatar
+        user.save()
+
+        
+        avatar_data = next((avatar for avatar in user.AVATAR_CHOICES if avatar[0] == avatar), None)
+
+        customAvatar_data = {
+            'url': user.customAvatar.url if user.customAvatar else None,
+            'filename': user.customAvatar.name if user.customAvatar else None,
+        }
+
+        response_data = {
+            'message': 'آواتار با موفقیت بارگذاری شد',
+            'avatar_data': avatar_data,
+            'customAvatar_data': customAvatar_data,
+        }
+
+        return Response(response_data, status=status.HTTP_200_OK)
 
 
 
@@ -427,6 +457,7 @@ class LoginView(APIView):
 
             if user_auth:
                 avatar_url = user.avatar.url if user.avatar else None
+                customAvatar_url = user.customAvatar.url if user.customAvatar else None
 
                 return Response({
                     'message': 'ورود کاربر با موفقیت انجام شد',
@@ -435,6 +466,7 @@ class LoginView(APIView):
                         'username': user.username,
                         'email': user.email,
                         'avatar_url': avatar_url,
+                        'customAvatar_url': customAvatar_url,
                     }
                 }, status=status.HTTP_200_OK)
 
@@ -720,12 +752,14 @@ class UserDetailsAPIView(APIView):
         try:
             user = CustomUser.objects.get(id=user_id)
             avatar_url = user.avatar.url if user.avatar else None
+            customAvatar_url = user.customAvatar.url if user.customAvatar else None
 
             user_data = {
                 'id': user.id,
                 'username': user.username,
                 'email': user.email,
                 'avatar_url': avatar_url,
+                'customAvatar':customAvatar_url,
 
             }
             return Response(user_data)
