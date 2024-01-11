@@ -10,6 +10,8 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.contrib.auth.models import AbstractUser
 import random
+from django.utils import timezone
+from background_task import background
 
 
 
@@ -20,9 +22,7 @@ en_formats.DATETIME_FORMAT = 'Y-m-d'
 
 
 
-
 class CustomUser(AbstractUser):
-    
     
     
     
@@ -41,20 +41,28 @@ class CustomUser(AbstractUser):
     ]
   
      avatar = models.FileField(upload_to='images/', verbose_name="Avatar", blank=True, choices=AVATAR_CHOICES)
+    # downloads = models.PositiveIntegerField(default=5, verbose_name="دانلود ها")
      
      def save(self, *args, **kwargs):
         if not self.avatar:  
             self.avatar = random.choice(self.AVATAR_CHOICES)[0]
         super().save(*args, **kwargs)
+        
+        
+#@background(schedule=30*24*60*60, autostart=True) 
+#def reset_download_counts():
+    
+ #   thirty_days_ago = timezone.now() - timezone.timedelta(days=30)
+ #   users_to_reset = CustomUser.objects.filter(last_download_date__lte=thirty_days_ago)
+
+ #   for user in users_to_reset:
+  #      user.downloads = 5  
+ #       user.save()
     
     
-    
+
 CustomUser._meta.get_field('groups').remote_field.related_name = 'custom_user_groups'
 CustomUser._meta.get_field('user_permissions').remote_field.related_name = 'custom_user_permissions'
-
-
-
-
 
 
 
@@ -415,6 +423,7 @@ class AllPosts(models.Model):
 
 
 
+
 class wallpapers(models.Model):
 
     DEVICE_CHOICES = (
@@ -443,6 +452,11 @@ class wallpapers(models.Model):
 
     resolution = models.CharField(
         max_length=50, blank=True, null=True, verbose_name="کیفیت")
+    
+   
+    
+    
+    
 
 
 
@@ -454,6 +468,8 @@ class wallpapers(models.Model):
 
     def __str__(self):
         return self.title
+
+
 
 
 

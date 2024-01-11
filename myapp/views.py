@@ -39,6 +39,7 @@ import datetime
 from datetime import timezone, datetime 
 from PIL import Image
 from django.utils import timezone
+from django.db.models import F
 
 
 
@@ -52,19 +53,30 @@ DATETIME_FORMAT = 'Y-m-d H:i:s'
 
 
 
+
+#class ResetDownloadsView(APIView):
+ #   def post(self, request, *args, **kwargs):
+  #      reset_download_counts(repeat=1)  
+    #    return Response({'message': 'تعداد دانلود های مجاز بروزرسانی شد'})
+
+
+
+
+
+
+
+
+
 class AvatarUploadView(generics.CreateAPIView):
-    
-    authentication_classes = [TokenAuthentication] 
-    
-    
+    serializer_class = AvatarUploadSerializer
+
     def post(self, request, *args, **kwargs):
-        userId = request.data.get('userId')
+        user_id = request.data.get('userId')
         avatar = request.data.get('avatar')
 
-
         try:
-            user = User.objects.get(pk=userId)
-        except User.DoesNotExist:
+            user = CustomUser.objects.get(pk=user_id)
+        except CustomUser.DoesNotExist:
             return Response({'error': 'کاربر یافت نشد'}, status=status.HTTP_400_BAD_REQUEST)
         
         if not avatar:
@@ -304,9 +316,6 @@ class UnsubscriberView(APIView):
 
 
 
-
-
-
 class SendNewsLetterViewSet(viewsets.ViewSet):
     
     authentication_classes = [TokenAuthentication] 
@@ -357,7 +366,7 @@ class SendNewsLetterViewSet(viewsets.ViewSet):
 
 class SignUpView(APIView):
     
-   # authentication_classes = [TokenAuthentication] 
+    authentication_classes = [TokenAuthentication] 
     
     def post(self, request):
         username = request.data.get('username')
@@ -928,6 +937,9 @@ class ReplyAPIView(BaseAPIView):
             return JsonResponse({'error': 'مشکلی در ثبت پاسخ رخ داد'}, status=status.HTTP_400_BAD_REQUEST)
 
 
+
+
+
 class ReplyLikeAPIView(APIView):
 
     queryset = ReplyLike.objects.all()
@@ -973,6 +985,9 @@ class ReplyLikeAPIView(APIView):
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+
+
+
 class ReplyLikesDetailAPIView(APIView):
     authentication_classes = [TokenAuthentication] 
     def get(self, request, reply_id):
@@ -1012,6 +1027,7 @@ class PollsView(APIView):
 
 
 
+
 class ChoiceView(APIView):
     queryset = Choice.objects.all()
     serializer_class = ChoiceSerializer
@@ -1026,11 +1042,15 @@ class ChoiceView(APIView):
     
     
     
+    
+    
 class ChoiceDetailView(APIView):
     def get(self, request, choice_id):
         choice = get_object_or_404(Choice, pk=choice_id)
         serializer = ChoiceSerializer(choice)
         return Response(serializer.data)
+    
+    
     
     
     
@@ -1072,11 +1092,17 @@ def voteChoice(request):
 
 
 
+
+
+
 class AllPostsDetailView(generics.RetrieveAPIView):
     authentication_classes = [TokenAuthentication] 
     queryset = AllPosts.objects.all()
     serializer_class = AllPostsSerializer
     lookup_field = 'slug'
+
+
+
 
 
 
@@ -1124,6 +1150,7 @@ class AlbumsDetailView(generics.RetrieveAPIView):
 
 
 
+
 class AlbumsView(APIView):
 
     queryset = albums.objects.all()
@@ -1134,6 +1161,7 @@ class AlbumsView(APIView):
         albums_list = albums.objects.all()
         serializer = albumsSerializer(albums_list, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 
 
@@ -1157,6 +1185,7 @@ class TracksView(APIView):
 
 
 
+
 class TracksDetailView(APIView):
     def get(self, request, track_id):
         track = get_object_or_404(tracks, pk=track_id)
@@ -1164,6 +1193,9 @@ class TracksDetailView(APIView):
         return Response(serializer.data)
 
     
+
+
+
 
 
 

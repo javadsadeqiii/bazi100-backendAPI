@@ -24,6 +24,10 @@ urlpatterns = [
     
     path('api/uploadavatar/', AvatarUploadView.as_view(), name='avatar-upload'),
     
+   # path('reset-downloads/', ResetDownloadsView.as_view(), name='reset_downloads'),
+    
+   # path('download/<int:user_id>/', DownloadHistoryView.download_request, name='download_request'),
+    
     path('api/tracks/', TracksView.as_view(), name='tracks'),
     
     path('api/tracks/<int:track_id>/', TracksDetailView.as_view(), name='track-detail'),

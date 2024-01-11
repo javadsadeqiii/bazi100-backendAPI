@@ -13,10 +13,9 @@ from rest_framework.response import Response
 
 
 class AvatarUploadSerializer(serializers.Serializer):
-    
     avatar = serializers.ImageField()
     
-  
+
 
 
 
@@ -31,15 +30,10 @@ class CommentReportSerializer(serializers.ModelSerializer):
 
 
 
-
-
-
 class ReplyReportSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReplyReport
         fields = ['replyText', 'reply', 'userId', 'post']
-
-
 
 
 

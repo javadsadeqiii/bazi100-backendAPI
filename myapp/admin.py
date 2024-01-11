@@ -44,19 +44,6 @@ admin.site.register(CustomUser, CustomUserAdmin)
 
 
 
-#class CustomUserAdmin(BaseUserAdmin):
-    
-  
-   # list_display = ['id', 'username', 'email']
-  ##  ordering = ('id',)
-
-
-#admin.site.unregister(User)
-
-#admin.site.register(User, CustomUserAdmin)
-
-
-
 
 
 
