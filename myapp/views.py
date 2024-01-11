@@ -88,7 +88,7 @@ class AvatarSelectionView(APIView):
          
          
         avatar_data = {'avatar': user.avatar}
-        return Response({'message': 'آواتار با موفقیت انتخاب شد', 'avatar_data': avatar_data}, status=status.HTTP_200_OK)
+        return Response({'message': 'آواتار با موفقیت انتخاب شد', 'avatar_data': avatar_data}, status=status.HTTP_200_OK, content_type='application/json; charset=utf-8')
 
 
 
