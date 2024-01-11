@@ -86,8 +86,9 @@ class AvatarSelectionView(APIView):
         user.save()
 
          
-        serializer = CustomUserSerializer(user)
-        return Response({'message': 'آواتار با موفقیت انتخاب شد', 'avatar_data': serializer.data}, status=status.HTTP_200_OK)
+         
+        avatar_data = {'avatar': user.avatar}
+        return Response({'message': 'آواتار با موفقیت انتخاب شد', 'avatar_data': avatar_data}, status=status.HTTP_200_OK)
 
 
 
