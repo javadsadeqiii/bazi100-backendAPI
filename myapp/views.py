@@ -39,7 +39,7 @@ import datetime
 from datetime import timezone, datetime 
 from PIL import Image
 from django.utils import timezone
-from django.db.models import F
+#from django.db.models import F
 
 
 
@@ -100,7 +100,7 @@ class AvatarUploadView(generics.CreateAPIView):
                 if width > max_dimension or height > max_dimension:
                     return Response({'message': f"پیکسل باشد {max_dimension}x{max_dimension} ابعاد آواتار نباید بیشتر از"}, status=status.HTTP_400_BAD_REQUEST)
             except Exception as e:
-                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'error': "خطایی در روند تغییر آواتار رخ داد"}, status=status.HTTP_400_BAD_REQUEST)
 
             user.avatar = avatar_data
 
