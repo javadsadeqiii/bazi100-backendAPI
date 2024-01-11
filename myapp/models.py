@@ -11,7 +11,7 @@ from django.dispatch import receiver
 from django.contrib.auth.models import AbstractUser
 import random
 from django.utils import timezone
-from background_task import background
+#from background_task import background
 
 
 
