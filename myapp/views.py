@@ -35,9 +35,10 @@ from django.core.cache import cache
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from datetime import timezone
-#from django.utils import timezone
 import datetime
+from datetime import timezone, datetime 
 from PIL import Image
+from django.utils import timezone
 
 
 
@@ -52,6 +53,8 @@ DATETIME_FORMAT = 'Y-m-d H:i:s'
 
 
 class AvatarUploadView(generics.CreateAPIView):
+    
+    authentication_classes = [TokenAuthentication] 
     
     
     def post(self, request, *args, **kwargs):
@@ -85,6 +88,7 @@ class AvatarUploadView(generics.CreateAPIView):
         user.save()
 
         return Response({'message': 'آواتار با موفقیت بارگذاری شد'}, status=status.HTTP_201_CREATED)
+
 
 
 
@@ -409,7 +413,7 @@ class SignUpView(APIView):
 
 class LoginView(APIView):
     
-   # authentication_classes = [TokenAuthentication] 
+    authentication_classes = [TokenAuthentication] 
     
     def post(self, request):
         email = request.data.get('email')
@@ -718,12 +722,14 @@ class UserDetailsAPIView(APIView):
     def get(self, request, user_id):
         try:
             user = CustomUser.objects.get(id=user_id)
+            avatar_url = user.get_avatar_url()
 
             user_data = {
                 'id': user.id,
                 'username': user.username,
                 'email': user.email,
-                'password': user.password
+                'password': user.password,
+                'avatar_url': avatar_url
 
             }
             return Response(user_data)
@@ -796,7 +802,7 @@ class BaseAPIView(APIView):
 class commentAPIView(BaseAPIView):
     
    
-    authentication_classes = [TokenAuthentication] 
+   # authentication_classes = [TokenAuthentication] 
 
     queryset = Comments.objects.all()
     serializer_class = CommentsSerializer
@@ -857,7 +863,7 @@ class ReplyAPIView(BaseAPIView):
 
     queryset = Reply.objects.all()
     serializer_class = ReplySerializer
-    authentication_classes = [TokenAuthentication] 
+   # authentication_classes = [TokenAuthentication] 
 
     forbidden_words = ["جمهوری اسلامی", "ولایت فقیه", "خمینی", "خامنه ای", "کیر", "کص", "کون", "حرومزاده", "کیری", "کسشر", "فاک", "گاییدم", "مادرتو", "اسکل", "کصخل",
                        "fuck", "dick", "pussy", "wtf", "خفه شو", "مادر جنده", "کسخل", "کونی", "سکس", "sex", "porn", "پورن", "جنده", "گی", "ترنس",

@@ -20,7 +20,10 @@ en_formats.DATETIME_FORMAT = 'Y-m-d'
 
 
 
+
 class CustomUser(AbstractUser):
+    
+    
     
     
      AVATAR_CHOICES = [
@@ -58,6 +61,8 @@ CustomUser._meta.get_field('user_permissions').remote_field.related_name = 'cust
 
 
 
+
+
 class CommentReport(models.Model):
     
     commentText = models.TextField()
@@ -68,6 +73,7 @@ class CommentReport(models.Model):
     class Meta:
         verbose_name = "گزارش کامنت"
         verbose_name_plural = "کامنت های گزارش شده"
+
 
 
 
@@ -386,7 +392,7 @@ class AllPosts(models.Model):
 
     isStory = models.BooleanField(default=False, null=True)
     
-    isReportage = models.BooleanField(default=False,null =True)
+   
     
     
 
