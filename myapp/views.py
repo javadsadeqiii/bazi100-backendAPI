@@ -313,7 +313,8 @@ class SendNewsLetterViewSet(viewsets.ViewSet):
 
     @action(detail=False, methods=['get'])
     def send_newsletter(self, request):
-        latest_posts = AllPosts.objects.all().order_by('-date')[:3]
+        
+        latest_posts = AllPosts.objects.filter(isReportage=False).order_by('-date')[:3]
         
         
 

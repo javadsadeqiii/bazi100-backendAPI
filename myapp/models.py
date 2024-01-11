@@ -392,6 +392,8 @@ class AllPosts(models.Model):
 
     isStory = models.BooleanField(default=False, null=True)
     
+    isReportage = models.BooleanField(default = False, null=True)
+    
    
     
     
@@ -441,6 +443,8 @@ class wallpapers(models.Model):
 
     resolution = models.CharField(
         max_length=50, blank=True, null=True, verbose_name="کیفیت")
+
+
 
     class Meta:
 
