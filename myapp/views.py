@@ -68,8 +68,8 @@ DATETIME_FORMAT = 'Y-m-d H:i:s'
 class AvatarSelectionView(APIView):
     
     def post(self, request, *args, **kwargs):
-        userId = request.data.get('userId').decode('utf-8')
-        selectedAvatar = request.data.get('selectedAvatar').decode('utf-8')
+        userId = request.data.get('userId')
+        selectedAvatar = request.data.get('selectedAvatar')
 
         try:
             user = CustomUser.objects.get(pk=userId)
@@ -86,9 +86,8 @@ class AvatarSelectionView(APIView):
         user.save()
 
          
-         
-        avatar_data = {'avatar': user.avatar}
-        return Response({'message': 'آواتار با موفقیت انتخاب شد', 'avatar_data': avatar_data}, status=status.HTTP_200_OK, content_type='application/json; charset=utf-8')
+        serializer = CustomUserSerializer(user)
+        return Response({'message': 'آواتار با موفقیت انتخاب شد', 'avatar_data': serializer.data}, status=status.HTTP_200_OK)
 
 
 
