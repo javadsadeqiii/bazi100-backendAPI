@@ -39,6 +39,7 @@ import datetime
 from datetime import timezone, datetime 
 from PIL import Image
 from django.utils import timezone
+from .serializers import CustomUserSerializer
 #from django.db.models import F
 
 
@@ -51,11 +52,11 @@ DATETIME_FORMAT = 'Y-m-d H:i:s'
 
 
 
+
 #class ResetDownloadsView(APIView):
  #   def post(self, request, *args, **kwargs):
   #      reset_download_counts(repeat=1)  
     #    return Response({'message': 'تعداد دانلود های مجاز بروزرسانی شد'})
-
 
 
 
@@ -84,7 +85,10 @@ class AvatarSelectionView(APIView):
         user.avatar = selectedAvatar
         user.save()
 
-        return Response({'message': 'آواتار با موفقیت انتخاب شد'}, status=status.HTTP_200_OK)
+         
+        serializer = CustomUserSerializer(user)
+        return Response({'message': 'آواتار با موفقیت انتخاب شد', 'avatar_data': serializer.data}, status=status.HTTP_200_OK)
+
 
 
 
