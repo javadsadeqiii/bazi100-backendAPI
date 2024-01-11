@@ -68,8 +68,8 @@ DATETIME_FORMAT = 'Y-m-d H:i:s'
 class AvatarSelectionView(APIView):
     
     def post(self, request, *args, **kwargs):
-        userId = request.data.get('userId')
-        selectedAvatar = request.data.get('selectedAvatar')
+        userId = request.data.get('userId').decode('utf-8')
+        selectedAvatar = request.data.get('selectedAvatar').decode('utf-8')
 
         try:
             user = CustomUser.objects.get(pk=userId)
