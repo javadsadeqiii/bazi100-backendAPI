@@ -40,7 +40,7 @@ class CustomUser(AbstractUser):
         ('images/avatar11.webp','Avatar 11'),
     ]
   
-     avatar = models.FileField(upload_to='images/', verbose_name="Avatar", blank=True, choices=AVATAR_CHOICES)
+     selectedAvatar = models.FileField(upload_to='images/', verbose_name="Avatar", blank=True, choices=AVATAR_CHOICES)
      customAvatar = models.FileField(upload_to='custom_avatars/', verbose_name="Custom Avatar", blank=True)
     # downloads = models.PositiveIntegerField(default=5, verbose_name="دانلود ها")
      
@@ -72,6 +72,7 @@ CustomUser._meta.get_field('user_permissions').remote_field.related_name = 'cust
 
 
 
+
 class CommentReport(models.Model):
     
     commentText = models.TextField()
@@ -82,6 +83,7 @@ class CommentReport(models.Model):
     class Meta:
         verbose_name = "گزارش کامنت"
         verbose_name_plural = "کامنت های گزارش شده"
+
 
 
 
@@ -107,6 +109,7 @@ class ReplyReport(models.Model):
 
 
 
+
 class Subscriber(models.Model):
     email = models.CharField(max_length=50)
     
@@ -123,6 +126,7 @@ class Subscriber(models.Model):
 
 
 
+
 class CommentLikeHistory(models.Model):
     
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
@@ -132,6 +136,7 @@ class CommentLikeHistory(models.Model):
     class Meta:
         verbose_name = "لایک کامنت ها"
         verbose_name_plural = "لایک کامنت ها"
+
 
 
 

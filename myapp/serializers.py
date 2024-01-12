@@ -11,7 +11,7 @@ from rest_framework.response import Response
 
 
 class AvatarSelectionSerializer(serializers.Serializer):
-    avatar = serializers.CharField()
+    selectedAvatar = serializers.CharField()
     
     
 class CustomAvatarUploadSerializer(serializers.ModelSerializer):
