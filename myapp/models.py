@@ -45,8 +45,8 @@ class CustomUser(AbstractUser):
     # downloads = models.PositiveIntegerField(default=5, verbose_name="دانلود ها")
      
      def save(self, *args, **kwargs):
-        if not self.avatar:  
-            self.avatar = random.choice(self.AVATAR_CHOICES)[0]
+        if not self.selectedAvatar:  
+            self.selectedAvatar = random.choice(self.AVATAR_CHOICES)[0]
         super().save(*args, **kwargs)
         
         
