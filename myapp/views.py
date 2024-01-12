@@ -103,6 +103,8 @@ class CustomAvatarUploadView(APIView):
 
 
 class AvatarSelectionView(APIView):
+    
+    authentication_classes = [TokenAuthentication]
     def post(self, request, *args, **kwargs):
         userId = request.data.get('userId')
         selectedAvatar = request.data.get('selectedAvatar')
@@ -116,7 +118,7 @@ class AvatarSelectionView(APIView):
         if selectedAvatar not in valid_avatars:
             return Response({'error': 'آواتار انتخابی معتبر نیست'}, status=status.HTTP_400_BAD_REQUEST)
 
-        user.avatar = selectedAvatar
+        user.selectedAvatar = selectedAvatar
         user.save()
 
      
@@ -468,7 +470,8 @@ class LoginView(APIView):
                         'username': user.username,
                         'email': user.email,
                         'selectedAvatar_url': selectedAvatar_url,
-                        'customAvatar_url': customAvatar_url,
+                        'customAvatar_url': customAvatar_url
+                        
                     }
                 }, status=status.HTTP_200_OK)
 
