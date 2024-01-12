@@ -12,7 +12,12 @@ from rest_framework.response import Response
 
 class AvatarSelectionSerializer(serializers.Serializer):
     avatar = serializers.CharField()
-    customAvatar = serializers.ImageField()
+    
+    
+class CustomAvatarUploadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['customAvatar']
     
 
 #class AvatarUploadSerializer(serializers.Serializer):

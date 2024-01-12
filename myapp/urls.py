@@ -24,6 +24,8 @@ urlpatterns = [
     
     path('api/selectavatar/', AvatarSelectionView.as_view(), name='select_avatar'),
     
+    path('api/uploadcustomavatar/', CustomAvatarUploadView.as_view(), name='upload_custom_avatar'),
+    
    # path('reset-downloads/', ResetDownloadsView.as_view(), name='reset_downloads'),
     
    # path('download/<int:user_id>/', DownloadHistoryView.download_request, name='download_request'),
