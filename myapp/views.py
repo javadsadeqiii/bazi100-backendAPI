@@ -458,7 +458,7 @@ class LoginView(APIView):
             user_auth = authenticate(username=user.username, password=password)
 
             if user_auth:
-                avatar_url = user.avatar.url if user.avatar else None
+                selectedAvatar_url = user.selectedAvatar.url if user.selectedAvatar else None
                 customAvatar_url = user.customAvatar.url if user.customAvatar else None
 
                 return Response({
@@ -467,7 +467,7 @@ class LoginView(APIView):
                         'id': user.id,
                         'username': user.username,
                         'email': user.email,
-                        'avatar_url': avatar_url,
+                        'selectedAvatar_url': selectedAvatar_url,
                         'customAvatar_url': customAvatar_url,
                     }
                 }, status=status.HTTP_200_OK)
@@ -753,14 +753,14 @@ class UserDetailsAPIView(APIView):
     def get(self, request, user_id):
         try:
             user = CustomUser.objects.get(id=user_id)
-            avatar_url = user.avatar.url if user.avatar else None
+            selectedAvatar_url = user.selectedAvatar.url if user.selectedAvatar else None
             customAvatar_url = user.customAvatar.url if user.customAvatar else None
 
             user_data = {
                 'id': user.id,
                 'username': user.username,
                 'email': user.email,
-                'avatar_url': avatar_url,
+                'selectedAvatar_url': selectedAvatar_url,
                 'customAvatar':customAvatar_url,
 
             }
