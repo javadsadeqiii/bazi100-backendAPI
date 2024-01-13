@@ -41,7 +41,7 @@ class CustomUser(AbstractUser):
     ]
   
      selectedAvatar = models.FileField(upload_to='images/', verbose_name="Avatar", blank=True, choices=AVATAR_CHOICES)
-     customAvatar = models.ImageField(upload_to='images/', verbose_name="Custom Avatar", blank=True)
+     customAvatar = models.FileField(upload_to='images/', verbose_name="Custom Avatar", blank=True)
     # downloads = models.PositiveIntegerField(default=5, verbose_name="دانلود ها")
      
      def save(self, *args, **kwargs):
