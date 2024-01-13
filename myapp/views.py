@@ -115,31 +115,12 @@ class AvatarSelectionView(APIView):
         if selectedAvatar not in valid_avatars:
             return Response({'error': 'آواتار انتخابی معتبر نیست'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if 'customAvatar' in request.FILES:
-            customAvatar = request.FILES['customAvatar']
+        user.selectedAvatar = selectedAvatar
+        user.save()
 
-           
-
-            user.selectedAvatar = None  
-            user.customAvatar = customAvatar
-            user.save()
-
-            serializer = CustomAvatarUploadSerializer(user)
-            return Response({'message': 'تصویر موردنظر با موفقیت بارگذاری شد', 'avatar_data': serializer.data},
-                            status=status.HTTP_200_OK)
-
-        elif selectedAvatar is not None:
-            user.customAvatar = None  
-            user.selectedAvatar = selectedAvatar
-            user.save()
-
-            serializer = CustomUserSerializer(user)
-            return Response({'message': 'آواتار با موفقیت تغییر کرد', 'avatar_data': serializer.data},
-                            status=status.HTTP_200_OK)
-
-        else:
-            return Response({'error': 'هیچ فایلی ارائه نشد'},
-                            status=status.HTTP_400_BAD_REQUEST)
+     
+        serializer = CustomUserSerializer(user)
+        return Response({'message': 'آواتار با موفقیت انتخاب شد', 'avatar_data': serializer.data}, status=status.HTTP_200_OK)
 
 
 
@@ -404,7 +385,7 @@ class SendNewsLetterViewSet(viewsets.ViewSet):
 
 class SignUpView(APIView):
     
-    authentication_classes = [TokenAuthentication] 
+  #  authentication_classes = [TokenAuthentication] 
     
     def post(self, request):
         username = request.data.get('username')

@@ -44,14 +44,14 @@ class CustomUser(AbstractUser):
     customAvatar = models.FileField(upload_to='images/', verbose_name="Custom Avatar", blank=True)
     # downloads = models.PositiveIntegerField(default=5, verbose_name="دانلود ها")
     
-    
     def save(self, *args, **kwargs):
-        if not self.customAvatar and not self.selectedAvatar:
-
+        if self.selectedAvatar:
+            self.customAvatar = None
+        elif self.customAvatar:
+            self.selectedAvatar = None
+        else:
             self.selectedAvatar = random.choice(self.AVATAR_CHOICES)[0]
-
         super().save(*args, **kwargs)
-
         
 CustomUser._meta.get_field('groups').remote_field.related_name = 'custom_user_groups'
 CustomUser._meta.get_field('user_permissions').remote_field.related_name = 'custom_user_permissions'
