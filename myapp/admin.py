@@ -14,7 +14,7 @@ CustomUserModel = get_user_model()
 
 
 class CustomUserAdmin(BaseUserAdmin):
-    list_display = ['id', 'username', 'email', 'selectedAvatar','customAvatar']  
+    list_display = ['pk', 'username', 'email', 'selectedAvatar','customAvatar']  
     ordering = ('id',)
 
     fieldsets = (
