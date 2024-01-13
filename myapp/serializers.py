@@ -19,6 +19,10 @@ class AvatarUploadSerializer(serializers.Serializer):
     
     
     
+    
+    
+    
+    
 class CustomAvatarUploadSerializer(serializers.ModelSerializer):
     
     class Meta:

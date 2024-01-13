@@ -3,12 +3,14 @@ from django.conf import settings
 from django.urls import path, include
 from myapp import views
 from django.conf.urls.static import static
+from django.urls import include, path
 from django.contrib import admin
 from django.urls import path
 from . import views
 from .views import SignUpView, LoginView
 from .views import ContactUsView
 from .views import *
+from django.urls import include, path
 
 
 
@@ -28,9 +30,7 @@ urlpatterns = [
     
     path('api/uploadcustomavatar/', CustomAvatarUploadView.as_view(), name='upload_custom_avatar'),
     
-   # path('reset-downloads/', ResetDownloadsView.as_view(), name='reset_downloads'),
-    
-   # path('download/<int:user_id>/', DownloadHistoryView.download_request, name='download_request'),
+    path('api/downloadlimit/<int:user_id>/', DownloadLimitView.as_view(), name='download-limit-view'),
     
     path('api/tracks/', TracksView.as_view(), name='tracks'),
     

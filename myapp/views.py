@@ -39,12 +39,10 @@ import datetime
 from datetime import timezone, datetime 
 from PIL import Image
 from django.utils import timezone
-#from .serializers import CustomUserSerializer
+from .serializers import CustomUserSerializer
 from django.utils.translation import gettext_lazy as _
-
-#from django.db.models import F
-
-
+from django.db.models import F
+from datetime import timedelta
 
 DATE_FORMAT = 'Y-m-d'
 DATETIME_FORMAT = 'Y-m-d H:i:s'
@@ -54,12 +52,40 @@ DATETIME_FORMAT = 'Y-m-d H:i:s'
 
 
 
+class DownloadLimitView(APIView):
+    
+    def get(self, request, user_id):
+        
+        user = get_object_or_404(CustomUser, id=user_id)
+        return Response({
+            'wallpaperDownloads': user.wallpaperDownloads,
+            'soundtrackDownloads': user.soundtrackDownloads,
+        })
 
-#class ResetDownloadsView(APIView):
- #   def post(self, request, *args, **kwargs):
-  #      reset_download_counts(repeat=1)  
-    #    return Response({'message': 'تعداد دانلود های مجاز بروزرسانی شد'})
 
+
+    def post(self, request, user_id):
+        user = get_object_or_404(CustomUser, id=user_id)
+
+        time_since_last_reset = timezone.now() - user.resetDate
+        if time_since_last_reset >= timedelta(minutes=3):
+         user.reset_download_limits()
+        
+        if user.wallpaperDownloads > 0 and user.soundtrackDownloads > 0:
+            user.decrease_wallpaperDownloads()  
+            user.decrease_soundtrackDownloads()  
+            return Response({'message': 'دانلود با موفقیت انجام شد.'})
+        else:
+            return Response({'message': 'تعداد دانلود مجاز شما به پایان رسیده است'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
+
+       # time_since_last_reset = timezone.now() - user.resetDate
+      #  if time_since_last_reset.days >= 30:
+        #    user.reset_download_limits()
 
 
 
@@ -79,7 +105,7 @@ class CustomAvatarUploadView(APIView):
         valid_extensions = ['jpg', 'jpeg', 'png', 'webp']
         ext = customAvatar.name.split('.')[-1].lower()
         if ext not in valid_extensions:
-            return Response({'error': 'فرمت نصویر آپلود شده صحیح نیست فرمت های مجاز jpg, jpeg, png, webp'},
+            return Response({'error': 'فرمت تصویر آپلود شده صحیح نیست فرمت های مجاز jpg, jpeg, png, webp'},
                             status=status.HTTP_400_BAD_REQUEST)
 
         max_file_size_kb = 100
@@ -91,8 +117,11 @@ class CustomAvatarUploadView(APIView):
         user.customAvatar = customAvatar
         user.save()
 
-        serializer = CustomAvatarUploadSerializer(user)
+        serializer = CustomUserSerializer(user)
         return Response({'message': 'تصویر با موفقیت بارگذاری شد', 'avatar_data': serializer.data})
+
+
+
 
 
 
@@ -122,6 +151,8 @@ class AvatarSelectionView(APIView):
      
         serializer = CustomUserSerializer(user)
         return Response({'message': 'آواتار با موفقیت بارگداری شد', 'avatar_data': serializer.data}, status=status.HTTP_200_OK)
+
+
 
 
 
@@ -158,6 +189,7 @@ class CommentReportView(APIView):
 
 
 
+
 class ReplyReportView(APIView):
     
     authentication_classes = [TokenAuthentication] 
@@ -180,6 +212,8 @@ class ReplyReportView(APIView):
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+
+
 
 
 
@@ -270,6 +304,8 @@ class ResetPasswordView(APIView):
                 return Response({'error': "توکن بازنشانی رمزعبور شما منقضی شده است لطفا دوباره تلاش کنید"}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({'error': "لطفا تمامی اطلاعات را به درستی وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 
 
@@ -386,7 +422,7 @@ class SendNewsLetterViewSet(viewsets.ViewSet):
 
 class SignUpView(APIView):
     
-  #  authentication_classes = [TokenAuthentication] 
+    authentication_classes = [TokenAuthentication] 
     
     def post(self, request):
         username = request.data.get('username')
@@ -469,7 +505,9 @@ class LoginView(APIView):
                         'username': user.username,
                         'email': user.email,
                         'selectedAvatar_url': selectedAvatar_url,
-                        'customAvatar_url': customAvatar_url
+                        'customAvatar_url': customAvatar_url,
+                        'wallpaperDownloads': user.wallpaperDownloads,
+                        'soundtrackDownloads': user.soundtrackDownloads 
                         
                     }
                 }, status=status.HTTP_200_OK)
@@ -764,8 +802,11 @@ class UserDetailsAPIView(APIView):
                 'email': user.email,
                 'selectedAvatar_url': selectedAvatar_url,
                 'customAvatar_url':customAvatar_url,
+                'wallpaperDownloads': user. wallpaperDownloads,
+                'soundtrackDownloads': user.soundtrackDownloads
 
             }
+            
             return Response(user_data)
         except CustomUser.DoesNotExist:
             return Response({'error': 'کاربر مورد نظر یافت نشد'}, status=status.HTTP_404_NOT_FOUND)

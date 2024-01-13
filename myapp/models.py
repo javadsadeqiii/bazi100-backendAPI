@@ -11,7 +11,7 @@ from django.dispatch import receiver
 from django.contrib.auth.models import AbstractUser
 import random
 from django.utils import timezone
-#from background_task import background
+from background_task import background
 
 
 
@@ -27,6 +27,7 @@ class CustomUser(AbstractUser):
    
     
     AVATAR_CHOICES = [
+        
         ('images/avatar1.webp', 'Avatar 1'),
         ('images/avatar2.webp', 'Avatar 2'),
         ('images/avatar3.webp', 'Avatar 3'),
@@ -42,7 +43,10 @@ class CustomUser(AbstractUser):
   
     selectedAvatar = models.FileField(upload_to='images/', verbose_name="Avatar", blank=True, choices=AVATAR_CHOICES)
     customAvatar = models.FileField(upload_to='images/', verbose_name="Custom Avatar", blank=True)
-    # downloads = models.PositiveIntegerField(default=5, verbose_name="دانلود ها")
+    wallpaperDownloads = models.IntegerField(default=3, verbose_name="wallpaper_dl_remain")
+    soundtrackDownloads = models.IntegerField(default=3, verbose_name="soundtrack_dl_remain")
+    resetDate = models.DateTimeField(default=timezone.now, verbose_name="تاریخ آخرین اتمام تعداد دانلودها")
+   
     
     def save(self, *args, **kwargs):
         if self.customAvatar:
@@ -56,18 +60,6 @@ CustomUser._meta.get_field('groups').remote_field.related_name = 'custom_user_gr
 CustomUser._meta.get_field('user_permissions').remote_field.related_name = 'custom_user_permissions'
 
 
-
-
-#@background(schedule=30*24*60*60, autostart=True) 
-#def reset_download_counts():
-    
- #   thirty_days_ago = timezone.now() - timezone.timedelta(days=30)
- #   users_to_reset = CustomUser.objects.filter(last_download_date__lte=thirty_days_ago)
-
- #   for user in users_to_reset:
-  #      user.downloads = 5  
- #       user.save()
-    
 
 
 
