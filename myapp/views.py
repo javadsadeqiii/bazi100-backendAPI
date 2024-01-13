@@ -88,7 +88,7 @@ class CustomAvatarUploadView(APIView):
                 return Response({'error': f'باشد  {max_dimension}x{max_dimension}  ابعاد آواتار نباید بیشتر از ' },
                                 status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response({'error': 'An error occurred during avatar processing'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'خطایی در روند بارگذاری آواتار رخ داد'}, status=status.HTTP_400_BAD_REQUEST)
 
         user.customAvatar = customAvatar
         user.save()
