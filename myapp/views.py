@@ -111,16 +111,17 @@ class AvatarSelectionView(APIView):
         except CustomUser.DoesNotExist:
             return Response({'error': 'کاربر یافت نشد'}, status=status.HTTP_400_BAD_REQUEST)
 
-        valid_avatars = [avatar[0] for avatar in user.AVATAR_CHOICES]
-        if selectedAvatar not in valid_avatars:
-            return Response({'error': 'آواتار انتخابی معتبر نیست'}, status=status.HTTP_400_BAD_REQUEST)
+          
+        if user.customAvatar and selectedAvatar in [avatar[0] for avatar in user.AVATAR_CHOICES]:
+            user.customAvatar = None
 
         user.selectedAvatar = selectedAvatar
         user.save()
 
+
      
         serializer = CustomUserSerializer(user)
-        return Response({'message': 'آواتار با موفقیت انتخاب شد', 'avatar_data': serializer.data}, status=status.HTTP_200_OK)
+        return Response({'message': 'آواتار با موفقیت بارگداری شد', 'avatar_data': serializer.data}, status=status.HTTP_200_OK)
 
 
 
