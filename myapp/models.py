@@ -45,12 +45,11 @@ class CustomUser(AbstractUser):
     # downloads = models.PositiveIntegerField(default=5, verbose_name="دانلود ها")
     
     def save(self, *args, **kwargs):
-        if self.selectedAvatar:
-            self.customAvatar = None
-        elif self.customAvatar:
+        if self.customAvatar:
             self.selectedAvatar = None
-        else:
+        elif not self.selectedAvatar:
             self.selectedAvatar = random.choice(self.AVATAR_CHOICES)[0]
+
         super().save(*args, **kwargs)
         
 CustomUser._meta.get_field('groups').remote_field.related_name = 'custom_user_groups'
