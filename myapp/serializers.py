@@ -15,9 +15,10 @@ class AvatarSelectionSerializer(serializers.Serializer):
     
     
 class CustomAvatarUploadSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CustomUser
-        fields = ['customAvatar']
+    customAvatar = serializers.ImageField()
+    #class Meta:
+       # model = CustomUser
+      #  fields = ['customAvatar']
     
 
 #class AvatarUploadSerializer(serializers.Serializer):
