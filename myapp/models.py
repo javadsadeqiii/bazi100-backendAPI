@@ -24,9 +24,9 @@ en_formats.DATETIME_FORMAT = 'Y-m-d'
 
 class CustomUser(AbstractUser):
     
+   
     
-    
-     AVATAR_CHOICES = [
+    AVATAR_CHOICES = [
         ('images/avatar1.webp', 'Avatar 1'),
         ('images/avatar2.webp', 'Avatar 2'),
         ('images/avatar3.webp', 'Avatar 3'),
@@ -40,18 +40,25 @@ class CustomUser(AbstractUser):
         ('images/avatar11.webp','Avatar 11'),
     ]
   
-     selectedAvatar = models.FileField(upload_to='images/', verbose_name="Avatar", blank=True, choices=AVATAR_CHOICES)
-     customAvatar = models.FileField(upload_to='images/', verbose_name="Custom Avatar", blank=True)
+    selectedAvatar = models.FileField(upload_to='images/', verbose_name="Avatar", blank=True, choices=AVATAR_CHOICES)
+    customAvatar = models.FileField(upload_to='images/', verbose_name="Custom Avatar", blank=True)
     # downloads = models.PositiveIntegerField(default=5, verbose_name="دانلود ها")
-     
-     def save(self, *args, **kwargs):
-        if self.customAvatar:
-            
-            self.selectedAvatar = None
-        elif not self.selectedAvatar:
-            
+    
+    
+    def save(self, *args, **kwargs):
+        if not self.customAvatar and not self.selectedAvatar:
+
             self.selectedAvatar = random.choice(self.AVATAR_CHOICES)[0]
+
+        super().save(*args, **kwargs)
+
         
+CustomUser._meta.get_field('groups').remote_field.related_name = 'custom_user_groups'
+CustomUser._meta.get_field('user_permissions').remote_field.related_name = 'custom_user_permissions'
+
+
+
+
 #@background(schedule=30*24*60*60, autostart=True) 
 #def reset_download_counts():
     
@@ -62,14 +69,6 @@ class CustomUser(AbstractUser):
   #      user.downloads = 5  
  #       user.save()
     
-        
-CustomUser._meta.get_field('groups').remote_field.related_name = 'custom_user_groups'
-CustomUser._meta.get_field('user_permissions').remote_field.related_name = 'custom_user_permissions'
-
-
-
-
-
 
 
 

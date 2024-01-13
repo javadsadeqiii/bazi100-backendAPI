@@ -14,12 +14,12 @@ CustomUserModel = get_user_model()
 
 
 class CustomUserAdmin(BaseUserAdmin):
-    list_display = ['pk', 'username', 'email', 'selectedAvatar','customAvatar']  
+    list_display = ['id', 'username', 'email',]  
     ordering = ('id',)
 
     fieldsets = (
-        (None, {'fields': ('username', 'password')}),
-        ('Personal info', {'fields': ('first_name', 'last_name', 'email', 'selectedAvatar','customAvatar')}),  
+        (None, {'fields': ('username', 'password','selectedAvatar','customAvatar')}),
+        ('Personal info', {'fields': ('first_name', 'last_name', 'email')}),  
         ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
@@ -27,18 +27,14 @@ class CustomUserAdmin(BaseUserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('username', 'password1', 'password2', 'email', 'selectedAvatar', 'customAvatar')
+            'fields': ('username', 'password1', 'password2', 'email')
         }),
         ('Personal info', {'fields': ('first_name', 'last_name' )}),
         ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
         ('Important dates', {'fields': ('last_login', 'date_joined')})
     )
     
-    def save_model(self, request, obj, form, change):
-        super().save_model(request, obj, form, change)
-        
-        obj.save()
-
+   
 
 if CustomUserModel != CustomUser:
     admin.site.unregister(CustomUserModel)

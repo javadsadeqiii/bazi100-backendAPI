@@ -39,7 +39,7 @@ import datetime
 from datetime import timezone, datetime 
 from PIL import Image
 from django.utils import timezone
-from .serializers import CustomUserSerializer
+#from .serializers import CustomUserSerializer
 from django.utils.translation import gettext_lazy as _
 
 #from django.db.models import F
@@ -65,10 +65,10 @@ DATETIME_FORMAT = 'Y-m-d H:i:s'
 
 class CustomAvatarUploadView(APIView):
     def post(self, request, *args, **kwargs):
-        userId = request.data.get('userId')
-        customAvatar = request.FILES.get('customAvatar')
-
         try:
+            userId = request.data.get('userId')
+            customAvatar = request.FILES.get('customAvatar')
+
             user = CustomUser.objects.get(pk=userId)
         except CustomUser.DoesNotExist:
             return Response({'error': 'کاربر یافت نشد'}, status=status.HTTP_400_BAD_REQUEST)
@@ -79,19 +79,20 @@ class CustomAvatarUploadView(APIView):
         valid_extensions = ['jpg', 'jpeg', 'png', 'webp']
         ext = customAvatar.name.split('.')[-1].lower()
         if ext not in valid_extensions:
-            return Response({'error': ' فرمت تصویر آپلود شده صحیح نیست فرمت های مجاز jpg , jpeg , png , webp'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'فرمت نصویر آپلود شده صحیح نیست فرمت های مجاز jpg, jpeg, png, webp'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
-        
         max_file_size_kb = 100
         max_file_size_bytes = max_file_size_kb * 1024
         if customAvatar.size > max_file_size_bytes:
-            return Response({'error': _(' حجم تصویر آپلود شده نمیتواند بیشتر از 100 کیلوبایت باشد')}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'حجم تصویر نمیتواند بیشتر از 100 کیلو بایت باشد'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         user.customAvatar = customAvatar
         user.save()
 
         serializer = CustomAvatarUploadSerializer(user)
-        return Response({'message': 'آواتار با موفقیت بارگذاری شد', 'avatar_data': serializer.data})
+        return Response({'message': 'تصویر با موفقیت بارگذاری شد', 'avatar_data': serializer.data})
 
 
 
@@ -383,7 +384,7 @@ class SendNewsLetterViewSet(viewsets.ViewSet):
 
 class SignUpView(APIView):
     
-   # authentication_classes = [TokenAuthentication] 
+    authentication_classes = [TokenAuthentication] 
     
     def post(self, request):
         username = request.data.get('username')
@@ -440,7 +441,7 @@ class SignUpView(APIView):
 
 class LoginView(APIView):
     
-   # authentication_classes = [TokenAuthentication] 
+    authentication_classes = [TokenAuthentication] 
     
     def post(self, request):
         email = request.data.get('email')
@@ -459,7 +460,7 @@ class LoginView(APIView):
                 selectedAvatar_url = user.selectedAvatar.url if user.selectedAvatar else None
                 customAvatar_url = user.customAvatar.url if user.customAvatar else None
 
-                return Response({
+            return Response({
                     'message': 'ورود کاربر با موفقیت انجام شد',
                     'user': {
                         'id': user.id,

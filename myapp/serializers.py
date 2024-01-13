@@ -21,8 +21,8 @@ class CustomAvatarUploadSerializer(serializers.ModelSerializer):
         fields = ['customAvatar']
     
 
-#class AvatarUploadSerializer(serializers.Serializer):
-  #  avatar = serializers.ImageField()
+class AvatarUploadSerializer(serializers.Serializer):
+    avatar = serializers.ImageField()
     
 
 
