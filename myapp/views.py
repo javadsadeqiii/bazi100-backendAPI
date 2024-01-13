@@ -85,8 +85,8 @@ class CustomAvatarUploadView(APIView):
             width, height = img.size
             max_dimension = 200
             if width > max_dimension or height > max_dimension:
-                return Response({'error': f'باشد  {max_dimension}x{max_dimension}  ابعاد آواتار نباید بیشتر از ' },
-                                status=status.HTTP_400_BAD_REQUEST)
+                return Response({'error': f'باشد  {max_dimension}x{max_dimension}  ابعاد آواتار نباید بیشتر از ' })
+                              
         except Exception as e:
             return Response({'error': 'خطایی در روند بارگذاری آواتار رخ داد'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -95,8 +95,8 @@ class CustomAvatarUploadView(APIView):
 
       
         serializer = CustomAvatarUploadSerializer(user)
-        return Response({'message': 'آواتار با موفقیت بارگذاری شد', 'avatar_data': serializer.data},
-                        status=status.HTTP_201_CREATED)
+        return Response({'message': 'آواتار با موفقیت بارگذاری شد', 'avatar_data': serializer.data})
+                       
 
 
 
