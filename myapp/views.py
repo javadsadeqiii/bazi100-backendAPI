@@ -383,7 +383,7 @@ class SendNewsLetterViewSet(viewsets.ViewSet):
 
 class SignUpView(APIView):
     
-    authentication_classes = [TokenAuthentication] 
+   # authentication_classes = [TokenAuthentication] 
     
     def post(self, request):
         username = request.data.get('username')
@@ -440,7 +440,7 @@ class SignUpView(APIView):
 
 class LoginView(APIView):
     
-    authentication_classes = [TokenAuthentication] 
+   # authentication_classes = [TokenAuthentication] 
     
     def post(self, request):
         email = request.data.get('email')

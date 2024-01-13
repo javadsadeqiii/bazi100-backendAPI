@@ -14,6 +14,8 @@ from .views import *
 
 urlpatterns = [
     
+    path('admin/', admin.site.urls),
+    
     path('api/allPosts/', AllPostsView.as_view(), name='all_posts'),
     
     path('api/wallpapers/', WallpapersView.as_view(), name='wallpapers'),

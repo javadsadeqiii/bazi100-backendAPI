@@ -27,12 +27,17 @@ class CustomUserAdmin(BaseUserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('username', 'password1', 'password2', 'email', 'avatar')
+            'fields': ('username', 'password1', 'password2', 'email', 'selectedAvatar', 'customAvatar')
         }),
         ('Personal info', {'fields': ('first_name', 'last_name' )}),
         ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
         ('Important dates', {'fields': ('last_login', 'date_joined')})
     )
+    
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        
+        obj.save()
 
 
 if CustomUserModel != CustomUser:
