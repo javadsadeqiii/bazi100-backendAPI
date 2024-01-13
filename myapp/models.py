@@ -45,10 +45,12 @@ class CustomUser(AbstractUser):
     # downloads = models.PositiveIntegerField(default=5, verbose_name="دانلود ها")
      
      def save(self, *args, **kwargs):
-        if not self.selectedAvatar:  
+        if self.customAvatar:
+            
+            self.selectedAvatar = None
+        elif not self.selectedAvatar:
+            
             self.selectedAvatar = random.choice(self.AVATAR_CHOICES)[0]
-        super().save(*args, **kwargs)
-        
         
 #@background(schedule=30*24*60*60, autostart=True) 
 #def reset_download_counts():
