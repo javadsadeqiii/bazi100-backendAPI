@@ -14,7 +14,7 @@ from .views import *
 
 urlpatterns = [
     
-    path('admin/', admin.site.urls),
+ #   path('admin/', admin.site.urls),
     
     path('api/allPosts/', AllPostsView.as_view(), name='all_posts'),
     
