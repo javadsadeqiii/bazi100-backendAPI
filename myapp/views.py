@@ -64,15 +64,16 @@ DATETIME_FORMAT = 'Y-m-d H:i:s'
 
 class CustomAvatarUploadView(APIView):
     def post(self, request, *args, **kwargs):
+       # serializer_class = CustomAvatarUploadSerializer
         userId = request.data.get('userId')
-        customAvatar = request.data.get('customAvatar')
+        customAvatar = request.FILES.get('customAvatar')
 
         try:
             user = CustomUser.objects.get(pk=userId)
         except CustomUser.DoesNotExist:
             return Response({'error': 'کاربر یافت نشد'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not customAvatar:
+        if not customAvatar.name:
             return Response({'error': 'فایلی ارائه نشد'}, status=status.HTTP_400_BAD_REQUEST)
 
         valid_extensions = ['jpg', 'jpeg', 'png', 'webp']
