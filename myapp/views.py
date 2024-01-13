@@ -64,7 +64,6 @@ DATETIME_FORMAT = 'Y-m-d H:i:s'
 
 class CustomAvatarUploadView(APIView):
     def post(self, request, *args, **kwargs):
-       # serializer_class = CustomAvatarUploadSerializer
         userId = request.data.get('userId')
         customAvatar = request.FILES.get('customAvatar')
 
@@ -73,7 +72,7 @@ class CustomAvatarUploadView(APIView):
         except CustomUser.DoesNotExist:
             return Response({'error': 'کاربر یافت نشد'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not customAvatar.name:
+        if not customAvatar or not customAvatar.name:
             return Response({'error': 'فایلی ارائه نشد'}, status=status.HTTP_400_BAD_REQUEST)
 
         valid_extensions = ['jpg', 'jpeg', 'png', 'webp']
@@ -81,23 +80,11 @@ class CustomAvatarUploadView(APIView):
         if ext not in valid_extensions:
             return Response({'error': 'jpg , jpeg , png , webp فرمت آواتار صحیح نیست فرمت های مجاز '}, status=status.HTTP_400_BAD_REQUEST)
 
-        try:
-            img = Image.open(customAvatar)
-            width, height = img.size
-            max_dimension = 200
-            if width > max_dimension or height > max_dimension:
-                return Response({'error': f'باشد  {max_dimension}x{max_dimension}  ابعاد آواتار نباید بیشتر از ' })
-                              
-        except Exception as e:
-            return Response({'error': 'خطایی در روند بارگذاری آواتار رخ داد'}, status=status.HTTP_400_BAD_REQUEST)
-
         user.customAvatar = customAvatar
         user.save()
 
-      
         serializer = CustomAvatarUploadSerializer(user)
         return Response({'message': 'آواتار با موفقیت بارگذاری شد', 'avatar_data': serializer.data})
-                       
 
 
 
