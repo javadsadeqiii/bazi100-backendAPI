@@ -85,7 +85,7 @@ class CustomAvatarUploadView(APIView):
         max_file_size_kb = 100
         max_file_size_bytes = max_file_size_kb * 1024
         if customAvatar.size > max_file_size_bytes:
-            return Response({'error': 'حجم تصویر نمیتواند بیشتر از 100 کیلو بایت باشد'},
+            return Response({'error': 'حجم تصویر نمی تواند بیشتر از 100 کیلوبایت باشد'},
                             status=status.HTTP_400_BAD_REQUEST)
 
         user.customAvatar = customAvatar
@@ -115,12 +115,31 @@ class AvatarSelectionView(APIView):
         if selectedAvatar not in valid_avatars:
             return Response({'error': 'آواتار انتخابی معتبر نیست'}, status=status.HTTP_400_BAD_REQUEST)
 
-        user.selectedAvatar = selectedAvatar
-        user.save()
+        if 'customAvatar' in request.FILES:
+            customAvatar = request.FILES['customAvatar']
 
-     
-        serializer = CustomUserSerializer(user)
-        return Response({'message': 'آواتار با موفقیت انتخاب شد', 'avatar_data': serializer.data}, status=status.HTTP_200_OK)
+           
+
+            user.selectedAvatar = None  
+            user.customAvatar = customAvatar
+            user.save()
+
+            serializer = CustomAvatarUploadSerializer(user)
+            return Response({'message': 'تصویر موردنظر با موفقیت بارگذاری شد', 'avatar_data': serializer.data},
+                            status=status.HTTP_200_OK)
+
+        elif selectedAvatar is not None:
+            user.customAvatar = None  
+            user.selectedAvatar = selectedAvatar
+            user.save()
+
+            serializer = CustomUserSerializer(user)
+            return Response({'message': 'آواتار با موفقیت تغییر کرد', 'avatar_data': serializer.data},
+                            status=status.HTTP_200_OK)
+
+        else:
+            return Response({'error': 'هیچ فایلی ارائه نشد'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
 
 
@@ -158,6 +177,7 @@ class CommentReportView(APIView):
 
 
 class ReplyReportView(APIView):
+    
     authentication_classes = [TokenAuthentication] 
     
     def post(self, request):
