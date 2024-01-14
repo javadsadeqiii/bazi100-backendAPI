@@ -54,30 +54,49 @@ DATETIME_FORMAT = 'Y-m-d H:i:s'
 
 class DownloadLimitView(APIView):
     
+    def reset_download_count(self, user):
+        current_time = timezone.now()
+        if (current_time - user.resetDate) > timedelta(minutes=10):
+            user.wallpaperDownloads = 3
+            user.soundtrackDownloads = 3
+            user.resetDate = current_time
+            user.save()
+
     def get(self, request, user_id):
-        
         user = get_object_or_404(CustomUser, id=user_id)
+        self.reset_download_count(user)
         return Response({
             'wallpaperDownloads': user.wallpaperDownloads,
             'soundtrackDownloads': user.soundtrackDownloads,
         })
 
+    def post(self, request):
+        userId = request.data.get('userId')
+        downloadType = request.data.get('downloadType')
 
+        try:
+            user = CustomUser.objects.get(id=userId)
+        except CustomUser.DoesNotExist:
+            return Response({'message': 'کاربری با این شناسه یافت نشد.'}, status=status.HTTP_404_NOT_FOUND)
 
-    def post(self, request, user_id):
-        user = get_object_or_404(CustomUser, id=user_id)
+        self.reset_download_count(user)
 
-        time_since_last_reset = timezone.now() - user.resetDate
-        if time_since_last_reset >= timedelta(minutes=3):
-         user.reset_download_limits()
-        
-        if user.wallpaperDownloads > 0 and user.soundtrackDownloads > 0:
-            user.decrease_wallpaperDownloads()  
-            user.decrease_soundtrackDownloads()  
-            return Response({'message': 'دانلود با موفقیت انجام شد.'})
+        if downloadType == 'wallpaper' and user.wallpaperDownloads <= 0:
+            return Response({'error': 'تعداد دانلود مجاز والپیپر به اتمام رسیده'}, status=status.HTTP_400_BAD_REQUEST)
+        elif downloadType == 'soundtrack' and user.soundtrackDownloads <= 0:
+            return Response({'error': 'تعداد دانلود مجاز موسیقی بازی به اتمام رسیده '}, status=status.HTTP_400_BAD_REQUEST)
+
+        user.downloadType = downloadType
+        user.save()
+
+        if downloadType == 'wallpaper':
+            user.decrease_wallpaperDownloads()
+        elif downloadType == 'music':
+            user.decrease_soundtrackDownloads()
         else:
-            return Response({'message': 'تعداد دانلود مجاز شما به پایان رسیده است'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'نوع فایل دانلودی نامعتبر است'}, status=status.HTTP_400_BAD_REQUEST)
 
+        return Response({'message': 'دانلود با موفقیت انجام شد'})
 
 
 

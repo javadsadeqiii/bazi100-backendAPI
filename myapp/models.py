@@ -42,9 +42,15 @@ class CustomUser(AbstractUser):
     ]
   
     selectedAvatar = models.FileField(upload_to='images/', verbose_name="Avatar", blank=True, choices=AVATAR_CHOICES)
+    
     customAvatar = models.FileField(upload_to='images/', verbose_name="Custom Avatar", blank=True)
+    
     wallpaperDownloads = models.IntegerField(default=3, verbose_name="wallpaper_dl_remain")
+    
     soundtrackDownloads = models.IntegerField(default=3, verbose_name="soundtrack_dl_remain")
+    
+    downloadType = models.CharField(max_length=2000, blank=True, null=True)
+    
     resetDate = models.DateTimeField(default=timezone.now, verbose_name="تاریخ آخرین اتمام تعداد دانلودها")
    
     
@@ -55,6 +61,16 @@ class CustomUser(AbstractUser):
             self.selectedAvatar = random.choice(self.AVATAR_CHOICES)[0]
 
         super().save(*args, **kwargs)
+        
+    def decrease_wallpaperDownloads(self):
+        if self.wallpaperDownloads > 0:
+            self.wallpaperDownloads -= 1
+            self.save()
+
+    def decrease_soundtrackDownloads(self):
+        if self.soundtrackDownloads > 0:
+            self.soundtrackDownloads -= 1
+            self.save()
         
 CustomUser._meta.get_field('groups').remote_field.related_name = 'custom_user_groups'
 CustomUser._meta.get_field('user_permissions').remote_field.related_name = 'custom_user_permissions'
