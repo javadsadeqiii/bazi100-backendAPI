@@ -546,7 +546,7 @@ class LoginView(APIView):
                         'customAvatar_url': customAvatar_url,
                         'wallpaperDownloads': user.wallpaperDownloads,
                         'soundtrackDownloads': user.soundtrackDownloads,
-                        'dlExpirationDate': dlExpirationDate,
+                        'dlExpirationDate': dlExpirationDate.isoformat(),
                         'dlRemainingDays': user.dlRemainingDays,
                         
                     }
@@ -850,7 +850,7 @@ class UserDetailsAPIView(APIView):
                 'customAvatar_url':customAvatar_url,
                 'wallpaperDownloads': user. wallpaperDownloads,
                 'soundtrackDownloads': user.soundtrackDownloads,
-                'dlExpirationDate': dlExpirationDate,
+                'dlExpirationDate': dlExpirationDate.isoformat(),
                 'dlRemainingDays': user.dlRemainingDays,
 
             }
