@@ -108,13 +108,13 @@ class DownloadLimitView(APIView):
         user.dlLastRechargeDate = timezone.now()
         user.save()
 
-        expirationDate = user.dlLastRechargeDate.date() + timedelta(days=user.dlRemainingDays)  
+        dlExpirationDate = user.dlLastRechargeDate.date() + timedelta(days=user.dlRemainingDays)  
         return Response({
             'message': 'دانلود با موفقیت انجام شد',
             'wallpaperDownloads': user.wallpaperDownloads,
             'soundtrackDownloads': user.soundtrackDownloads,
-            'expirationDate': expirationDate,
-            'remainingDays': user.dlRemainingDays,
+            'dlExpirationDate': dlExpirationDate,
+            'dlRemainingDays': user.dlRemainingDays,
         })
 
 
@@ -459,7 +459,7 @@ class SendNewsLetterViewSet(viewsets.ViewSet):
 
 class SignUpView(APIView):
     
-   # authentication_classes = [TokenAuthentication] 
+    authentication_classes = [TokenAuthentication] 
     
     def post(self, request):
         username = request.data.get('username')
@@ -534,7 +534,7 @@ class LoginView(APIView):
             if user_auth:
                 selectedAvatar_url = user.selectedAvatar.url if user.selectedAvatar else None
                 customAvatar_url = user.customAvatar.url if user.customAvatar else None
-                expirationDate = user.resetDate + timedelta(days=100)
+                dlExpirationDate = user.dlResetDate + timedelta(days=100)
 
             return Response({
                     'message': 'ورود کاربر با موفقیت انجام شد',
@@ -546,8 +546,8 @@ class LoginView(APIView):
                         'customAvatar_url': customAvatar_url,
                         'wallpaperDownloads': user.wallpaperDownloads,
                         'soundtrackDownloads': user.soundtrackDownloads,
-                        'expirationDate': expirationDate,
-                        'remainingDays': user.remainingDays,
+                        'dlExpirationDate': dlExpirationDate,
+                        'dlRemainingDays': user.dlRemainingDays,
                         
                     }
                 }, status=status.HTTP_200_OK)
@@ -837,7 +837,9 @@ class UserDetailsAPIView(APIView):
             user = CustomUser.objects.get(id=user_id)
             selectedAvatar_url = user.selectedAvatar.url if user.selectedAvatar else None
             customAvatar_url = user.customAvatar.url if user.customAvatar else None
-            expirationDate = user.resetDate + timedelta(days=100)
+            dlExpirationDate = user.dlResetDate + timedelta(days=100)
+
+
 
             user_data = {
                 
@@ -848,10 +850,11 @@ class UserDetailsAPIView(APIView):
                 'customAvatar_url':customAvatar_url,
                 'wallpaperDownloads': user. wallpaperDownloads,
                 'soundtrackDownloads': user.soundtrackDownloads,
-                'expirationDate': expirationDate,
-                'remainingDays': user.remainingDays,
+                'dlExpirationDate': dlExpirationDate,
+                'dlRemainingDays': user.dlRemainingDays,
 
             }
+            
             
             return Response(user_data)
         except CustomUser.DoesNotExist:
