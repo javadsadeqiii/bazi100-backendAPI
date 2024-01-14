@@ -51,11 +51,11 @@ class CustomUser(AbstractUser):
     
     downloadType = models.CharField(max_length=2000, blank=True, null=True)
     
-    resetDate = models.DateTimeField(default=timezone.now, verbose_name="تاریخ آخرین اتمام تعداد دانلودها")
+    dlResetDate = models.DateTimeField(default=timezone.now, verbose_name="dlResetDate")
     
-    remainingDays = models.IntegerField(default=30, verbose_name="روز باقی‌مانده")
+    dlRemainingDays = models.IntegerField(default=30, verbose_name="dlRemainingDays")
     
-    lastRechargeDate = models.DateTimeField(default=timezone.now, verbose_name="تاریخ آخرین آپدیت دانلودها")
+    dlLastRechargeDate = models.DateTimeField(default=timezone.now, verbose_name="dlLastRechargeDate")
    
     
     def save(self, *args, **kwargs):

@@ -59,24 +59,19 @@ class DownloadLimitView(APIView):
     
     def reset_download_count(self, user):
         current_time = timezone.now()
-        if (current_time - user.lastRechargeDate) > timedelta(days=30):
-            user.lastRechargeDate = current_time
+        if (current_time - user.dlLastRechargeDate) > timedelta(days=30):
+            user.dlLastRechargeDate = current_time
             user.wallpaperDownloads = 100
             user.soundtrackDownloads = 100
-            user.remainingDays = 30
+            user.dlRemainingDays = 30
             user.save()
 
-    def get(self, request, user_id):
-        user = get_object_or_404(CustomUser, id=user_id)
-        self.reset_download_count(user)
-        
-        expirationDate = user.lastRechargeDate.date() + timedelta(days=user.remainingDays)  
-        return Response({
-            'wallpaperDownloads': user.wallpaperDownloads,
-            'soundtrackDownloads': user.soundtrackDownloads,
-            'expirationDate': expirationDate,
-            'remainingDays': user.remainingDays,
-        })
+    def calculate_remaining_days(self, user):
+        current_time = timezone.now()
+        time_since_last_recharge = current_time - user.dlLastRechargeDate
+        days_since_last_recharge = time_since_last_recharge.days
+        remaining_days = max(30 - days_since_last_recharge, 0)
+        return remaining_days
 
     def post(self, request):
         userId = request.data.get('userId')
@@ -89,7 +84,9 @@ class DownloadLimitView(APIView):
 
         self.reset_download_count(user)
 
-        if user.remainingDays <= 0:
+        remaining_days = self.calculate_remaining_days(user)
+
+        if remaining_days <= 0:
             return Response({'error': 'تعداد روزهای باقی‌مانده به اتمام رسیده'}, status=status.HTTP_400_BAD_REQUEST)
 
         if downloadType == 'wallpaper' and user.wallpaperDownloads <= 0:
@@ -107,18 +104,18 @@ class DownloadLimitView(APIView):
         else:
             return Response({'error': 'نوع فایل دانلودی نامعتبر است'}, status=status.HTTP_400_BAD_REQUEST)
 
-        user.remainingDays -= 1
+        user.dlRemainingDays = self.calculate_remaining_days(user)
+        user.dlLastRechargeDate = timezone.now()
         user.save()
 
-        expirationDate = user.lastRechargeDate.date() + timedelta(days=user.remainingDays)  
+        expirationDate = user.dlLastRechargeDate.date() + timedelta(days=user.dlRemainingDays)  
         return Response({
             'message': 'دانلود با موفقیت انجام شد',
             'wallpaperDownloads': user.wallpaperDownloads,
             'soundtrackDownloads': user.soundtrackDownloads,
             'expirationDate': expirationDate,
-            'remainingDays': user.remainingDays,
+            'remainingDays': user.dlRemainingDays,
         })
-
 
 
 
@@ -462,7 +459,7 @@ class SendNewsLetterViewSet(viewsets.ViewSet):
 
 class SignUpView(APIView):
     
-    authentication_classes = [TokenAuthentication] 
+   # authentication_classes = [TokenAuthentication] 
     
     def post(self, request):
         username = request.data.get('username')
