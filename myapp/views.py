@@ -59,21 +59,23 @@ class DownloadLimitView(APIView):
     
     def reset_download_count(self, user):
         current_time = timezone.now()
-        if (current_time - user.resetDate) > timedelta(days=30):
+        if (current_time - user.lastRechargeDate) > timedelta(days=30):
+            user.lastRechargeDate = current_time
             user.wallpaperDownloads = 100
             user.soundtrackDownloads = 100
-            user.resetDate = current_time
+            user.remainingDays = 30
             user.save()
 
     def get(self, request, user_id):
         user = get_object_or_404(CustomUser, id=user_id)
         self.reset_download_count(user)
         
-        expirationDate = user.resetDate + timedelta(days=30)  
+        expirationDate = user.lastRechargeDate.date() + timedelta(days=user.remainingDays)  
         return Response({
             'wallpaperDownloads': user.wallpaperDownloads,
             'soundtrackDownloads': user.soundtrackDownloads,
             'expirationDate': expirationDate,
+            'remainingDays': user.remainingDays,
         })
 
     def post(self, request):
@@ -86,6 +88,9 @@ class DownloadLimitView(APIView):
             return Response({'message': 'کاربری با این شناسه یافت نشد.'}, status=status.HTTP_404_NOT_FOUND)
 
         self.reset_download_count(user)
+
+        if user.remainingDays <= 0:
+            return Response({'error': 'تعداد روزهای باقی‌مانده به اتمام رسیده'}, status=status.HTTP_400_BAD_REQUEST)
 
         if downloadType == 'wallpaper' and user.wallpaperDownloads <= 0:
             return Response({'error': 'تعداد دانلود مجاز والپیپر به اتمام رسیده'}, status=status.HTTP_400_BAD_REQUEST)
@@ -102,16 +107,17 @@ class DownloadLimitView(APIView):
         else:
             return Response({'error': 'نوع فایل دانلودی نامعتبر است'}, status=status.HTTP_400_BAD_REQUEST)
 
-       
-        
-        expirationDate = user.resetDate + timedelta(days=30)  
+        user.remainingDays -= 1
+        user.save()
+
+        expirationDate = user.lastRechargeDate.date() + timedelta(days=user.remainingDays)  
         return Response({
             'message': 'دانلود با موفقیت انجام شد',
             'wallpaperDownloads': user.wallpaperDownloads,
             'soundtrackDownloads': user.soundtrackDownloads,
             'expirationDate': expirationDate,
+            'remainingDays': user.remainingDays,
         })
-
 
 
 
@@ -544,6 +550,7 @@ class LoginView(APIView):
                         'wallpaperDownloads': user.wallpaperDownloads,
                         'soundtrackDownloads': user.soundtrackDownloads,
                         'expirationDate': expirationDate,
+                        'remainingDays': user.remainingDays,
                         
                     }
                 }, status=status.HTTP_200_OK)
@@ -845,6 +852,7 @@ class UserDetailsAPIView(APIView):
                 'wallpaperDownloads': user. wallpaperDownloads,
                 'soundtrackDownloads': user.soundtrackDownloads,
                 'expirationDate': expirationDate,
+                'remainingDays': user.remainingDays,
 
             }
             

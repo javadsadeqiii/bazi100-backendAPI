@@ -52,6 +52,10 @@ class CustomUser(AbstractUser):
     downloadType = models.CharField(max_length=2000, blank=True, null=True)
     
     resetDate = models.DateTimeField(default=timezone.now, verbose_name="تاریخ آخرین اتمام تعداد دانلودها")
+    
+    remainingDays = models.IntegerField(default=30, verbose_name="روز باقی‌مانده")
+    
+    lastRechargeDate = models.DateTimeField(default=timezone.now, verbose_name="تاریخ آخرین آپدیت دانلودها")
    
     
     def save(self, *args, **kwargs):
@@ -461,8 +465,7 @@ class wallpapers(models.Model):
     device = models.CharField(max_length=60, blank=True, null=True,
                               choices=DEVICE_CHOICES, verbose_name="نوع دستگاه ")
 
-    image = models.ImageField(upload_to='wallpapers/',
-                              verbose_name="فایل والپیپر", null=True)
+    image = models.CharField(verbose_name="فایل والپیپر", null=True)
 
     resolution = models.CharField(
         max_length=50, blank=True, null=True, verbose_name="کیفیت")
@@ -507,8 +510,7 @@ class tracks(models.Model):
     image = models.ImageField(upload_to='images/', verbose_name="کاور آلبوم", null=True,
                               help_text="  WEBP & Transparent حجم عکس باید کمتر از 200 کیلوبایت باشد ترجیحا 100 کیلوبایت و در فرمت ")
 
-    audioFile = models.FileField(
-        upload_to='music/', verbose_name="فایل موسیقی")
+    audioFile = models.CharField( verbose_name="فایل موسیقی")
 
     fileSize = models.CharField(null=True, blank=True, verbose_name="حجم فایل")
 
@@ -553,7 +555,7 @@ class albums(models.Model):
     totalFileSize = models.FloatField(
         null=True, blank=True, verbose_name="حجم فایل زیپ")
 
-    zipFile = models.FileField(upload_to='zipfiles/', verbose_name="فایل زیپ")
+    zipFile = models.CharField(verbose_name="فایل زیپ")
 
     slug = models.SlugField(verbose_name="آدرس", unique=True, null=True)
 
