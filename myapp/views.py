@@ -84,7 +84,7 @@ class DownloadLimitView(APIView):
         if downloadType == 'wallpaper' and user.wallpaperDownloads <= 0:
             return Response({'error': 'تعداد دانلود مجاز والپیپر به اتمام رسیده'}, status=status.HTTP_400_BAD_REQUEST)
         elif downloadType == 'soundtrack' and user.soundtrackDownloads <= 0:
-            return Response({'error': 'تعداد دانلود مجاز موسیقی بازی به اتمام رسیده '}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'تعداد دانلود مجاز ساندترک به اتمام رسیده '}, status=status.HTTP_400_BAD_REQUEST)
 
         user.downloadType = downloadType
         user.save()
@@ -96,7 +96,11 @@ class DownloadLimitView(APIView):
         else:
             return Response({'error': 'نوع فایل دانلودی نامعتبر است'}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response({'message': 'دانلود با موفقیت انجام شد'})
+        return Response({
+            'message': 'دانلود با موفقیت انجام شد',
+            'wallpaperDownloads': user.wallpaperDownloads,
+            'soundtrackDownloads': user.soundtrackDownloads,
+        })
 
 
 
