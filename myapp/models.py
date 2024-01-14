@@ -45,9 +45,9 @@ class CustomUser(AbstractUser):
     
     customAvatar = models.FileField(upload_to='images/', verbose_name="Custom Avatar", blank=True)
     
-    wallpaperDownloads = models.IntegerField(default=3, verbose_name="wallpaper_dl_remain")
+    wallpaperDownloads = models.IntegerField(default=100, verbose_name="wallpaper_dl_remain")
     
-    soundtrackDownloads = models.IntegerField(default=3, verbose_name="soundtrack_dl_remain")
+    soundtrackDownloads = models.IntegerField(default=100, verbose_name="soundtrack_dl_remain")
     
     downloadType = models.CharField(max_length=2000, blank=True, null=True)
     

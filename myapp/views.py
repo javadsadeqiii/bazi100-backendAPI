@@ -52,22 +52,28 @@ DATETIME_FORMAT = 'Y-m-d H:i:s'
 
 
 
+
+
+ 
 class DownloadLimitView(APIView):
     
     def reset_download_count(self, user):
         current_time = timezone.now()
-        if (current_time - user.resetDate) > timedelta(minutes=10):
-            user.wallpaperDownloads = 3
-            user.soundtrackDownloads = 3
+        if (current_time - user.resetDate) > timedelta(days=30):
+            user.wallpaperDownloads = 100
+            user.soundtrackDownloads = 100
             user.resetDate = current_time
             user.save()
 
     def get(self, request, user_id):
         user = get_object_or_404(CustomUser, id=user_id)
         self.reset_download_count(user)
+        
+        expirationDate = user.resetDate + timedelta(days=30)  
         return Response({
             'wallpaperDownloads': user.wallpaperDownloads,
             'soundtrackDownloads': user.soundtrackDownloads,
+            'expirationDate': expirationDate,
         })
 
     def post(self, request):
@@ -96,19 +102,22 @@ class DownloadLimitView(APIView):
         else:
             return Response({'error': 'نوع فایل دانلودی نامعتبر است'}, status=status.HTTP_400_BAD_REQUEST)
 
+       
+        
+        expirationDate = user.resetDate + timedelta(days=30)  
         return Response({
             'message': 'دانلود با موفقیت انجام شد',
             'wallpaperDownloads': user.wallpaperDownloads,
             'soundtrackDownloads': user.soundtrackDownloads,
+            'expirationDate': expirationDate,
         })
 
 
 
 
 
-       # time_since_last_reset = timezone.now() - user.resetDate
-      #  if time_since_last_reset.days >= 30:
-        #    user.reset_download_limits()
+
+
 
 
 
@@ -151,6 +160,7 @@ class CustomAvatarUploadView(APIView):
 
 
 
+
 class AvatarSelectionView(APIView):
     
     authentication_classes = [TokenAuthentication]
@@ -174,6 +184,7 @@ class AvatarSelectionView(APIView):
      
         serializer = CustomUserSerializer(user)
         return Response({'message': 'آواتار با موفقیت بارگداری شد', 'avatar_data': serializer.data}, status=status.HTTP_200_OK)
+
 
 
 
@@ -520,6 +531,7 @@ class LoginView(APIView):
             if user_auth:
                 selectedAvatar_url = user.selectedAvatar.url if user.selectedAvatar else None
                 customAvatar_url = user.customAvatar.url if user.customAvatar else None
+                expirationDate = user.resetDate + timedelta(days=100)
 
             return Response({
                     'message': 'ورود کاربر با موفقیت انجام شد',
@@ -530,7 +542,8 @@ class LoginView(APIView):
                         'selectedAvatar_url': selectedAvatar_url,
                         'customAvatar_url': customAvatar_url,
                         'wallpaperDownloads': user.wallpaperDownloads,
-                        'soundtrackDownloads': user.soundtrackDownloads 
+                        'soundtrackDownloads': user.soundtrackDownloads,
+                        'expirationDate': expirationDate,
                         
                     }
                 }, status=status.HTTP_200_OK)
@@ -810,6 +823,8 @@ class CommentDetailAPIView(APIView):
 
 
 
+
+
 class UserDetailsAPIView(APIView):
     authentication_classes = [TokenAuthentication] 
 
@@ -818,21 +833,27 @@ class UserDetailsAPIView(APIView):
             user = CustomUser.objects.get(id=user_id)
             selectedAvatar_url = user.selectedAvatar.url if user.selectedAvatar else None
             customAvatar_url = user.customAvatar.url if user.customAvatar else None
+            expirationDate = user.resetDate + timedelta(days=100)
 
             user_data = {
+                
                 'id': user.id,
                 'username': user.username,
                 'email': user.email,
                 'selectedAvatar_url': selectedAvatar_url,
                 'customAvatar_url':customAvatar_url,
                 'wallpaperDownloads': user. wallpaperDownloads,
-                'soundtrackDownloads': user.soundtrackDownloads
+                'soundtrackDownloads': user.soundtrackDownloads,
+                'expirationDate': expirationDate,
 
             }
             
             return Response(user_data)
         except CustomUser.DoesNotExist:
             return Response({'error': 'کاربر مورد نظر یافت نشد'}, status=status.HTTP_404_NOT_FOUND)
+
+
+
 
 
 
@@ -849,6 +870,8 @@ class PostReplyView(APIView):
 
 
 
+
+
 class CommentRepliesAPIView(APIView):
     serializer_class = ReplySerializer
     authentication_classes = [TokenAuthentication] 
@@ -859,6 +882,7 @@ class CommentRepliesAPIView(APIView):
             commentId=comment_id, parentReplyId=None)
         serializer = ReplySerializer(main_replies, many=True)
         return Response(serializer.data)
+
 
 
 
