@@ -53,6 +53,8 @@ class CustomUser(AbstractUser):
     
     dlResetDate = models.DateTimeField(default=timezone.now, verbose_name="dlResetDate")
     
+    dlExpirationDate = models.DateTimeField(default=timezone.now, verbose_name="dlExpirationDate")
+    
     dlRemainingDays = models.IntegerField(default=30, verbose_name="dlRemainingDays")
     
     dlLastRechargeDate = models.DateTimeField(default=timezone.now, verbose_name="dlLastRechargeDate")

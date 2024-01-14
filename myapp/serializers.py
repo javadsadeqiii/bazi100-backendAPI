@@ -40,6 +40,8 @@ class CustomAvatarUploadSerializer(serializers.ModelSerializer):
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
+    
+    dlExpirationDate = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
     class Meta:
         model = CustomUser
         fields = ('__all__')
