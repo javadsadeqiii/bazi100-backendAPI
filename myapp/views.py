@@ -62,13 +62,13 @@ class DownloadLimitView(APIView):
             user.resetDate = current_time
             user.save()
 
-  #  def get(self, request, user_id):
-   #     user = get_object_or_404(CustomUser, id=userId)
-   #     self.reset_download_count(user)
-   #     return Response({
-    #        'wallpaperDownloads': user.wallpaperDownloads,
-    #        'soundtrackDownloads': user.soundtrackDownloads,
-     #   })
+    def get(self, request, user_id):
+        user = get_object_or_404(CustomUser, id=user_id)
+        self.reset_download_count(user)
+        return Response({
+            'wallpaperDownloads': user.wallpaperDownloads,
+            'soundtrackDownloads': user.soundtrackDownloads,
+        })
 
     def post(self, request):
         userId = request.data.get('userId')
