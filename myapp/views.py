@@ -91,7 +91,7 @@ class DownloadLimitView(APIView):
 
         if downloadType == 'wallpaper':
             user.decrease_wallpaperDownloads()
-        elif downloadType == 'music':
+        elif downloadType == 'soundtrack':
             user.decrease_soundtrackDownloads()
         else:
             return Response({'error': 'نوع فایل دانلودی نامعتبر است'}, status=status.HTTP_400_BAD_REQUEST)
