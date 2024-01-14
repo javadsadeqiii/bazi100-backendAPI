@@ -30,7 +30,7 @@ urlpatterns = [
     
     path('api/uploadcustomavatar/', CustomAvatarUploadView.as_view(), name='upload_custom_avatar'),
     
-    path('api/downloadlimit/<int:user_id>/', DownloadLimitView.as_view(), name='download-limit-view'),
+    path('api/downloadlimit/<int:userId>/', DownloadLimitView.as_view(), name='download-limit-view'),
     
     path('api/tracks/', TracksView.as_view(), name='tracks'),
     
