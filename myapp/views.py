@@ -534,7 +534,7 @@ class LoginView(APIView):
             if user_auth:
                 selectedAvatar_url = user.selectedAvatar.url if user.selectedAvatar else None
                 customAvatar_url = user.customAvatar.url if user.customAvatar else None
-                dlExpirationDate = user.dlResetDate + timedelta(days=100)
+              #  dlExpirationDate = user.dlResetDate + timedelta(days=100)
 
             return Response({
                     'message': 'ورود کاربر با موفقیت انجام شد',
@@ -546,7 +546,7 @@ class LoginView(APIView):
                         'customAvatar_url': customAvatar_url,
                         'wallpaperDownloads': user.wallpaperDownloads,
                         'soundtrackDownloads': user.soundtrackDownloads,
-                        'dlExpirationDate': dlExpirationDate.isoformat(),
+                        'dlExpirationDate': user.dlExpirationDate,
                         'dlRemainingDays': user.dlRemainingDays,
                         
                     }
@@ -837,7 +837,7 @@ class UserDetailsAPIView(APIView):
             user = CustomUser.objects.get(id=user_id)
             selectedAvatar_url = user.selectedAvatar.url if user.selectedAvatar else None
             customAvatar_url = user.customAvatar.url if user.customAvatar else None
-            dlExpirationDate = user.dlResetDate + timedelta(days=100)
+           # dlExpirationDate = user.dlResetDate + timedelta(days=100)
 
 
 
@@ -850,7 +850,7 @@ class UserDetailsAPIView(APIView):
                 'customAvatar_url':customAvatar_url,
                 'wallpaperDownloads': user. wallpaperDownloads,
                 'soundtrackDownloads': user.soundtrackDownloads,
-                'dlExpirationDate': dlExpirationDate.isoformat(),
+                'dlExpirationDate': user.dlExpirationDate,
                 'dlRemainingDays': user.dlRemainingDays,
 
             }

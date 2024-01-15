@@ -467,7 +467,7 @@ class wallpapers(models.Model):
     device = models.CharField(max_length=60, blank=True, null=True,
                               choices=DEVICE_CHOICES, verbose_name="نوع دستگاه ")
 
-    image = models.CharField(verbose_name="فایل والپیپر", null=True)
+    image = models.TextField(verbose_name="فایل والپیپر", null=True)
 
     resolution = models.CharField(
         max_length=50, blank=True, null=True, verbose_name="کیفیت")
@@ -512,7 +512,7 @@ class tracks(models.Model):
     image = models.ImageField(upload_to='images/', verbose_name="کاور آلبوم", null=True,
                               help_text="  WEBP & Transparent حجم عکس باید کمتر از 200 کیلوبایت باشد ترجیحا 100 کیلوبایت و در فرمت ")
 
-    audioFile = models.CharField( verbose_name="فایل موسیقی")
+    audioFile = models.TextField( verbose_name="فایل موسیقی")
 
     fileSize = models.CharField(null=True, blank=True, verbose_name="حجم فایل")
 
@@ -557,7 +557,7 @@ class albums(models.Model):
     totalFileSize = models.FloatField(
         null=True, blank=True, verbose_name="حجم فایل زیپ")
 
-    zipFile = models.CharField(verbose_name="فایل زیپ")
+    zipFile = models.TextField(verbose_name="فایل زیپ")
 
     slug = models.SlugField(verbose_name="آدرس", unique=True, null=True)
 
