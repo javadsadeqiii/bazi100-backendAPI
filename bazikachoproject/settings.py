@@ -17,7 +17,7 @@ SECRET_KEY = 'django-insecure-8s-3p(w9m1oo!6exe@4bod0q67$w)-#^tn#ms-icv7&#5n2i@=
 DEBUG = True
 
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["https://bazikacho.ir","https://backend.bazikacho.ir","http://localhost:3000"]
 
 
 
@@ -116,14 +116,16 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:8080",
     "http://127.0.0.1:9000",
     "http://localhost:3000",
-    "http://bazikacho.ir",
+    "https://bazikacho.ir",
+    "https://dl.bazikacho.ir",
+    "https://backend.bazikacho.ir",
     
 
 
 ]
 
 
-CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_ALLOW_ALL = False
 
 
 
