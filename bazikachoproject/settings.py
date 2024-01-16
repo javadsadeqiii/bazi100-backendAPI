@@ -17,7 +17,7 @@ SECRET_KEY = 'django-insecure-8s-3p(w9m1oo!6exe@4bod0q67$w)-#^tn#ms-icv7&#5n2i@=
 DEBUG = True
 
 
-ALLOWED_HOSTS = ["https://bazikacho.ir","https://backend.bazikacho.ir","http://localhost:3000"]
+ALLOWED_HOSTS = ["bazikacho.ir","backend.bazikacho.ir","localhost","dl.bazikacho.ir"]
 
 
 
@@ -111,10 +111,8 @@ CKEDITOR_CONFIGS = {
 
 
 CORS_ALLOWED_ORIGINS = [
-    "https://example.com",
-    "https://sub.example.com",
-    "http://localhost:8080",
-    "http://127.0.0.1:9000",
+   
+    
     "http://localhost:3000",
     "https://bazikacho.ir",
     "https://dl.bazikacho.ir",
