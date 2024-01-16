@@ -499,10 +499,6 @@ class LoginView(APIView):
                         'email': user.email,
                         'selectedAvatar_url': selectedAvatar_url,
                         'customAvatar_url': customAvatar_url,
-                        'wallpaperDownloads': user.wallpaperDownloads,
-                        'soundtrackDownloads': user.soundtrackDownloads,
-                        'dlExpirationDate': user.dlExpirationDate,
-                        'dlRemainingDays': user.dlRemainingDays,
                         
                     }
                 }, status=status.HTTP_200_OK)
@@ -798,10 +794,7 @@ class UserDetailsAPIView(APIView):
                 'email': user.email,
                 'selectedAvatar_url': selectedAvatar_url,
                 'customAvatar_url':customAvatar_url,
-                'wallpaperDownloads': user. wallpaperDownloads,
-                'soundtrackDownloads': user.soundtrackDownloads,
-                'dlExpirationDate': user.dlExpirationDate,
-                'dlRemainingDays': user.dlRemainingDays,
+                
 
             }
             
