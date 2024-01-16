@@ -20,10 +20,6 @@ DEBUG = True
 ALLOWED_HOSTS = ["*"]
 
 
-#AUTHENTICATION_BACKENDS = [
-  #  'django.contrib.auth.backends.ModelBackend',
-    # ...
-#]
 
 
 AUTH_USER_MODEL = 'myapp.CustomUser'
@@ -53,6 +49,30 @@ MIDDLEWARE = [
    'myapp.middlewares.TokenMiddleware',
     # ...
 ]
+
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'mail.bazikacho.ir'  
+EMAIL_PORT = 465  
+EMAIL_USE_SSL = True  
+EMAIL_HOST_USER = 'support@bazikacho.ir'  
+EMAIL_HOST_PASSWORD = '773148javad' 
+EMAIL_HOST_USER_CONTACT_US = 'support@bazikacho.ir'  
+
+
+
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'mail.bazikacho.ir'
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True
+EMAIL_HOST_USER_2 = 'info@bazikacho.ir'
+EMAIL_HOST_PASSWORD = '773148javad'
+EMAIL_HOST_USER_SEND_NEWSLETTER = 'info@bazikacho.ir'
+
+
 
 
 
@@ -195,17 +215,6 @@ CACHES = {
 }
 
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587  
-EMAIL_HOST_USER = 'valoranttt200@gmail.com'
-EMAIL_HOST_PASSWORD = 'eglijfdujnmwtmii'
-EMAIL_USE_TLS = True  
-
-
-# Internationalization
-# https://docs.djangoproject.com/en/4.2/topics/i18n/
-# settings.py
 
 
 

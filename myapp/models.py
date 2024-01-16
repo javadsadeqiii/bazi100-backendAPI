@@ -10,8 +10,7 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.contrib.auth.models import AbstractUser
 import random
-from django.utils import timezone
-#from background_task import background
+
 
 
 
@@ -45,21 +44,7 @@ class CustomUser(AbstractUser):
     
     customAvatar = models.FileField(upload_to='images/', verbose_name="Custom Avatar", blank=True)
     
-    wallpaperDownloads = models.IntegerField(default=100, verbose_name="wallpaper_dl_remain")
-    
-    soundtrackDownloads = models.IntegerField(default=100, verbose_name="soundtrack_dl_remain")
-    
-    downloadType = models.CharField(max_length=2000, blank=True, null=True)
-    
-    dlResetDate = models.DateTimeField(default=timezone.now, verbose_name="dlResetDate")
-    
-    dlExpirationDate = models.DateTimeField(default=timezone.now, verbose_name="dlExpirationDate")
-    
-    dlRemainingDays = models.IntegerField(default=30, verbose_name="dlRemainingDays")
-    
-    dlLastRechargeDate = models.DateTimeField(default=timezone.now, verbose_name="dlLastRechargeDate")
    
-    
     def save(self, *args, **kwargs):
         if self.customAvatar:
             self.selectedAvatar = None
@@ -67,16 +52,7 @@ class CustomUser(AbstractUser):
             self.selectedAvatar = random.choice(self.AVATAR_CHOICES)[0]
 
         super().save(*args, **kwargs)
-        
-    def decrease_wallpaperDownloads(self):
-        if self.wallpaperDownloads > 0:
-            self.wallpaperDownloads -= 1
-            self.save()
-
-    def decrease_soundtrackDownloads(self):
-        if self.soundtrackDownloads > 0:
-            self.soundtrackDownloads -= 1
-            self.save()
+      
         
 CustomUser._meta.get_field('groups').remote_field.related_name = 'custom_user_groups'
 CustomUser._meta.get_field('user_permissions').remote_field.related_name = 'custom_user_permissions'
@@ -421,6 +397,8 @@ class AllPosts(models.Model):
     isStory = models.BooleanField(default=False, null=True)
     
     isReportage = models.BooleanField(default = False, null=True)
+    
+    
     
    
     

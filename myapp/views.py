@@ -41,8 +41,8 @@ from PIL import Image
 from django.utils import timezone
 from .serializers import CustomUserSerializer
 from django.utils.translation import gettext_lazy as _
-from django.db.models import F
-from datetime import timedelta
+from email.utils import formataddr
+
 
 DATE_FORMAT = 'Y-m-d'
 DATETIME_FORMAT = 'Y-m-d H:i:s'
@@ -53,78 +53,9 @@ DATETIME_FORMAT = 'Y-m-d H:i:s'
 
 
 
-
- 
-class DownloadLimitView(APIView):
-    
-    def reset_download_count(self, user):
-        current_time = timezone.now()
-        if (current_time - user.dlLastRechargeDate) > timedelta(days=30):
-            user.dlLastRechargeDate = current_time
-            user.wallpaperDownloads = 100
-            user.soundtrackDownloads = 100
-            user.dlRemainingDays = 30
-            user.save()
-
-    def calculate_remaining_days(self, user):
-        current_time = timezone.now()
-        time_since_last_recharge = current_time - user.dlLastRechargeDate
-        days_since_last_recharge = time_since_last_recharge.days
-        remaining_days = max(30 - days_since_last_recharge, 0)
-        return remaining_days
-
-    def post(self, request):
-        userId = request.data.get('userId')
-        downloadType = request.data.get('downloadType')
-
-        try:
-            user = CustomUser.objects.get(id=userId)
-        except CustomUser.DoesNotExist:
-            return Response({'message': 'کاربری با این شناسه یافت نشد.'}, status=status.HTTP_404_NOT_FOUND)
-
-        self.reset_download_count(user)
-
-        remaining_days = self.calculate_remaining_days(user)
-
-        if remaining_days <= 0:
-            return Response({'error': 'تعداد روزهای باقی‌مانده به اتمام رسیده'}, status=status.HTTP_400_BAD_REQUEST)
-
-        if downloadType == 'wallpaper' and user.wallpaperDownloads <= 0:
-            return Response({'error': 'تعداد دانلود مجاز والپیپر به اتمام رسیده'}, status=status.HTTP_400_BAD_REQUEST)
-        elif downloadType == 'soundtrack' and user.soundtrackDownloads <= 0:
-            return Response({'error': 'تعداد دانلود مجاز ساندترک به اتمام رسیده '}, status=status.HTTP_400_BAD_REQUEST)
-
-        user.downloadType = downloadType
-        user.save()
-
-        if downloadType == 'wallpaper':
-            user.decrease_wallpaperDownloads()
-        elif downloadType == 'soundtrack':
-            user.decrease_soundtrackDownloads()
-        else:
-            return Response({'error': 'نوع فایل دانلودی نامعتبر است'}, status=status.HTTP_400_BAD_REQUEST)
-
-        user.dlRemainingDays = self.calculate_remaining_days(user)
-        user.dlLastRechargeDate = timezone.now()
-        user.save()
-
-        dlExpirationDate = user.dlLastRechargeDate.date() + timedelta(days=user.dlRemainingDays)  
-        return Response({
-            'message': 'دانلود با موفقیت انجام شد',
-            'wallpaperDownloads': user.wallpaperDownloads,
-            'soundtrackDownloads': user.soundtrackDownloads,
-            'dlExpirationDate': dlExpirationDate,
-            'dlRemainingDays': user.dlRemainingDays,
-        })
-
-
-
-
-
-
-
-
 class CustomAvatarUploadView(APIView):
+    
+    authentication_classes = [TokenAuthentication]
     def post(self, request, *args, **kwargs):
         try:
             userId = request.data.get('userId')
@@ -257,7 +188,11 @@ class ReplyReportView(APIView):
 
 
 
+
 class ResetPasswordView(APIView):
+    
+    
+    authentication_classes = [TokenAuthentication]
     
     
     @method_decorator(cache_page(60*5))  
@@ -280,7 +215,7 @@ class ResetPasswordView(APIView):
 
             html_message = render_to_string('resetpassword.html', {'user_id': user.id, 'token': token})
             subject = "درخواست بازیابی رمز عبور"
-            from_email = settings.EMAIL_HOST_USER
+            from_email = '"بازیکاچو" <' + settings.EMAIL_HOST_USER_2 + '>'
             to_email = [email]
 
             send_mail(subject, '', from_email, to_email, html_message=html_message, fail_silently=False)
@@ -349,6 +284,10 @@ class ResetPasswordView(APIView):
 
 
 
+
+
+
+
 class SubscriberView(APIView):
     
     authentication_classes = [TokenAuthentication] 
@@ -379,6 +318,8 @@ class SubscriberView(APIView):
         return Response({'message': 'عضویت شما در خبرنامه با موفقیت ثبت شد'}, status=status.HTTP_201_CREATED)
      except Exception as e:
         return Response({'error': 'عملیات ثبت عضویت خبرنامه ناموفق بود', 'details': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+        
         
         
         
@@ -418,42 +359,56 @@ class SendNewsLetterViewSet(viewsets.ViewSet):
         
         latest_posts = AllPosts.objects.filter(isReportage=False).order_by('-date')[:3]
         
-        
-
         subject = 'تازه ترین مطالب سایت بازیکاچو'
-        from_email = settings.EMAIL_HOST_USER
+        from_email = '"بازیکاچو" <' + settings.EMAIL_HOST_USER_2 + '>'
         recipient_list = []
-        post_url = '' 
+        post_urls = []  
 
         subscribers = Subscriber.objects.values_list('email', flat=True)
         recipient_list.extend(subscribers)
         
         for post in latest_posts:
+            post_url = ''  
             
             if post.isEvent and post.eventStage:
                 post_url = f"http://bazikacho.ir/{post.eventStage}/{post.slug}/"
             elif post.isArticle:
-                post_url = f"http://bazikacho/articles/{post.slug}/"
+                post_url = f"http://bazikacho.ir/articles/{post.slug}/"
             elif post.isVideo and post.videoType:
-                post_url = f"http://bazikacho/{post.videoType}/{post.slug}/"
+                post_url = f"http://bazikacho.ir/{post.videoType}/{post.slug}/"
             elif post.isNews:
-                post_url = f"http://bazikacho/news/{post.slug}/"
+                post_url = f"http://bazikacho.ir/news/{post.slug}/"
             elif post.isStory:
-                post_url = f"http://bazikacho/stories/{post.slug}/"
+                post_url = f"http://bazikacho.ir/stories/{post.slug}/"
                 
+            post_urls.append(post_url) 
         
-            post.post_url = post_url
-            
-        html_message = render_to_string('newsletter.html', {'latest_posts': latest_posts})
+        
+        html_message = render_to_string('newsletter.html', {'latest_posts': latest_posts, 'post_urls': post_urls})
 
-        for subscriber_email in recipient_list:
-            send_mail(subject, '', from_email, [subscriber_email], html_message=html_message)
+        for subscriber_email, post_url in zip(subscribers, post_urls):
+            plain_message = strip_tags(html_message)
+
+            email = EmailMultiAlternatives(
+                subject=subject,
+                body=plain_message,
+                from_email=from_email,
+                to=[subscriber_email],
+            )
+            email.attach_alternative(html_message, "text/html")
+
+            email.host = 'mail.bazikacho.ir'
+            email.port = 465
+            email.use_ssl = True
+            email.username = 'info@bazikacho.ir'
+            email.password = '773148javad'
+
+            email.send(fail_silently=False)
 
         return HttpResponse(html_message, content_type='text/html')
-    
 
 
-
+           
 
 
 
@@ -534,7 +489,7 @@ class LoginView(APIView):
             if user_auth:
                 selectedAvatar_url = user.selectedAvatar.url if user.selectedAvatar else None
                 customAvatar_url = user.customAvatar.url if user.customAvatar else None
-              #  dlExpirationDate = user.dlResetDate + timedelta(days=100)
+              
 
             return Response({
                     'message': 'ورود کاربر با موفقیت انجام شد',
@@ -627,17 +582,16 @@ class ChangePasswordView(APIView):
 
 class ContactUsView(APIView):
     
+    
     authentication_classes = [TokenAuthentication]
+    
     serializer_class = ContactUsSerializer
     queryset = ContactUs.objects.all()
-   
-   
-    
+
     def get(self, request):
         contact = ContactUs.objects.all()
         serializer = ContactUsSerializer(contact, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
 
     def post(self, request):
         fullName = request.data.get('fullName')
@@ -646,40 +600,36 @@ class ContactUsView(APIView):
 
         if not fullName or not emailContact or not message:
             return JsonResponse({'error': 'لطفاً تمام فیلدها را پر کنید'}, status=400)
-        
-        
-           
-      
-        
 
         created_contact = ContactUs.objects.create(
             fullName=fullName, emailContact=emailContact, message=message)
 
         if created_contact:
-           
             html_message = render_to_string('contactus.html', {'user_message': message})
-            
-           
             plain_message = strip_tags(html_message)
 
-            
             html_message = html_message.replace('پیام کاربر', message)
 
-            
             email = EmailMultiAlternatives(
-                
                 subject="ارتباط با تیم بازیکاچو",
                 body=plain_message,
-                from_email=settings.EMAIL_HOST_USER,
+                from_email=formataddr(('پشتیبانی بازیکاچو', settings.EMAIL_HOST_USER_CONTACT_US)),
                 to=[emailContact],
             )
             email.attach_alternative(html_message, "text/html")
+           
+           
+            email.host = 'mail.bazikacho.ir'
+            email.port = 465
+            email.use_ssl = True
+            email.username = 'support@bazikacho.ir'
+            email.password = '773148javad'
+
             email.send(fail_silently=False)
 
             return Response({'message': 'اطلاعات با موفقیت ذخیره شد و ایمیل ارسال شد.'}, status=201)
         else:
             return Response({'error': 'خطایی در ذخیره‌سازی اطلاعات رخ داده است.'}, status=500)
-
 
 
 
@@ -837,7 +787,7 @@ class UserDetailsAPIView(APIView):
             user = CustomUser.objects.get(id=user_id)
             selectedAvatar_url = user.selectedAvatar.url if user.selectedAvatar else None
             customAvatar_url = user.customAvatar.url if user.customAvatar else None
-           # dlExpirationDate = user.dlResetDate + timedelta(days=100)
+           
 
 
 
@@ -932,7 +882,7 @@ class BaseAPIView(APIView):
 class commentAPIView(BaseAPIView):
     
    
-   # authentication_classes = [TokenAuthentication] 
+    authentication_classes = [TokenAuthentication] 
 
     queryset = Comments.objects.all()
     serializer_class = CommentsSerializer
@@ -993,7 +943,7 @@ class ReplyAPIView(BaseAPIView):
 
     queryset = Reply.objects.all()
     serializer_class = ReplySerializer
-   # authentication_classes = [TokenAuthentication] 
+    authentication_classes = [TokenAuthentication] 
 
     forbidden_words = ["جمهوری اسلامی", "ولایت فقیه", "خمینی", "خامنه ای", "کیر", "کص", "کون", "حرومزاده", "کیری", "کسشر", "فاک", "گاییدم", "مادرتو", "اسکل", "کصخل",
                        "fuck", "dick", "pussy", "wtf", "خفه شو", "مادر جنده", "کسخل", "کونی", "سکس", "sex", "porn", "پورن", "جنده", "گی", "ترنس",
@@ -1109,6 +1059,7 @@ class ReplyLikeAPIView(APIView):
 
 
 class ReplyLikesDetailAPIView(APIView):
+    
     authentication_classes = [TokenAuthentication] 
     def get(self, request, reply_id):
        
@@ -1134,6 +1085,7 @@ class ReplyLikesDetailAPIView(APIView):
 
 
 class PollsView(APIView):
+    
     queryset = Polls.objects.all()
     serializer_class = pollsSerializer
     authentication_classes = [TokenAuthentication] 
@@ -1165,6 +1117,9 @@ class ChoiceView(APIView):
     
     
 class ChoiceDetailView(APIView):
+    
+    authentication_classes = [TokenAuthentication]
+    
     def get(self, request, choice_id):
         choice = get_object_or_404(Choice, pk=choice_id)
         serializer = ChoiceSerializer(choice)
@@ -1307,6 +1262,8 @@ class TracksView(APIView):
 
 
 class TracksDetailView(APIView):
+    
+    authentication_classes = [TokenAuthentication]
     def get(self, request, track_id):
         track = get_object_or_404(tracks, pk=track_id)
         serializer = tracksSerializer(track)
