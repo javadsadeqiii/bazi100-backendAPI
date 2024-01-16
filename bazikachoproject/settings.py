@@ -17,7 +17,7 @@ SECRET_KEY = 'django-insecure-8s-3p(w9m1oo!6exe@4bod0q67$w)-#^tn#ms-icv7&#5n2i@=
 DEBUG = True
 
 
-ALLOWED_HOSTS = ["bazikacho.ir","backend.bazikacho.ir","localhost","dl.bazikacho.ir"]
+ALLOWED_HOSTS = ["bazikacho.ir","backend.bazikacho.ir","localhost","dl.bazikacho.ir","127.0.0.1"]
 
 
 
