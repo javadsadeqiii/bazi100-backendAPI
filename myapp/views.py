@@ -489,6 +489,10 @@ class LoginView(APIView):
             if user_auth:
                 selectedAvatar_url = user.selectedAvatar.url if user.selectedAvatar else None
                 customAvatar_url = user.customAvatar.url if user.customAvatar else None
+                
+            else:
+                
+                return Response({'error': 'ایمیل یا رمز عبور اشتباه است '}, status=status.HTTP_401_UNAUTHORIZED)
               
 
             return Response({
@@ -497,7 +501,7 @@ class LoginView(APIView):
                         'id': user.id,
                         'username': user.username,
                         'email': user.email,
-                        'selectedAvatar_url': selectedAvatar_url,
+                        'selectedAvatar_url':selectedAvatar_url,
                         'customAvatar_url': customAvatar_url,
                         
                     }
